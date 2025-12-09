@@ -37,15 +37,18 @@ export class ProductService {
     const filter: Record<string, unknown> = {};
 
     if (search) filter.$text = { $search: search };
-    if (category) filter.category = category;
-    if (subcategory) filter.subcategory = subcategory;
-    if (color) filter.color = color;
-    if (brand) filter.brand = brand;
 
+    const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    if (category) filter.category = { $regex: new RegExp(`^${escapeRegex(category)}$`, 'i') };
+    if (subcategory)
+      filter.subcategory = { $regex: new RegExp(`^${escapeRegex(subcategory)}$`, 'i') };
+    if (color) filter.color = { $regex: new RegExp(`^${escapeRegex(color)}$`, 'i') };
+    if (brand) filter.brand = { $regex: new RegExp(`^${escapeRegex(brand)}$`, 'i') };
     if (size) {
       filter.sizes = {
         $elemMatch: {
-          size: size,
+          size: { $regex: new RegExp(`^${escapeRegex(size)}$`, 'i') },
           stock: { $gt: 0 },
         },
       };

@@ -7,6 +7,8 @@ import { MongooseService } from './database/mongoose.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { ProductModule } from './product/product.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { ProductModule } from './product/product.module';
       ],
     }),
     ProductModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [
