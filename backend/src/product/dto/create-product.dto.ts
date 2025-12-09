@@ -16,6 +16,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateSizeDto } from './create-size.dto';
+import { ColorEnum } from '../common/enums/color.enum';
 
 export class CreateProductDto {
   @IsString({ message: 'El nombre es obligatorio y debe ser texto.' })
@@ -63,7 +64,7 @@ export class CreateProductDto {
   @IsUrl({}, { each: true, message: 'Cada imagen debe ser una URL válida.' })
   images?: string[];
 
-  @IsString({ message: 'El color es obligatorio.' })
+  @IsIn(Object.values(ColorEnum), { message: 'Color inválido.' })
   @IsNotEmpty({ message: 'El color no puede estar vacío.' })
   color!: string;
 

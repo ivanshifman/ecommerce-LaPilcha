@@ -17,7 +17,7 @@ export class Cart {
           color: { type: String, trim: true },
           _id: false,
         },
-        quantity: { type: Number, required: true, min: 1 },
+        quantity: { type: Number, required: true, min: 1, default: 1 },
       },
     ],
     default: [],
@@ -30,3 +30,5 @@ export class Cart {
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
+
+CartSchema.index({ user: 1 });

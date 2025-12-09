@@ -1,7 +1,8 @@
-import { IsString, IsNumber, Min, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsNumber, Min, IsOptional, IsNotEmpty, IsIn } from 'class-validator';
+import { SizeEnum } from '../common/enums/size.enum';
 
 export class CreateSizeDto {
-  @IsString({ message: 'El talle debe ser texto.' })
+  @IsIn(Object.values(SizeEnum), { message: 'Talle inválido.' })
   @IsNotEmpty({ message: 'El talle no puede estar vacío.' })
   size!: string;
 

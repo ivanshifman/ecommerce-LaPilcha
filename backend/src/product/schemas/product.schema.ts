@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import { ColorEnum } from '../common/enums/color.enum';
+import { SizeEnum } from '../common/enums/size.enum';
 
 export type ProductDocument = Product & Document;
 
@@ -36,8 +38,12 @@ export class Product {
   @Prop({ type: [String], default: [] })
   images?: string[];
 
-  @Prop({ required: true })
-  color!: string;
+  @Prop({
+    type: String,
+    enum: Object.values(ColorEnum),
+    required: true,
+  })
+  color!: ColorEnum;
 
   @Prop({ min: 0, max: 100, default: 0 })
   discount?: number;
@@ -74,7 +80,7 @@ export class Product {
   @Prop({
     type: [
       {
-        size: { type: String, required: true },
+        size: { type: String, required: true, enum: Object.values(SizeEnum) },
         stock: { type: Number, required: true, min: 0 },
         minStock: { type: Number, default: 5 },
       },
@@ -82,7 +88,7 @@ export class Product {
     default: [],
   })
   sizes!: Array<{
-    size: string;
+    size: SizeEnum;
     stock: number;
     minStock: number;
   }>;

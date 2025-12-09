@@ -1,5 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, IsIn, IsNumber, Min, Max } from 'class-validator';
+import { ColorEnum } from '../common/enums/color.enum';
+import { SizeEnum } from '../common/enums/size.enum';
 
 export class QueryProductDto {
   @IsOptional()
@@ -28,11 +30,11 @@ export class QueryProductDto {
   subcategory?: string;
 
   @IsOptional()
-  @IsString({ message: 'color debe ser texto.' })
+  @IsIn(Object.values(ColorEnum), { message: 'color inválido.' })
   color?: string;
 
   @IsOptional()
-  @IsString({ message: 'size debe ser texto.' })
+  @IsIn(Object.values(SizeEnum), { message: 'size inválido.' })
   size?: string;
 
   @IsOptional()

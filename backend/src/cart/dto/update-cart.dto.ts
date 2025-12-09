@@ -1,10 +1,15 @@
-import { IsMongoId, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsNumber, Min, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CartVariantDto } from './add-cart.dto';
 
 export class UpdateCartItemDto {
-  @IsMongoId({ message: 'ID de producto inválido' })
-  product!: string;
-
+  @IsOptional()
   @IsNumber()
   @Min(1, { message: 'La cantidad mínima es 1' })
-  quantity!: number;
+  quantity?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CartVariantDto)
+  variant?: CartVariantDto;
 }

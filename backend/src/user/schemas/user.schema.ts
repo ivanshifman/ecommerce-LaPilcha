@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { UserRole } from '../common/enums/userRole.enum';
+import { AuthProvider } from '../common/enums/authProvider.enum';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -30,11 +32,11 @@ export class User {
   avatar?: string;
 
   @Prop({
-    enum: ['admin', 'customer'],
+    enum: Object.values(UserRole),
     default: 'customer',
     index: true,
   })
-  role!: 'admin' | 'customer';
+  role!: UserRole;
 
   @Prop({ default: true, index: true })
   isActive!: boolean;
@@ -64,10 +66,10 @@ export class User {
   };
 
   @Prop({
-    enum: ['local', 'google', 'apple'],
+    enum: Object.values(AuthProvider),
     default: 'local',
   })
-  authProvider!: 'local' | 'google' | 'apple';
+  authProvider!: AuthProvider;
 
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Product' }],
@@ -107,11 +109,11 @@ UserSchema.index({ 'oauthProviders.google': 1, deletedAt: 1 }, { sparse: true, u
 UserSchema.index({ 'oauthProviders.apple': 1, deletedAt: 1 }, { sparse: true, unique: true });
 
 UserSchema.pre('save', function (next) {
-  if (this.authProvider === 'local' && this.isNew && !this.password) {
+  if (this.authProvider === AuthProvider.LOCAL && this.isNew && !this.password) {
     return next(new Error('La contraseña es obligatoria para usuarios locales'));
   }
 
-  if (this.authProvider !== 'local') {
+  if (this.authProvider !== AuthProvider.LOCAL) {
     this.emailVerified = true;
   }
 

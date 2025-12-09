@@ -7,18 +7,11 @@ import {
   IsEnum,
   Matches,
   IsUrl,
+  Validate,
 } from 'class-validator';
-
-export enum UserRole {
-  ADMIN = 'admin',
-  CUSTOMER = 'customer',
-}
-
-export enum AuthProvider {
-  LOCAL = 'local',
-  GOOGLE = 'google',
-  APPLE = 'apple',
-}
+import { PasswordAuthProviderConstraint } from '../validators/password-authprovider.validator';
+import { UserRole } from '../common/enums/userRole.enum';
+import { AuthProvider } from '../common/enums/authProvider.enum';
 
 export class CreateUserDto {
   @IsString({ message: 'El nombre debe ser texto.' })
@@ -41,6 +34,7 @@ export class CreateUserDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
     message: 'La contraseña debe contener al menos una mayúscula, una minúscula y un número.',
   })
+  @Validate(PasswordAuthProviderConstraint)
   password?: string;
 
   @IsOptional()

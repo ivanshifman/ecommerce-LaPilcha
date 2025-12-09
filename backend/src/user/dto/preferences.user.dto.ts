@@ -1,4 +1,11 @@
-import { ArrayMaxSize, IsArray, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class UserPreferencesDto {
   @IsOptional()
@@ -10,5 +17,6 @@ export class UserPreferencesDto {
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(10)
+  @ArrayUnique()
   favoriteColors?: string[];
 }
