@@ -6,6 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MongooseService } from './database/mongoose.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
         },
       ],
     }),
+    ProductModule,
   ],
   controllers: [],
   providers: [
