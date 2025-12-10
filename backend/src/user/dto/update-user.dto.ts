@@ -6,6 +6,7 @@ import {
   Matches,
   IsBoolean,
   ValidateNested,
+  IsUrl,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserPreferencesDto } from './preferences.user.dto';
@@ -32,7 +33,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^https?:\/\/.*/, { message: 'Avatar debe ser una URL válida' })
+  @IsUrl()
   avatar?: string;
 
   @IsOptional()

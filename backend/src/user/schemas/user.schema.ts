@@ -25,7 +25,7 @@ export class User {
   @Prop({ select: false, trim: true, minlength: 6 })
   password?: string;
 
-  @Prop({ trim: true, minlength: 8, maxlength: 20, match: /^\+?[\d\s\-()]{8,20}$/ })
+  @Prop({ trim: true, match: /^\+?[1-9]\d{7,14}$/ })
   phone?: string;
 
   @Prop()
@@ -67,7 +67,7 @@ export class User {
 
   @Prop({
     enum: Object.values(AuthProvider),
-    default: 'local',
+    default: AuthProvider.LOCAL,
   })
   authProvider!: AuthProvider;
 

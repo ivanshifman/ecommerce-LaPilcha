@@ -17,6 +17,7 @@ import {
 import { Type } from 'class-transformer';
 import { CreateSizeDto } from './create-size.dto';
 import { ColorEnum } from '../common/enums/color.enum';
+import { GenderEnum } from '../common/enums/gender.enum';
 
 export class CreateProductDto {
   @IsString({ message: 'El nombre es obligatorio y debe ser texto.' })
@@ -79,7 +80,7 @@ export class CreateProductDto {
   tags?: string[];
 
   @IsOptional()
-  @IsIn(['male', 'female', 'unisex'], { message: 'gender inválido.' })
+  @IsIn(Object.values(GenderEnum), { message: 'gender inválido.' })
   gender?: string;
 
   @IsOptional()

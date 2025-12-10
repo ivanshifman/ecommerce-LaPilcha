@@ -1,5 +1,5 @@
-import { IsEmail, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
-import { AuthProvider } from '../../user/dto/create-user.dto';
+import { IsEmail, IsEnum, IsOptional, IsString, IsUrl } from 'class-validator';
+import { AuthProvider } from '../../user/common/enums/authProvider.enum';
 
 export class OAuthUserDto {
   @IsString()
@@ -20,6 +20,6 @@ export class OAuthUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^https?:\/\/.*/, { message: 'Avatar debe ser una URL válida' })
+  @IsUrl()
   avatar?: string;
 }

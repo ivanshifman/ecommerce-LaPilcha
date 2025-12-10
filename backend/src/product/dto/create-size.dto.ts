@@ -1,8 +1,9 @@
-import { IsNumber, Min, IsOptional, IsNotEmpty, IsIn } from 'class-validator';
-import { SizeEnum } from '../common/enums/size.enum';
+import { IsNumber, Min, IsOptional, IsNotEmpty, Matches } from 'class-validator';
 
 export class CreateSizeDto {
-  @IsIn(Object.values(SizeEnum), { message: 'Talle inválido.' })
+  @Matches(/^([A-Z]{1,4}|[0-9]{1,3})$/, {
+    message: 'Talle inválido.',
+  })
   @IsNotEmpty({ message: 'El talle no puede estar vacío.' })
   size!: string;
 

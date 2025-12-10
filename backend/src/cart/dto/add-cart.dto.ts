@@ -1,4 +1,5 @@
 import {
+  IsIn,
   IsMongoId,
   IsNumber,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ColorEnum } from 'src/product/common/enums/color.enum';
 
 export class AddToCartDto {
   @IsMongoId({ message: 'ID de producto inválido' })
@@ -27,13 +29,14 @@ export class AddToCartDto {
 export class CartVariantDto {
   @IsOptional()
   @IsString()
-  @MaxLength(10)
-  @Matches(/^[a-zA-Z0-9]{1,10}$/, { message: 'Talle inválido' })
+  @Matches(/^([A-Z]{1,4}|[0-9]{1,3})$/, {
+    message: 'Talle inválido.',
+  })
   size?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(20)
-  @Matches(/^[a-zA-Z0-9\s-]{1,20}$/, { message: 'Color inválido' })
+  @IsIn(Object.values(ColorEnum), { message: 'Color inválido.' })
   color?: string;
 }

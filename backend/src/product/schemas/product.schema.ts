@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import { ColorEnum } from '../common/enums/color.enum';
-import { SizeEnum } from '../common/enums/size.enum';
+import { GenderEnum } from '../common/enums/gender.enum';
 
 export type ProductDocument = Product & Document;
 
@@ -53,8 +53,8 @@ export class Product {
 
   @Prop({
     type: String,
-    enum: ['male', 'female', 'unisex'],
-    default: 'unisex',
+    enum: Object.values(GenderEnum),
+    default: GenderEnum.UNISEX,
     index: true,
   })
   gender?: string;
@@ -80,7 +80,7 @@ export class Product {
   @Prop({
     type: [
       {
-        size: { type: String, required: true, enum: Object.values(SizeEnum) },
+        size: { type: String, required: true, match: /^([A-Z]{1,4}|[0-9]{1,3})$/ },
         stock: { type: Number, required: true, min: 0 },
         minStock: { type: Number, default: 5 },
       },
@@ -88,7 +88,7 @@ export class Product {
     default: [],
   })
   sizes!: Array<{
-    size: SizeEnum;
+    size: string;
     stock: number;
     minStock: number;
   }>;
