@@ -50,7 +50,7 @@ export class User {
   @Prop({ select: false, index: true })
   resetPasswordToken?: string;
 
-  @Prop()
+  @Prop({ select: false })
   resetPasswordExpires?: Date;
 
   @Prop({
@@ -105,8 +105,22 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.index({ email: 1, isActive: 1 });
-UserSchema.index({ 'oauthProviders.google': 1, deletedAt: 1 }, { sparse: true, unique: true });
-UserSchema.index({ 'oauthProviders.apple': 1, deletedAt: 1 }, { sparse: true, unique: true });
+UserSchema.index(
+  { 'oauthProviders.google': 1 },
+  {
+    sparse: true,
+    unique: true,
+    partialFilterExpression: { deletedAt: { $exists: false } },
+  },
+);
+UserSchema.index(
+  { 'oauthProviders.apple': 1 },
+  {
+    sparse: true,
+    unique: true,
+    partialFilterExpression: { deletedAt: { $exists: false } },
+  },
+);
 
 UserSchema.pre('save', function (next) {
   if (this.authProvider === AuthProvider.LOCAL && this.isNew && !this.password) {

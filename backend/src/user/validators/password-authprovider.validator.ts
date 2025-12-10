@@ -18,10 +18,18 @@ export class PasswordAuthProviderConstraint implements ValidatorConstraintInterf
       return !obj.password;
     }
 
+    if (!obj.authProvider || obj.authProvider === 'local') {
+      return !!obj.password;
+    }
+
     return true;
   }
 
-  defaultMessage() {
-    return 'No puede enviar password cuando authProvider no es local';
+  defaultMessage(args: ValidationArguments) {
+    const obj = args.object as UserLike;
+    if (obj.authProvider && obj.authProvider !== 'local') {
+      return 'No puede enviar password cuando authProvider no es local';
+    }
+    return 'La contraseña es obligatoria para usuarios locales';
   }
 }

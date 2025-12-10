@@ -26,7 +26,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[\d\s\-()]{8,20}$/, {
+  @Matches(/^\+?[1-9]\d{7,14}$/, {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
