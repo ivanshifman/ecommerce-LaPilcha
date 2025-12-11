@@ -47,11 +47,11 @@ export class User {
   @Prop({ select: false })
   refreshTokenHash?: string;
 
-  @Prop({ select: false, index: true })
-  resetPasswordToken?: string;
+  @Prop({ type: String, select: false, index: true, default: null })
+  resetPasswordToken?: string | null;
 
-  @Prop({ select: false })
-  resetPasswordExpires?: Date;
+  @Prop({ type: Date, select: false, default: null })
+  resetPasswordExpires?: Date | null;
 
   @Prop({
     type: {
@@ -100,27 +100,15 @@ export class User {
 
   @Prop()
   deletedAt?: Date;
+
+  @Prop({ select: false })
+  emailVerificationCode?: string;
+
+  @Prop({ select: false })
+  emailVerificationExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.index({ email: 1, isActive: 1 });
-UserSchema.index(
-  { 'oauthProviders.google': 1 },
-  {
-    sparse: true,
-    unique: true,
-    partialFilterExpression: { deletedAt: { $exists: false } },
-  },
-);
-UserSchema.index(
-  { 'oauthProviders.apple': 1 },
-  {
-    sparse: true,
-    unique: true,
-    partialFilterExpression: { deletedAt: { $exists: false } },
-  },
-);
 
 UserSchema.pre('save', function (next) {
   if (this.authProvider === AuthProvider.LOCAL && this.isNew && !this.password) {

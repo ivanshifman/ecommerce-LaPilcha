@@ -14,7 +14,7 @@ import {
   IsNotEmpty,
   IsUrl,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { CreateSizeDto } from './create-size.dto';
 import { ColorEnum } from '../common/enums/color.enum';
 import { GenderEnum } from '../common/enums/gender.enum';
@@ -67,6 +67,10 @@ export class CreateProductDto {
 
   @IsIn(Object.values(ColorEnum), { message: 'Color inválido.' })
   @IsNotEmpty({ message: 'El color no puede estar vacío.' })
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') return value.toLowerCase();
+    return value;
+  })
   color!: string;
 
   @IsOptional()

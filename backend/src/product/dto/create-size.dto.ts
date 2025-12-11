@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsNumber, Min, IsOptional, IsNotEmpty, Matches } from 'class-validator';
 
 export class CreateSizeDto {
@@ -5,6 +6,10 @@ export class CreateSizeDto {
     message: 'Talle inválido.',
   })
   @IsNotEmpty({ message: 'El talle no puede estar vacío.' })
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') return value.toUpperCase();
+    return value;
+  })
   size!: string;
 
   @IsNumber({}, { message: 'El stock debe ser un número.' })

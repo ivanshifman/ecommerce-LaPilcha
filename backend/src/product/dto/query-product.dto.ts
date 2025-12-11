@@ -1,6 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsIn, IsNumber, Min, Max, Matches } from 'class-validator';
-import { ColorEnum } from '../common/enums/color.enum';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional, IsString, IsIn, IsNumber, Min, Max } from 'class-validator';
 import { GenderEnum } from '../common/enums/gender.enum';
 
 export class QueryProductDto {
@@ -30,12 +29,18 @@ export class QueryProductDto {
   subcategory?: string;
 
   @IsOptional()
-  @IsIn(Object.values(ColorEnum), { message: 'color inválido.' })
+  @IsString()
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') return value.trim().toLowerCase();
+    return value;
+  })
   color?: string;
 
   @IsOptional()
-  @Matches(/^([A-Z]{1,4}|[0-9]{1,3})$/, {
-    message: 'Talle inválido.',
+  @IsString()
+  @Transform(({ value }: { value: unknown }) => {
+    if (typeof value === 'string') return value.trim().toUpperCase();
+    return value;
   })
   size?: string;
 

@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { json, urlencoded } from 'express';
 import * as cookieParser from 'cookie-parser';
 import { helmetConfig } from './config/helmet.config';
 
@@ -10,8 +9,6 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  app.use(json({ limit: '20mb' }));
-  app.use(urlencoded({ extended: true }));
   app.use(helmetConfig);
   app.use(cookieParser());
 

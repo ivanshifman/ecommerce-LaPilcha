@@ -17,12 +17,18 @@ export class CreateUserDto {
   @IsString({ message: 'El nombre debe ser texto.' })
   @MinLength(3, { message: 'El nombre debe tener al menos 3 caracteres.' })
   @MaxLength(255, { message: 'El nombre no puede exceder los 255 caracteres.' })
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El nombre solo puede contener letras y espacios.',
+  })
   name!: string;
 
   @IsOptional()
   @IsString({ message: 'El apellido debe ser texto.' })
   @MinLength(3, { message: 'El apellido debe tener al menos 3 caracteres.' })
   @MaxLength(255, { message: 'El apellido no puede exceder los 255 caracteres.' })
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El apellido solo puede contener letras y espacios.',
+  })
   lastName?: string;
 
   @IsEmail({}, { message: 'El correo electrónico no es válido.' })
@@ -69,10 +75,19 @@ export class CreateUserDto {
 export class RegisterDto {
   @IsString({ message: 'El nombre debe ser texto.' })
   @MinLength(3, { message: 'El nombre debe tener al menos 3 caracteres.' })
+  @MaxLength(255, { message: 'El nombre no puede exceder los 255 caracteres.' })
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El nombre solo puede contener letras y espacios.',
+  })
   name!: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'El apellido debe ser texto.' })
+  @MinLength(3, { message: 'El apellido debe tener al menos 3 caracteres.' })
+  @MaxLength(255, { message: 'El apellido no puede exceder los 255 caracteres.' })
+  @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
+    message: 'El apellido solo puede contener letras y espacios.',
+  })
   lastName?: string;
 
   @IsEmail({}, { message: 'El correo electrónico no es válido.' })
@@ -91,4 +106,8 @@ export class RegisterDto {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
+
+  @IsOptional()
+  @IsEnum(AuthProvider)
+  authProvider?: AuthProvider;
 }
