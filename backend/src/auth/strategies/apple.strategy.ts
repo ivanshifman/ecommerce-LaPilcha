@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import * as AppleStrategyPkg from 'passport-apple';
-import { AuthService } from '../auth.service';
+import { OAuthService } from '../OAuth.service';
 import { ConfigService } from '@nestjs/config';
 import { OAuthUserDto } from '../dto/o-auth-user.dto';
 import { AuthProvider } from '../../user/common/enums/authProvider.enum';
@@ -20,16 +20,16 @@ interface AppleProfile {
 @Injectable()
 export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple') {
   constructor(
-    private authService: AuthService,
-    private config: ConfigService,
+    private OAuthService: OAuthService,
+    private configService: ConfigService,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     super({
-      clientID: config.get<string>('APPLE_CLIENT_ID'),
-      teamID: config.get<string>('APPLE_TEAM_ID'),
-      keyID: config.get<string>('APPLE_KEY_ID'),
-      privateKey: config.get<string>('APPLE_PRIVATE_KEY'),
-      callbackURL: config.get<string>('APPLE_CALLBACK') || '/auth/apple/callback',
+      clientID: configService.get<string>('APPLE_CLIENT_ID'),
+      teamID: configService.get<string>('APPLE_TEAM_ID'),
+      keyID: configService.get<string>('APPLE_KEY_ID'),
+      privateKey: configService.get<string>('APPLE_PRIVATE_KEY'),
+      callbackURL: configService.get<string>('APPLE_CALLBACK') || '/auth/apple/callback',
       scope: ['name', 'email'],
     } as any);
   }
@@ -52,7 +52,7 @@ export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple')
         avatar: undefined,
       };
 
-      const result = await this.authService.oauthLogin(dto);
+      const result = await this.OAuthService.oauthLogin(dto);
 
       return done(null, result.user);
     } catch (err) {

@@ -1,0 +1,82 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { UserDocument } from '../user/schemas/user.schema';
+import { UserService } from '../user/user.service';
+import { MailService } from '../common/mail/mail.service';
+import { parseDurationToMs } from '../common/utils/parseDuration.util';
+import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/update-password.dto';
+import { TokenService } from './token.service';
+
+@Injectable()
+export class PasswordService {
+  private saltRounds = 10;
+
+  constructor(
+    private configService: ConfigService,
+    private userService: UserService,
+    private mailService: MailService,
+    private tokenService: TokenService,
+  ) {}
+
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, this.saltRounds);
+  }
+
+  async validatePassword(user: UserDocument, password: string) {
+    if (!user.password) return false;
+    return bcrypt.compare(password, user.password);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.userService.findById(userId);
+    if (!user) throw new BadRequestException('User not found');
+
+    const ok = await this.validatePassword(user, dto.currentPassword);
+    if (!ok) throw new BadRequestException('Contraseña actual incorrecta');
+
+    const newHash = await this.hashPassword(dto.newPassword);
+    await this.userService.updatePassword(userId, newHash);
+    await this.userService.setRefreshTokenHash(userId, null);
+    return { message: 'Contraseña cambiada exitosamente' };
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const user = await this.userService.findByEmail(dto.email);
+    if (!user) return;
+
+    const payload = { sub: String(user._id), email: user.email };
+    const token = await this.tokenService.signVerificationToken(payload);
+
+    const expires = new Date(
+      Date.now() +
+        parseDurationToMs(this.configService.get<string>('JWT_VERIFICATION_EXPIRATION') ?? '1h'),
+    );
+
+    await this.userService.setResetToken(String(user._id), token, expires);
+    await this.mailService.sendResetPasswordEmail(dto.email, token);
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    try {
+      await this.tokenService.verifyToken(dto.token);
+    } catch {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+
+    const user = await this.userService.findByResetToken(dto.token);
+    if (
+      !user ||
+      user.resetPasswordToken !== dto.token ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+
+    const hashed = await this.hashPassword(dto.newPassword);
+    await this.userService.updatePasswordAndClearReset(String(user._id), hashed);
+    await this.userService.setRefreshTokenHash(String(user._id), null);
+    return { message: 'Contraseña actualizada exitosamente' };
+  }
+}

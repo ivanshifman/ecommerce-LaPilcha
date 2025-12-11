@@ -1,17 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from '../common/mail/mail.service';
-import { LocalStrategy } from './strategies/local.strategy';
+import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { User, UserSchema } from '../user/schemas/user.schema';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { LocalStrategy } from './strategies/local.strategy';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { TokenService } from './token.service';
+import { PasswordService } from './password.service';
+import { EmailVerificationService } from './emailVerification.service';
+import { OAuthService } from './OAuth.service';
+import { MailService } from '../common/mail/mail.service';
 
 @Module({
   imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -23,7 +30,16 @@ import { MailModule } from '../common/mail/mail.module';
     MailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, MailService, LocalStrategy, JwtStrategy],
-  exports: [AuthService],
+  providers: [
+    AuthService,
+    TokenService,
+    PasswordService,
+    EmailVerificationService,
+    OAuthService,
+    MailService,
+    LocalStrategy,
+    JwtStrategy,
+  ],
+  exports: [AuthService, TokenService, PasswordService, EmailVerificationService, OAuthService],
 })
 export class AuthModule {}

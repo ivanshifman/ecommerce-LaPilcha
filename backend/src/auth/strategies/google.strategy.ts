@@ -6,7 +6,7 @@ import {
   Profile as GoogleProfile,
   VerifyCallback,
 } from 'passport-google-oauth20';
-import { AuthService } from '../auth.service';
+import { OAuthService } from '../OAuth.service';
 import { ConfigService } from '@nestjs/config';
 import { OAuthUserDto } from '../dto/o-auth-user.dto';
 import { AuthProvider } from '../../user/common/enums/authProvider.enum';
@@ -14,13 +14,13 @@ import { AuthProvider } from '../../user/common/enums/authProvider.enum';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private readonly authService: AuthService,
-    private readonly config: ConfigService,
+    private readonly OAuthService: OAuthService,
+    private readonly configService: ConfigService,
   ) {
     const options: StrategyOptions = {
-      clientID: config.get<string>('GOOGLE_CLIENT_ID') ?? '',
-      clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET') ?? '',
-      callbackURL: config.get<string>('GOOGLE_CALLBACK') ?? '/auth/google/callback',
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID') ?? '',
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') ?? '',
+      callbackURL: configService.get<string>('GOOGLE_CALLBACK') ?? '/auth/google/callback',
       scope: ['email', 'profile'],
     };
 
@@ -39,7 +39,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         avatar: profile.photos?.[0]?.value,
       };
 
-      const result = await this.authService.oauthLogin(dto);
+      const result = await this.OAuthService.oauthLogin(dto);
 
       return done(null, result.user);
     } catch (err) {

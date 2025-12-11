@@ -1,30 +1,34 @@
 import { Controller, Get, Patch, UseGuards, Body, Param, Delete, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UserService } from './user.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { UserRole } from './common/enums/userRole.enum';
+import { UserService } from './user.service';
+import { WishlistService } from './wishList.service';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
-import { Request } from 'express';
 import { UpdateUserAdminDto } from './dto/update-user.dto';
-import { UserResponseDto } from 'src/auth/dto/auth-response.dto';
+import { UserResponseDto } from '../auth/dto/auth-response.dto';
+import { UserRole } from './common/enums/userRole.enum';
 
 @Controller('users')
 export class UserController {
-  constructor(private users: UserService) {}
+  constructor(
+    private userService: UserService,
+    private wishlistService: WishlistService,
+  ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   async findAll() {
-    return await this.users.findAll();
+    return await this.userService.findAll();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.users.findById(id);
+    return await this.userService.findById(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -34,41 +38,41 @@ export class UserController {
     @Param('id') id: string,
     @Body() body: UpdateUserAdminDto,
   ): Promise<UserResponseDto> {
-    return await this.users.updateUserAdmin(id, body);
+    return await this.userService.updateUserAdmin(id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
-    return await this.users.delete(id);
+    return await this.userService.delete(id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('wishlist')
   async getWishlist(@Req() req: Request) {
     const user = req.user as AuthenticatedUserDto;
-    return await this.users.getWishlist(user.id);
+    return await this.wishlistService.getWishlist(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('wishlist/:productId')
   async addToWishlist(@Req() req: Request, @Param('productId') productId: string) {
     const user = req.user as AuthenticatedUserDto;
-    return await this.users.addToWishlist(user.id, productId);
+    return await this.wishlistService.addToWishlist(user.id, productId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('wishlist/:productId')
   async removeFromWishlist(@Req() req: Request, @Param('productId') productId: string) {
     const user = req.user as AuthenticatedUserDto;
-    return await this.users.removeFromWishlist(user.id, productId);
+    return await this.wishlistService.removeFromWishlist(user.id, productId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('wishlist')
   async clearWishlist(@Req() req: Request) {
     const user = req.user as AuthenticatedUserDto;
-    return { success: true, wishlist: await this.users.clearWishlist(user.id) };
+    return await this.wishlistService.clearWishlist(user.id);
   }
 }

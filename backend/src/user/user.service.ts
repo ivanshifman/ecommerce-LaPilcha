@@ -1,22 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
 import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto } from './dto/create-user.dto';
-import { AuthProvider } from './common/enums/authProvider.enum';
 import { UpdateUserAdminDto, UpdateUserDto } from './dto/update-user.dto';
-import { AdminUserResponseDto, UserResponseDto } from 'src/auth/dto/auth-response.dto';
+import { AdminUserResponseDto, UserResponseDto } from '../auth/dto/auth-response.dto';
+import { AuthProvider } from './common/enums/authProvider.enum';
 
 @Injectable()
 export class UserService {
   private saltRounds = 10;
 
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private config: ConfigService,
-  ) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async createLocal(data: RegisterDto): Promise<UserDocument> {
     if (!data.password) {
@@ -83,11 +79,6 @@ export class UserService {
 
   async setRefreshTokenHash(userId: string, refreshTokenHash: string | null) {
     return this.userModel.findByIdAndUpdate(userId, { refreshTokenHash }, { new: true }).exec();
-  }
-
-  async validatePassword(user: UserDocument, password: string) {
-    if (!user.password) return false;
-    return bcrypt.compare(password, user.password);
   }
 
   async update(userId: string, dto: UpdateUserDto): Promise<UserDocument> {
@@ -164,37 +155,6 @@ export class UserService {
     );
   }
 
-  async generateAndSaveVerificationCode(userId: string) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(
-      Date.now() +
-        parseDurationToMs(this.config.get<string>('JWT_VERIFICATION_EXPIRATION') ?? '1h'),
-    );
-    await this.userModel.findByIdAndUpdate(userId, {
-      emailVerificationCode: code,
-      emailVerificationExpires: expires,
-    });
-    return { code, expires };
-  }
-
-  async verifyEmailCode(userId: string, code: string) {
-    const user = await this.userModel
-      .findById(userId)
-      .select('+emailVerificationCode +emailVerificationExpires')
-      .exec();
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    if (!user.emailVerificationCode || !user.emailVerificationExpires)
-      throw new BadRequestException('No hay código de verificación activo');
-    if (user.emailVerificationExpires < new Date())
-      throw new BadRequestException('Código expirado');
-    if (user.emailVerificationCode !== code) throw new BadRequestException('Código inválido');
-    user.emailVerified = true;
-    user.emailVerificationCode = undefined;
-    user.emailVerificationExpires = undefined;
-    await user.save();
-    return user;
-  }
-
   async clearVerification(userId: string) {
     return this.userModel.findByIdAndUpdate(
       userId,
@@ -213,58 +173,5 @@ export class UserService {
 
   async findByResetToken(token: string) {
     return this.userModel.findOne({ resetPasswordToken: token }).exec();
-  }
-
-  async getWishlist(userId: string) {
-    const user = await this.userModel.findById(userId).populate('wishlist').exec();
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    return user.wishlist;
-  }
-
-  async addToWishlist(userId: string, productId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-
-    const productObjectId = new Types.ObjectId(productId);
-
-    if (!user.wishlist.some((id) => id.equals(productObjectId))) {
-      user.wishlist.push(productObjectId);
-      await user.save();
-    }
-
-    return user.wishlist;
-  }
-
-  async removeFromWishlist(userId: string, productId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.wishlist = user.wishlist.filter((id) => id.toString() !== productId);
-    await user.save();
-    return user.wishlist;
-  }
-
-  async clearWishlist(userId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.wishlist = [];
-    await user.save();
-    return user.wishlist;
-  }
-}
-
-function parseDurationToMs(str: string) {
-  const num = parseInt(str.slice(0, -1), 10);
-  const unit = str.slice(-1);
-  switch (unit) {
-    case 's':
-      return num * 1000;
-    case 'm':
-      return num * 60 * 1000;
-    case 'h':
-      return num * 60 * 60 * 1000;
-    case 'd':
-      return num * 24 * 60 * 60 * 1000;
-    default:
-      return num * 1000;
   }
 }
