@@ -9,32 +9,33 @@ import {
   Patch,
   Get,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { RegisterDto } from '../user/dto/create-user.dto';
+import { RegisterResponseDto } from '../user/dto/register-response.dto';
 import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/update-password';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
+import { AuthResponseDto, ProfileResponseDto, UserResponseDto } from './dto/auth-response.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { REFRESH_COOKIE } from '../common/utils/cookie.util';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly auth: AuthService,
-    private readonly config: ConfigService,
-  ) {}
+  constructor(private readonly auth: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  async register(@Body() dto: RegisterDto): Promise<RegisterResponseDto> {
     return await this.auth.registerLocal(dto);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthResponseDto> {
     const user = req.user as AuthenticatedUserDto;
     return await this.auth.loginLocal(user, res);
   }
@@ -88,14 +89,15 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  async updateUser(@Req() req: Request, @Body() dto: UpdateUserDto) {
+  async updateUser(@Req() req: Request, @Body() dto: UpdateUserDto): Promise<UserResponseDto> {
     const user = req.user as AuthenticatedUserDto;
     return await this.auth.updateUser(user, dto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async profile(@Req() req: Request) {
-    return await this.auth.profile(req.user as AuthenticatedUserDto);
+  async profile(@Req() req: Request): Promise<ProfileResponseDto> {
+    const user = req.user as AuthenticatedUserDto;
+    return await this.auth.profile(user);
   }
 }

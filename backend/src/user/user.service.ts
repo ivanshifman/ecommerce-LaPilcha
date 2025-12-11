@@ -4,8 +4,10 @@ import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { User, UserDocument } from './schemas/user.schema';
-import { AuthProvider } from './common/enums/authProvider.enum';
 import { RegisterDto } from './dto/create-user.dto';
+import { AuthProvider } from './common/enums/authProvider.enum';
+import { UpdateUserAdminDto, UpdateUserDto } from './dto/update-user.dto';
+import { AdminUserResponseDto, UserResponseDto } from 'src/auth/dto/auth-response.dto';
 
 @Injectable()
 export class UserService {
@@ -16,15 +18,22 @@ export class UserService {
     private config: ConfigService,
   ) {}
 
-  async createLocal(data: RegisterDto) {
-    if (!data.password)
+  async createLocal(data: RegisterDto): Promise<UserDocument> {
+    if (!data.password) {
       throw new BadRequestException('La contraseña es obligatoria para usuarios locales');
+    }
+
     const hashed = await bcrypt.hash(data.password, this.saltRounds);
+
     const created = new this.userModel({
-      ...data,
+      name: data.name,
+      lastName: data.lastName,
+      email: data.email,
       password: hashed,
-      authProvider: data.authProvider ?? 'local',
+      phone: data.phone,
+      authProvider: AuthProvider.LOCAL,
     });
+
     return created.save();
   }
 
@@ -81,8 +90,64 @@ export class UserService {
     return bcrypt.compare(password, user.password);
   }
 
-  async update(userId: string, payload: Partial<UserDocument>) {
-    return this.userModel.findByIdAndUpdate(userId, payload, { new: true }).exec();
+  async update(userId: string, dto: UpdateUserDto): Promise<UserDocument> {
+    const updated = await this.userModel.findByIdAndUpdate(userId, dto, { new: true }).exec();
+    if (!updated) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    return updated;
+  }
+
+  async updateUserAdmin(userId: string, dto: UpdateUserAdminDto): Promise<AdminUserResponseDto> {
+    const updatedDoc = await this.userModel.findByIdAndUpdate(userId, dto, { new: true }).exec();
+    if (!updatedDoc) throw new NotFoundException('Usuario no encontrado');
+    return this.toAdminUserResponseDto(updatedDoc);
+  }
+
+  async updatePassword(userId: string, hashedPassword: string): Promise<void> {
+    const result = await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
+    if (!result) throw new NotFoundException('Usuario no encontrado');
+  }
+
+  async updatePasswordAndClearReset(userId: string, hashedPassword: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+    });
+  }
+
+  private toUserResponseDto(doc: UserDocument): UserResponseDto {
+    return {
+      id: doc._id.toString(),
+      name: doc.name,
+      lastName: doc.lastName,
+      email: doc.email,
+      role: doc.role,
+      emailVerified: doc.emailVerified,
+      avatar: doc.avatar,
+      phone: doc.phone,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
+  }
+
+  private toAdminUserResponseDto(doc: UserDocument): AdminUserResponseDto {
+    return {
+      ...this.toUserResponseDto(doc),
+      isActive: doc.isActive,
+      lastLogin: doc.lastLogin,
+      totalOrders: doc.totalOrders,
+      totalSpent: doc.totalSpent,
+    };
+  }
+
+  async findByIdAsDto(id: string): Promise<UserResponseDto> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return this.toUserResponseDto(user);
   }
 
   async delete(id: string): Promise<UserDocument> {

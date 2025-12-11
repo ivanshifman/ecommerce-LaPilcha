@@ -22,6 +22,8 @@ import { Response } from 'express';
 import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { UserDocument } from '../user/schemas/user.schema';
+import { AuthResponseDto, ProfileResponseDto, UserResponseDto } from './dto/auth-response.dto';
+import { RegisterResponseDto } from 'src/user/dto/register-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,13 +39,23 @@ export class AuthService {
     this.tokensUtil = new TokensUtil(this.config, this.jwtService);
   }
 
-  async registerLocal(dto: RegisterDto) {
+  async registerLocal(dto: RegisterDto): Promise<RegisterResponseDto> {
     const exists = await this.users.findByEmail(dto.email);
     if (exists) throw new BadRequestException('Email ya registrado');
+
     const user = await this.users.createLocal(dto);
     const { code } = await this.users.generateAndSaveVerificationCode(String(user._id));
+
     await this.mail.sendVerificationCode(user.email, code);
-    return user;
+
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      message: 'Registro exitoso. Por favor verifica tu email.',
+    };
   }
 
   async validateUser(dto: LoginUserDto) {
@@ -56,10 +68,9 @@ export class AuthService {
     return user;
   }
 
-  async updateUser(user: AuthenticatedUserDto, dto: UpdateUserDto) {
+  async updateUser(user: AuthenticatedUserDto, dto: UpdateUserDto): Promise<UserResponseDto> {
     const updated = await this.users.update(user.id, dto);
-    if (!updated) throw new NotFoundException('Usuario no encontrado');
-    return updated;
+    return this.toUserResponseDto(updated);
   }
 
   private async createTokensForUser(user: AuthenticatedUserDto): Promise<AuthTokens> {
@@ -81,13 +92,39 @@ export class AuthService {
     };
   }
 
-  async loginLocal(user: AuthenticatedUserDto, res: Response) {
-    if (!user.emailVerified)
-      throw new UnauthorizedException('Email no verificado. Revisa tu correo.');
+  async loginLocal(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('Email no verificado');
+    }
+
     const tokens = await this.createTokensForUser(user);
+
     res.cookie(ACCESS_COOKIE, tokens.accessToken, cookieOptions(this.config, false));
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(this.config, true));
-    return { user, ...tokens };
+
+    const userDoc = await this.users.findById(user.id);
+    if (!userDoc) throw new NotFoundException('Usuario no encontrado');
+
+    return {
+      user: this.toUserResponseDto(userDoc),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  private toUserResponseDto(doc: UserDocument): UserResponseDto {
+    return {
+      id: doc._id.toString(),
+      name: doc.name,
+      lastName: doc.lastName,
+      email: doc.email,
+      role: doc.role,
+      emailVerified: doc.emailVerified,
+      avatar: doc.avatar,
+      phone: doc.phone,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
   }
 
   toDto(user: UserDocument): AuthenticatedUserDto {
@@ -173,14 +210,9 @@ export class AuthService {
 
     const hashed = await bcrypt.hash(dto.newPassword, this.saltRounds);
 
-    await this.users.update(String(user._id), {
-      password: hashed,
-      resetPasswordToken: null,
-      resetPasswordExpires: null,
-    });
-
+    await this.users.updatePasswordAndClearReset(String(user._id), hashed);
     await this.users.setRefreshTokenHash(String(user._id), null);
-    return true;
+    return { message: 'Contraseña actualizada exitosamente' };
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
@@ -191,10 +223,9 @@ export class AuthService {
     if (!ok) throw new BadRequestException('Contraseña actual incorrecta');
 
     const newHash = await bcrypt.hash(dto.newPassword, this.saltRounds);
-    await this.users.update(userId, { password: newHash });
+    await this.users.updatePassword(userId, newHash);
     await this.users.setRefreshTokenHash(userId, null);
-
-    return true;
+    return { message: 'Contraseña cambiada exitosamente' };
   }
 
   async verifyEmail(userId: string, code: string, res: Response) {
@@ -240,10 +271,18 @@ export class AuthService {
     return { ...tokens, user };
   }
 
-  async profile(user: AuthenticatedUserDto) {
+  async profile(user: AuthenticatedUserDto): Promise<ProfileResponseDto> {
     const userDoc = await this.users.findById(user.id);
     if (!userDoc) throw new NotFoundException('Usuario no encontrado');
-    return userDoc;
+
+    return {
+      ...this.toUserResponseDto(userDoc),
+      wishlist: userDoc.wishlist.map((id) => id.toString()),
+      preferences: userDoc.preferences,
+      totalOrders: userDoc.totalOrders,
+      totalSpent: userDoc.totalSpent,
+      lastLogin: userDoc.lastLogin,
+    };
   }
 }
 

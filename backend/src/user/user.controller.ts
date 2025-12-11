@@ -4,9 +4,10 @@ import { UserService } from './user.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from './common/enums/userRole.enum';
-import { UserDocument } from './schemas/user.schema';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { Request } from 'express';
+import { UpdateUserAdminDto } from './dto/update-user.dto';
+import { UserResponseDto } from 'src/auth/dto/auth-response.dto';
 
 @Controller('users')
 export class UserController {
@@ -26,10 +27,14 @@ export class UserController {
     return await this.users.findById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: UserDocument) {
-    return await this.users.update(id, body);
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateUserAdminDto,
+  ): Promise<UserResponseDto> {
+    return await this.users.updateUserAdmin(id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

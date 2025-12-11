@@ -1,12 +1,12 @@
 import {
-  IsString,
   IsEmail,
-  MinLength,
-  MaxLength,
-  IsOptional,
   IsEnum,
-  Matches,
+  IsOptional,
+  IsString,
   IsUrl,
+  Matches,
+  MaxLength,
+  MinLength,
   Validate,
 } from 'class-validator';
 import { PasswordAuthProviderConstraint } from '../validators/password-authprovider.validator';
@@ -62,14 +62,6 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(AuthProvider)
   authProvider?: AuthProvider;
-
-  @IsOptional()
-  @IsString()
-  googleId?: string;
-
-  @IsOptional()
-  @IsString()
-  appleId?: string;
 }
 
 export class RegisterDto {
@@ -106,8 +98,4 @@ export class RegisterDto {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
-
-  @IsOptional()
-  @IsEnum(AuthProvider)
-  authProvider?: AuthProvider;
 }

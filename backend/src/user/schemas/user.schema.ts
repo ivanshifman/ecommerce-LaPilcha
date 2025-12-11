@@ -106,6 +106,10 @@ export class User {
 
   @Prop({ select: false })
   emailVerificationExpires?: Date;
+
+  createdAt?: Date;
+
+  updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
