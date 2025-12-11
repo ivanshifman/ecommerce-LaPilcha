@@ -19,9 +19,9 @@ import { AuthProvider } from '../user/common/enums/authProvider.enum';
 import { AuthTokens } from './types/auth-tokens.type';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { Response } from 'express';
-import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from 'src/common/utils/cookie.util';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
-import { UserDocument } from 'src/user/schemas/user.schema';
+import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
+import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
 export class AuthService {

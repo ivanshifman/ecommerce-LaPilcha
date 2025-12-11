@@ -5,7 +5,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from './common/enums/userRole.enum';
 import { UserDocument } from './schemas/user.schema';
-import { AuthenticatedUserDto } from 'src/auth/dto/authenticated-user.dto';
+import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { Request } from 'express';
 
 @Controller('users')

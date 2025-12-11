@@ -18,7 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET') ?? '',
     };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super(options);
   }
 

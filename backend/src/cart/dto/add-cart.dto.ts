@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ColorEnum } from 'src/product/common/enums/color.enum';
+import { ColorEnum } from '../../product/common/enums/color.enum';
 
 export class AddToCartDto {
   @IsMongoId({ message: 'ID de producto inválido' })

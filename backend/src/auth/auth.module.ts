@@ -4,11 +4,11 @@ import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/common/mail/mail.service';
+import { MailService } from '../common/mail/mail.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { UserModule } from 'src/user/user.module';
-import { MailModule } from 'src/common/mail/mail.module';
+import { UserModule } from '../user/user.module';
+import { MailModule } from '../common/mail/mail.module';
 
 @Module({
   imports: [
