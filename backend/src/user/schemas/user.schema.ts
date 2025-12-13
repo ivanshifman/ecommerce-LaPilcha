@@ -25,7 +25,7 @@ export class User {
   @Prop({ select: false, trim: true, minlength: 6 })
   password?: string;
 
-  @Prop({ trim: true, match: /^\+?[1-9]\d{7,14}$/ })
+  @Prop({ trim: true, match: /^\+[1-9]\d{7,14}$/ })
   phone?: string;
 
   @Prop()

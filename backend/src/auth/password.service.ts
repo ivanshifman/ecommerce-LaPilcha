@@ -35,17 +35,28 @@ export class PasswordService {
     const ok = await this.validatePassword(user, dto.currentPassword);
     if (!ok) throw new BadRequestException('Contraseña actual incorrecta');
 
+    const isSamePassword = await this.validatePassword(user, dto.newPassword);
+    if (isSamePassword) {
+      throw new BadRequestException('La nueva contraseña debe ser diferente a la actual');
+    }
+
     const newHash = await this.hashPassword(dto.newPassword);
+
     await this.userService.updatePassword(userId, newHash);
     await this.userService.setRefreshTokenHash(userId, null);
+
     return { message: 'Contraseña cambiada exitosamente' };
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.userService.findByEmail(dto.email);
-    if (!user) return;
+    if (!user) {
+      return {
+        message: 'Si el email está registrado, recibirás instrucciones para resetear tu contraseña',
+      };
+    }
 
-    const payload = { sub: String(user._id), email: user.email };
+    const payload = { sub: String(user._id), email: user.email, role: user.role };
     const token = await this.tokenService.signVerificationToken(payload);
 
     const expires = new Date(
@@ -55,16 +66,15 @@ export class PasswordService {
 
     await this.userService.setResetToken(String(user._id), token, expires);
     await this.mailService.sendResetPasswordEmail(dto.email, token);
+
+    return {
+      message: 'Si el email está registrado, recibirás instrucciones para resetear tu contraseña',
+    };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
-    try {
-      await this.tokenService.verifyToken(dto.token);
-    } catch {
-      throw new BadRequestException('Token inválido o expirado');
-    }
-
     const user = await this.userService.findByResetToken(dto.token);
+
     if (
       !user ||
       user.resetPasswordToken !== dto.token ||
@@ -74,9 +84,18 @@ export class PasswordService {
       throw new BadRequestException('Token inválido o expirado');
     }
 
+    if (user.password) {
+      const isSamePassword = await this.validatePassword(user, dto.newPassword);
+      if (isSamePassword) {
+        throw new BadRequestException('La nueva contraseña debe ser diferente a la actual');
+      }
+    }
+
     const hashed = await this.hashPassword(dto.newPassword);
+
     await this.userService.updatePasswordAndClearReset(String(user._id), hashed);
     await this.userService.setRefreshTokenHash(String(user._id), null);
+
     return { message: 'Contraseña actualizada exitosamente' };
   }
 }

@@ -45,7 +45,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[1-9]\d{7,14}$/, {
+  @Matches(/^\+[1-9]\d{7,14}$/, {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
@@ -94,7 +94,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[1-9]\d{7,14}$/, {
+  @Matches(/^\+[1-9]\d{7,14}$/, {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;

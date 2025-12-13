@@ -1,8 +1,5 @@
-export class RegisterResponseDto {
-  id!: string;
-  name!: string;
-  lastName?: string;
-  email!: string;
-  emailVerified!: boolean;
+import { UserResponseDto } from '../../auth/dto/auth-response.dto';
+
+export class RegisterResponseDto extends UserResponseDto {
   message!: string;
 }

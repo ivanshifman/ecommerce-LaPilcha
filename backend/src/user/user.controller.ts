@@ -17,18 +17,46 @@ export class UserController {
     private wishlistService: WishlistService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me/wishlist')
+  async getMyWishlist(@Req() req: Request) {
+    const user = req.user as AuthenticatedUserDto;
+    return await this.wishlistService.getWishlist(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/wishlist/:productId')
+  async addToMyWishlist(@Req() req: Request, @Param('productId') productId: string) {
+    const user = req.user as AuthenticatedUserDto;
+    return await this.wishlistService.addToWishlist(user.id, productId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/wishlist/:productId')
+  async removeFromMyWishlist(@Req() req: Request, @Param('productId') productId: string) {
+    const user = req.user as AuthenticatedUserDto;
+    return await this.wishlistService.removeFromWishlist(user.id, productId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/wishlist')
+  async clearMyWishlist(@Req() req: Request) {
+    const user = req.user as AuthenticatedUserDto;
+    return await this.wishlistService.clearWishlist(user.id);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
   async findAll() {
-    return await this.userService.findAll();
+    return await this.userService.findAllAsDto();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.userService.findById(id);
+    return await this.userService.findByIdAsDto(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -46,33 +74,5 @@ export class UserController {
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
     return await this.userService.delete(id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('wishlist')
-  async getWishlist(@Req() req: Request) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.getWishlist(user.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('wishlist/:productId')
-  async addToWishlist(@Req() req: Request, @Param('productId') productId: string) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.addToWishlist(user.id, productId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('wishlist/:productId')
-  async removeFromWishlist(@Req() req: Request, @Param('productId') productId: string) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.removeFromWishlist(user.id, productId);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('wishlist')
-  async clearWishlist(@Req() req: Request) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.clearWishlist(user.id);
   }
 }

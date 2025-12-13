@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserDocument } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
 import { TokenService } from './token.service';
@@ -23,8 +23,15 @@ export class OAuthService {
 
   async oauthLogin(dto: OAuthUserDto) {
     const existing = await this.userService.findByEmail(dto.email);
+
+    if (existing && !existing.isActive) {
+      throw new UnauthorizedException('Usuario desactivado');
+    }
+
     if (existing && existing.authProvider !== dto.authProvider) {
-      throw new BadRequestException(`Email ya registrado con ${existing.authProvider}`);
+      throw new BadRequestException(
+        `Este email ya está registrado con otro método de autenticación. Por favor inicia sesión con tu método original.`,
+      );
     }
 
     const user = await this.userService.createOAuthUser({

@@ -14,7 +14,6 @@ import { TokenService } from './token.service';
 import { PasswordService } from './password.service';
 import { EmailVerificationService } from './emailVerification.service';
 import { OAuthService } from './OAuth.service';
-import { MailService } from '../common/mail/mail.service';
 
 @Module({
   imports: [
@@ -36,7 +35,6 @@ import { MailService } from '../common/mail/mail.service';
     PasswordService,
     EmailVerificationService,
     OAuthService,
-    MailService,
     LocalStrategy,
     JwtStrategy,
   ],

@@ -1,4 +1,5 @@
 import { IsString, IsOptional } from 'class-validator';
+import { UserRole } from '../../user/common/enums/userRole.enum';
 
 export class JwtPayloadDto {
   @IsString()
@@ -9,5 +10,5 @@ export class JwtPayloadDto {
 
   @IsOptional()
   @IsString({})
-  role?: string;
+  role?: UserRole;
 }

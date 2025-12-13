@@ -14,32 +14,54 @@ export class WishlistService {
   }
 
   async addToWishlist(userId: string, productId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-
     const productObjectId = new Types.ObjectId(productId);
 
-    if (!user.wishlist.some((id) => id.equals(productObjectId))) {
-      user.wishlist.push(productObjectId);
-      await user.save();
+    const result = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $addToSet: { wishlist: productObjectId },
+        },
+        { new: true, select: 'wishlist' },
+      )
+      .exec();
+
+    if (!result) {
+      throw new NotFoundException('Usuario no encontrado');
     }
 
-    return user.wishlist;
+    return result.wishlist;
   }
 
   async removeFromWishlist(userId: string, productId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.wishlist = user.wishlist.filter((id) => id.toString() !== productId);
-    await user.save();
-    return user.wishlist;
+    const productObjectId = new Types.ObjectId(productId);
+
+    const result = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $pull: { wishlist: productObjectId },
+        },
+        { new: true, select: 'wishlist' },
+      )
+      .exec();
+
+    if (!result) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return result.wishlist;
   }
 
   async clearWishlist(userId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    user.wishlist = [];
-    await user.save();
-    return user.wishlist;
+    const result = await this.userModel
+      .findByIdAndUpdate(userId, { wishlist: [] }, { new: true, select: 'wishlist' })
+      .exec();
+
+    if (!result) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return result.wishlist;
   }
 }

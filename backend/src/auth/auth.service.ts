@@ -44,19 +44,27 @@ export class AuthService {
     const exists = await this.userService.findByEmail(dto.email);
     if (exists) throw new BadRequestException('Email ya registrado');
 
-    const user = await this.userService.createLocal(dto);
-    const { code } = await this.emailVerificationService.generateAndSaveVerificationCode(
-      String(user._id),
-    );
+    if (!dto.password) {
+      throw new BadRequestException('La contraseña es obligatoria para usuarios locales');
+    }
+
+    const hashedPassword = await this.passwordService.hashPassword(dto.password);
+
+    const user = await this.userService.create({
+      name: dto.name,
+      lastName: dto.lastName,
+      email: dto.email,
+      password: hashedPassword,
+      phone: dto.phone,
+      authProvider: AuthProvider.LOCAL,
+    });
+
+    const { code } = await this.emailVerificationService.generateAndSaveVerificationCode(user.id);
 
     await this.mailService.sendVerificationCode(user.email, code);
 
     return {
-      id: user._id.toString(),
-      name: user.name,
-      lastName: user.lastName,
-      email: user.email,
-      emailVerified: user.emailVerified,
+      ...user,
       message: 'Registro exitoso. Por favor verifica tu email.',
     };
   }
@@ -64,6 +72,11 @@ export class AuthService {
   async validateUser(dto: LoginUserDto) {
     const user = await this.userService.findByEmail(dto.email);
     if (!user) return null;
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Usuario desactivado');
+    }
+
     if (user.authProvider && user.authProvider !== AuthProvider.LOCAL) return null;
     const ok = await this.passwordService.validatePassword(user, dto.password);
     if (!ok) return null;
@@ -71,8 +84,7 @@ export class AuthService {
   }
 
   async updateUser(user: AuthenticatedUserDto, dto: UpdateUserDto): Promise<UserResponseDto> {
-    const updated = await this.userService.update(user.id, dto);
-    return this.toUserResponseDto(updated);
+    return this.userService.update(user.id, dto);
   }
 
   async loginLocal(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
@@ -88,25 +100,13 @@ export class AuthService {
     const userDoc = await this.userService.findById(user.id);
     if (!userDoc) throw new NotFoundException('Usuario no encontrado');
 
+    userDoc.lastLogin = new Date();
+    await userDoc.save();
+
     return {
       user: this.toUserResponseDto(userDoc),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-    };
-  }
-
-  private toUserResponseDto(doc: UserDocument): UserResponseDto {
-    return {
-      id: doc._id.toString(),
-      name: doc.name,
-      lastName: doc.lastName,
-      email: doc.email,
-      role: doc.role,
-      emailVerified: doc.emailVerified,
-      avatar: doc.avatar,
-      phone: doc.phone,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
     };
   }
 
@@ -150,6 +150,21 @@ export class AuthService {
       totalOrders: userDoc.totalOrders,
       totalSpent: userDoc.totalSpent,
       lastLogin: userDoc.lastLogin,
+    };
+  }
+
+  private toUserResponseDto(doc: UserDocument): UserResponseDto {
+    return {
+      id: doc._id.toString(),
+      name: doc.name,
+      lastName: doc.lastName,
+      email: doc.email,
+      role: doc.role,
+      emailVerified: doc.emailVerified,
+      avatar: doc.avatar,
+      phone: doc.phone,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
     };
   }
 }

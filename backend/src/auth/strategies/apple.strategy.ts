@@ -31,6 +31,7 @@ export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple')
       privateKey: configService.get<string>('APPLE_PRIVATE_KEY'),
       callbackURL: configService.get<string>('APPLE_CALLBACK') || '/auth/apple/callback',
       scope: ['name', 'email'],
+      passReqToCallback: false,
     } as any);
   }
 
@@ -41,14 +42,30 @@ export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple')
     done: (err: unknown, user?: unknown) => void,
   ) {
     try {
+      const email = profile.email;
+      if (!email) {
+        return done(
+          new Error('Se requiere acceso al email. Por favor permite el acceso al email en Apple.'),
+          undefined,
+        );
+      }
+
+      const providerId = profile.sub ?? profile.id;
+      if (!providerId) {
+        return done(new Error('Error de autenticación con Apple. Intenta de nuevo.'), undefined);
+      }
+
       const firstName = profile.name?.firstName ?? '';
       const lastName = profile.name?.lastName ?? '';
+
+      const name = firstName || lastName ? `${firstName} ${lastName}`.trim() : email.split('@')[0];
+
       const dto: OAuthUserDto = {
-        name: firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Apple user',
+        name,
         lastName: lastName || undefined,
-        email: profile.email ?? 'no-email@apple.com',
+        email,
         authProvider: AuthProvider.APPLE,
-        providerId: profile.id ?? profile.sub ?? 'unknown',
+        providerId,
         avatar: undefined,
       };
 

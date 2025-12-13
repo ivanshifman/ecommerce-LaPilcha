@@ -29,11 +29,32 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   async validate(profile: GoogleProfile, done: VerifyCallback): Promise<void> {
     try {
-      const dto: OAuthUserDto = {
-        name: profile.displayName ?? profile.name?.givenName ?? 'Unknown',
+      const email = profile.emails?.[0]?.value;
+      if (!email) {
+        return done(
+          new Error(
+            'No se pudo obtener el email de Google. Verifica los permisos de la aplicación.',
+          ),
+          undefined,
+        );
+      }
 
+      if (!profile.id) {
+        return done(new Error('Error de autenticación con Google'), undefined);
+      }
+
+      let name = profile.displayName;
+      if (!name && profile.name?.givenName) {
+        name = profile.name.givenName;
+      }
+      if (!name) {
+        name = email.split('@')[0];
+      }
+
+      const dto: OAuthUserDto = {
+        name,
         lastName: profile.name?.familyName,
-        email: profile.emails?.[0]?.value ?? '',
+        email,
         authProvider: AuthProvider.GOOGLE,
         providerId: profile.id,
         avatar: profile.photos?.[0]?.value,

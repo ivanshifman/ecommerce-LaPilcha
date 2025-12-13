@@ -8,6 +8,7 @@ import { TokensUtil } from '../common/utils/tokens.util';
 import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { AuthTokens } from './types/auth-tokens.type';
+import { UserRole } from '../user/common/enums/userRole.enum';
 
 @Injectable()
 export class TokenService {
@@ -57,7 +58,7 @@ export class TokenService {
     return this.createTokensForUser(userDto);
   }
 
-  async signVerificationToken(payload: { sub: string; email: string; role?: string }) {
+  async signVerificationToken(payload: { sub: string; email: string; role: UserRole }) {
     return this.tokensUtil.signVerificationToken(payload);
   }
 

@@ -28,7 +28,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[1-9]\d{7,14}$/, {
+  @Matches(/^\+[1-9]\d{7,14}$/, {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
@@ -42,10 +42,6 @@ export class UpdateUserDto {
   @ValidateNested()
   @Type(() => UserPreferencesDto)
   preferences?: UserPreferencesDto;
-
-  @IsOptional()
-  @IsBoolean()
-  emailVerified?: boolean;
 }
 
 export class UpdateUserAdminDto {
@@ -63,7 +59,7 @@ export class UpdateUserAdminDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[1-9]\d{7,14}$/, {
+  @Matches(/^\+[1-9]\d{7,14}$/, {
     message: 'Formato de teléfono inválido',
   })
   phone?: string;
