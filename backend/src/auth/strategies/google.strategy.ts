@@ -6,7 +6,7 @@ import {
   Profile as GoogleProfile,
   VerifyCallback,
 } from 'passport-google-oauth20';
-import { OAuthService } from '../OAuth.service';
+import { OAuthService } from '../oAuth.service';
 import { ConfigService } from '@nestjs/config';
 import { OAuthUserDto } from '../dto/o-auth-user.dto';
 import { AuthProvider } from '../../user/common/enums/authProvider.enum';

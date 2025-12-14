@@ -1,15 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Response } from 'express';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/schemas/user.schema';
-import { OAuthService } from './OAuth.service';
-import { TokenService } from './token.service';
 import { UserService } from '../user/user.service';
-import { parseDurationToMs } from '../common/utils/parseDuration.util';
 import { MailService } from '../common/mail/mail.service';
-import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
+import { parseDurationToMs } from '../common/utils/parseDuration.util';
+import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
+import { UserMapper } from '../common/mappers/user.mapper';
+import { AuthProvider } from '../user/common/enums/authProvider.enum';
 
 @Injectable()
 export class EmailVerificationService {
@@ -18,8 +17,6 @@ export class EmailVerificationService {
     private configService: ConfigService,
     private userService: UserService,
     private mailService: MailService,
-    private oAuthService: OAuthService,
-    private tokenService: TokenService,
   ) {}
 
   async generateAndSaveVerificationCode(userId: string) {
@@ -35,13 +32,9 @@ export class EmailVerificationService {
     return { code, expires };
   }
 
-  async verifyEmail(userId: string, code: string, res: Response) {
+  async verifyEmail(userId: string, code: string): Promise<AuthenticatedUserDto> {
     const user = await this.verifyEmailCode(userId, code);
-    const userDto = this.oAuthService.toDto(user);
-    const tokens = await this.tokenService.createTokensForUser(userDto);
-    res.cookie(ACCESS_COOKIE, tokens.accessToken, cookieOptions(this.configService, false));
-    res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(this.configService, true));
-    return userDto;
+    return UserMapper.toAuthenticatedDto(user);
   }
 
   async verifyEmailCode(userId: string, code: string) {
@@ -64,8 +57,26 @@ export class EmailVerificationService {
 
   async resendVerificationCode(userId: string) {
     const user = await this.userService.findById(userId);
-    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (!user.isActive) {
+      throw new BadRequestException('Usuario desactivado');
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('El email ya ha sido verificado');
+    }
+
+    if (user.authProvider !== AuthProvider.LOCAL) {
+      throw new BadRequestException('Los usuarios OAuth no requieren verificación de email');
+    }
+
     const { code } = await this.generateAndSaveVerificationCode(String(user._id));
     await this.mailService.sendVerificationCode(user.email, code);
+
+    return { message: 'Código de verificación enviado exitosamente' };
   }
 }

@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { UpdateUserAdminDto, UpdateUserDto } from './dto/update-user.dto';
 import { AdminUserResponseDto, UserResponseDto } from '../auth/dto/auth-response.dto';
 import { AuthProvider } from './common/enums/authProvider.enum';
+import { UserMapper } from '../common/mappers/user.mapper';
 
 @Injectable()
 export class UserService {
@@ -26,43 +27,28 @@ export class UserService {
   async createOAuthUser(payload: {
     name: string;
     email: string;
-    provider: string;
+    provider: AuthProvider.GOOGLE | AuthProvider.APPLE;
     providerId: string;
     avatar?: string;
-  }) {
+  }): Promise<UserResponseDto> {
     const { email, provider, providerId, name, avatar } = payload;
-    const user = await this.userModel.findOne({ email }).exec();
-    if (user) {
-      const key = provider as 'google' | 'apple';
 
-      if (user.authProvider === AuthProvider.LOCAL) {
-        throw new BadRequestException(
-          'Esta cuenta fue creada con email y contraseña. Por favor inicia sesión con tu contraseña.',
-        );
-      }
+    const oauthKey = provider === AuthProvider.GOOGLE ? 'google' : 'apple';
 
-      if (user.oauthProviders?.[key] && user.oauthProviders[key] !== providerId) {
-        throw new BadRequestException(`Esta cuenta ya está vinculada a otra cuenta de ${provider}`);
-      }
-
-      if (!user.oauthProviders) user.oauthProviders = {};
-      user.oauthProviders[key] = providerId;
-      user.authProvider = provider === 'google' ? AuthProvider.GOOGLE : AuthProvider.APPLE;
-      user.emailVerified = true;
-      user.lastLogin = new Date();
-      await user.save();
-      return user;
-    }
     const newUser = new this.userModel({
       name,
       email,
       avatar,
-      authProvider: provider === 'google' ? 'google' : 'apple',
+      authProvider: provider,
       emailVerified: true,
-      oauthProviders: { [provider]: providerId },
+      oauthProviders: {
+        [oauthKey]: providerId,
+      },
       lastLogin: new Date(),
     });
-    return newUser.save();
+
+    const saved = await newUser.save();
+    return this.toUserResponseDto(saved);
   }
 
   async setRefreshTokenHash(userId: string, refreshTokenHash: string | null) {
@@ -115,28 +101,11 @@ export class UserService {
   }
 
   private toUserResponseDto(doc: UserDocument): UserResponseDto {
-    return {
-      id: doc._id.toString(),
-      name: doc.name,
-      lastName: doc.lastName,
-      email: doc.email,
-      role: doc.role,
-      emailVerified: doc.emailVerified,
-      avatar: doc.avatar,
-      phone: doc.phone,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    };
+    return UserMapper.toUserResponseDto(doc);
   }
 
   private toAdminUserResponseDto(doc: UserDocument): AdminUserResponseDto {
-    return {
-      ...this.toUserResponseDto(doc),
-      isActive: doc.isActive,
-      lastLogin: doc.lastLogin,
-      totalOrders: doc.totalOrders,
-      totalSpent: doc.totalSpent,
-    };
+    return UserMapper.toAdminUserResponseDto(doc);
   }
 
   async findById(id: string) {
@@ -166,7 +135,10 @@ export class UserService {
   }
 
   async findByResetToken(token: string) {
-    return this.userModel.findOne({ resetPasswordToken: token }).exec();
+    return this.userModel
+      .findOne({ resetPasswordToken: token })
+      .select('+password +resetPasswordToken +resetPasswordExpires')
+      .exec();
   }
 
   async update(userId: string, dto: UpdateUserDto): Promise<UserResponseDto> {

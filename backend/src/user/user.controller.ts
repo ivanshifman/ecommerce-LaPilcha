@@ -8,6 +8,7 @@ import { WishlistService } from './wishList.service';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { UpdateUserAdminDto } from './dto/update-user.dto';
 import { UserResponseDto } from '../auth/dto/auth-response.dto';
+import { MongoIdDto, ProductIdDto } from '../common/dto/mongo-id.dto';
 import { UserRole } from './common/enums/userRole.enum';
 
 @Controller('users')
@@ -26,18 +27,17 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Post('me/wishlist/:productId')
-  async addToMyWishlist(@Req() req: Request, @Param('productId') productId: string) {
+  async addToMyWishlist(@Req() req: Request, @Param() params: ProductIdDto) {
     const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.addToWishlist(user.id, productId);
+    return await this.wishlistService.addToWishlist(user.id, params.productId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('me/wishlist/:productId')
-  async removeFromMyWishlist(@Req() req: Request, @Param('productId') productId: string) {
+  async removeFromMyWishlist(@Req() req: Request, @Param() params: ProductIdDto) {
     const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.removeFromWishlist(user.id, productId);
+    return await this.wishlistService.removeFromWishlist(user.id, params.productId);
   }
-
   @UseGuards(JwtAuthGuard)
   @Delete('me/wishlist')
   async clearMyWishlist(@Req() req: Request) {
@@ -55,24 +55,24 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.userService.findByIdAsDto(id);
+  async findOne(@Param() params: MongoIdDto) {
+    return await this.userService.findByIdAsDto(params.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param() params: MongoIdDto,
     @Body() body: UpdateUserAdminDto,
   ): Promise<UserResponseDto> {
-    return await this.userService.updateUserAdmin(id, body);
+    return await this.userService.updateUserAdmin(params.id, body);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    return await this.userService.delete(id);
+  async deleteUser(@Param() params: MongoIdDto) {
+    return await this.userService.delete(params.id);
   }
 }

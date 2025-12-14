@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import * as AppleStrategyPkg from 'passport-apple';
-import { OAuthService } from '../OAuth.service';
+import { OAuthService } from '../oAuth.service';
 import { ConfigService } from '@nestjs/config';
 import { OAuthUserDto } from '../dto/o-auth-user.dto';
 import { AuthProvider } from '../../user/common/enums/authProvider.enum';

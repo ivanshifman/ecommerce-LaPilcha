@@ -23,6 +23,7 @@ import { AuthProvider } from '../user/common/enums/authProvider.enum';
 import { AuthTokens } from './types/auth-tokens.type';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
+import { UserMapper } from '../common/mappers/user.mapper';
 
 @Injectable()
 export class AuthService {
@@ -64,8 +65,8 @@ export class AuthService {
     await this.mailService.sendVerificationCode(user.email, code);
 
     return {
-      ...user,
       message: 'Registro exitoso. Por favor verifica tu email.',
+      ...user,
     };
   }
 
@@ -142,29 +143,10 @@ export class AuthService {
   async profile(user: AuthenticatedUserDto): Promise<ProfileResponseDto> {
     const userDoc = await this.userService.findById(user.id);
     if (!userDoc) throw new NotFoundException('Usuario no encontrado');
-
-    return {
-      ...this.toUserResponseDto(userDoc),
-      wishlist: userDoc.wishlist.map((id) => id.toString()),
-      preferences: userDoc.preferences,
-      totalOrders: userDoc.totalOrders,
-      totalSpent: userDoc.totalSpent,
-      lastLogin: userDoc.lastLogin,
-    };
+    return UserMapper.toProfileResponseDto(userDoc);
   }
 
   private toUserResponseDto(doc: UserDocument): UserResponseDto {
-    return {
-      id: doc._id.toString(),
-      name: doc.name,
-      lastName: doc.lastName,
-      email: doc.email,
-      role: doc.role,
-      emailVerified: doc.emailVerified,
-      avatar: doc.avatar,
-      phone: doc.phone,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    };
+    return UserMapper.toUserResponseDto(doc);
   }
 }

@@ -75,12 +75,7 @@ export class PasswordService {
   async resetPassword(dto: ResetPasswordDto) {
     const user = await this.userService.findByResetToken(dto.token);
 
-    if (
-      !user ||
-      user.resetPasswordToken !== dto.token ||
-      !user.resetPasswordExpires ||
-      user.resetPasswordExpires < new Date()
-    ) {
+    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
       throw new BadRequestException('Token inválido o expirado');
     }
 

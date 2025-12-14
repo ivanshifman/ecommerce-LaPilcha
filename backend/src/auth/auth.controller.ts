@@ -22,6 +22,8 @@ import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/up
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import { AuthResponseDto, ProfileResponseDto, UserResponseDto } from './dto/auth-response.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -47,19 +49,15 @@ export class AuthController {
   }
 
   @Post('verify-email')
-  async verifyEmail(
-    @Body() body: { userId: string; code: string },
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const userDto = await this.emailVerificationService.verifyEmail(body.userId, body.code, res);
+  async verifyEmail(@Body() dto: VerifyEmailDto, @Res({ passthrough: true }) res: Response) {
+    const userDto = await this.emailVerificationService.verifyEmail(dto.userId, dto.code);
     if (!userDto) throw new BadRequestException('Verificación fallida');
-
     return await this.authService.loginLocal(userDto, res);
   }
 
   @Post('resend-code')
-  async resend(@Body() body: { userId: string }) {
-    return await this.emailVerificationService.resendVerificationCode(body.userId);
+  async resend(@Body() dto: ResendVerificationDto) {
+    return await this.emailVerificationService.resendVerificationCode(dto.userId);
   }
 
   @Post('forgot-password')

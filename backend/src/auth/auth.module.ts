@@ -13,7 +13,7 @@ import { AuthController } from './auth.controller';
 import { TokenService } from './token.service';
 import { PasswordService } from './password.service';
 import { EmailVerificationService } from './emailVerification.service';
-import { OAuthService } from './OAuth.service';
+import { OAuthService } from './oAuth.service';
 
 @Module({
   imports: [
