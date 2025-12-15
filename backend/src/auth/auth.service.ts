@@ -88,18 +88,14 @@ export class AuthService {
     return this.userService.update(user.id, dto);
   }
 
-  async loginLocal(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
-    if (!user.emailVerified) {
-      throw new UnauthorizedException('Email no verificado');
-    }
-
+  private async finalizeLogin(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
     const tokens = await this.tokenService.createTokensForUser(user);
 
     res.cookie(ACCESS_COOKIE, tokens.accessToken, cookieOptions(this.configService, false));
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, cookieOptions(this.configService, true));
 
     const userDoc = await this.userService.findById(user.id);
-    if (!userDoc) throw new NotFoundException('Usuario no encontrado');
+    if (!userDoc) throw new UnauthorizedException('Usuario no encontrado');
 
     userDoc.lastLogin = new Date();
     await userDoc.save();
@@ -109,6 +105,18 @@ export class AuthService {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
+  }
+
+  async loginLocal(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('Email no verificado');
+    }
+
+    return this.finalizeLogin(user, res);
+  }
+
+  async loginOAuth(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
+    return this.finalizeLogin(user, res);
   }
 
   async logout(userId: string, res: Response) {

@@ -10,6 +10,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
@@ -46,6 +47,28 @@ export class AuthController {
   ): Promise<AuthResponseDto> {
     const user = req.user as AuthenticatedUserDto;
     return await this.authService.loginLocal(user, res);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user = req.user as AuthenticatedUserDto;
+    return this.authService.loginOAuth(user, res);
+  }
+
+  @Get('apple')
+  @UseGuards(AuthGuard('apple'))
+  appleAuth() {}
+
+  @Get('apple/callback')
+  @UseGuards(AuthGuard('apple'))
+  async appleCallback(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user = req.user as AuthenticatedUserDto;
+    return this.authService.loginOAuth(user, res);
   }
 
   @Post('verify-email')

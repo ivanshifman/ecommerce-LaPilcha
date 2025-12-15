@@ -29,7 +29,7 @@ export class PasswordService {
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.findByIdWithPassword(userId);
     if (!user) throw new BadRequestException('User not found');
 
     const ok = await this.validatePassword(user, dto.currentPassword);

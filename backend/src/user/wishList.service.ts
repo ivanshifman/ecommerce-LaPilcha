@@ -1,27 +1,44 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
-import { Model, Types } from 'mongoose';
+import { Product, ProductDocument } from '../product/schemas/product.schema';
 
 @Injectable()
 export class WishlistService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+  ) {}
 
   async getWishlist(userId: string) {
-    const user = await this.userModel.findById(userId).populate('wishlist').exec();
+    const user = await this.userModel
+      .findById(userId)
+      .populate({
+        path: 'wishlist',
+        match: { status: true },
+      })
+      .exec();
+
     if (!user) throw new NotFoundException('Usuario no encontrado');
-    return user.wishlist;
+
+    return user.wishlist.filter(Boolean);
   }
 
   async addToWishlist(userId: string, productId: string) {
-    const productObjectId = new Types.ObjectId(productId);
+    const productExists = await this.productModel.exists({
+      _id: productId,
+      status: true,
+    });
+
+    if (!productExists) {
+      throw new NotFoundException('Producto no encontrado');
+    }
 
     const result = await this.userModel
       .findByIdAndUpdate(
         userId,
-        {
-          $addToSet: { wishlist: productObjectId },
-        },
+        { $addToSet: { wishlist: productId } },
         { new: true, select: 'wishlist' },
       )
       .exec();
@@ -34,14 +51,19 @@ export class WishlistService {
   }
 
   async removeFromWishlist(userId: string, productId: string) {
-    const productObjectId = new Types.ObjectId(productId);
+    const productExists = await this.productModel.exists({
+      _id: productId,
+      status: true,
+    });
+
+    if (!productExists) {
+      throw new NotFoundException('Producto no encontrado');
+    }
 
     const result = await this.userModel
       .findByIdAndUpdate(
         userId,
-        {
-          $pull: { wishlist: productObjectId },
-        },
+        { $pull: { wishlist: productId } },
         { new: true, select: 'wishlist' },
       )
       .exec();

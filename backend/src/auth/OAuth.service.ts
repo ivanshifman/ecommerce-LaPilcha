@@ -44,6 +44,7 @@ export class OAuthService {
       providerId: dto.providerId,
       email: dto.email,
       name: dto.name,
+      lastName: dto.lastName,
       avatar: dto.avatar,
     });
 

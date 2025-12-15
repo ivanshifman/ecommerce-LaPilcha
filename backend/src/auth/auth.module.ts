@@ -6,6 +6,8 @@ import { PassportModule } from '@nestjs/passport';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { AppleStrategy } from './strategies/apple.strategy';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
 import { AuthService } from './auth.service';
@@ -36,6 +38,8 @@ import { OAuthService } from './oAuth.service';
     EmailVerificationService,
     OAuthService,
     LocalStrategy,
+    GoogleStrategy,
+    AppleStrategy,
     JwtStrategy,
   ],
   exports: [AuthService, TokenService, PasswordService, EmailVerificationService, OAuthService],

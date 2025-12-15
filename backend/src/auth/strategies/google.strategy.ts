@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Strategy,
-  StrategyOptions,
-  Profile as GoogleProfile,
-  VerifyCallback,
-} from 'passport-google-oauth20';
+import { Strategy, Profile as GoogleProfile } from 'passport-google-oauth20';
 import { OAuthService } from '../oAuth.service';
 import { ConfigService } from '@nestjs/config';
 import { OAuthUserDto } from '../dto/o-auth-user.dto';
@@ -17,54 +12,41 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private readonly OAuthService: OAuthService,
     private readonly configService: ConfigService,
   ) {
-    const options: StrategyOptions = {
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID') ?? '',
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') ?? '',
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK') ?? '/auth/google/callback',
+    super({
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID')!,
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
+      callbackURL: configService.get<string>('GOOGLE_CALLBACK'),
       scope: ['email', 'profile'],
-    };
-
-    super(options);
+    });
   }
 
-  async validate(profile: GoogleProfile, done: VerifyCallback): Promise<void> {
-    try {
-      const email = profile.emails?.[0]?.value;
-      if (!email) {
-        return done(
-          new Error(
-            'No se pudo obtener el email de Google. Verifica los permisos de la aplicación.',
-          ),
-          undefined,
-        );
-      }
-
-      if (!profile.id) {
-        return done(new Error('Error de autenticación con Google'), undefined);
-      }
-
-      let name = profile.displayName;
-      if (!name && profile.name?.givenName) {
-        name = profile.name.givenName;
-      }
-      if (!name) {
-        name = email.split('@')[0];
-      }
-
-      const dto: OAuthUserDto = {
-        name,
-        lastName: profile.name?.familyName,
-        email,
-        authProvider: AuthProvider.GOOGLE,
-        providerId: profile.id,
-        avatar: profile.photos?.[0]?.value,
-      };
-
-      const result = await this.OAuthService.oauthLogin(dto);
-
-      return done(null, result.user);
-    } catch (err) {
-      return done(err, undefined);
+  async validate(accessToken: string, refreshToken: string, profile: GoogleProfile) {
+    const email = profile.emails?.[0]?.value;
+    if (!email) {
+      throw new Error('No se pudo obtener el email de Google. Verifica los permisos.');
     }
+
+    if (!profile.id) {
+      throw new Error('Error de autenticación con Google');
+    }
+
+    const givenName = profile.name?.givenName;
+    const familyName = profile.name?.familyName;
+
+    const name = givenName ?? profile.displayName?.split(' ')[0] ?? email.split('@')[0];
+    const lastName = familyName ?? profile.displayName?.split(' ').slice(1).join(' ') ?? undefined;
+
+    const dto: OAuthUserDto = {
+      name,
+      lastName,
+      email,
+      authProvider: AuthProvider.GOOGLE,
+      providerId: profile.id,
+      avatar: profile.photos?.[0]?.value,
+    };
+
+    const result = await this.OAuthService.oauthLogin(dto);
+
+    return result.user;
   }
 }

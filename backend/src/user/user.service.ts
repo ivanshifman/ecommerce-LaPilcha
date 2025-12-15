@@ -27,16 +27,18 @@ export class UserService {
   async createOAuthUser(payload: {
     name: string;
     email: string;
+    lastName?: string;
     provider: AuthProvider.GOOGLE | AuthProvider.APPLE;
     providerId: string;
     avatar?: string;
   }): Promise<UserResponseDto> {
-    const { email, provider, providerId, name, avatar } = payload;
+    const { email, provider, providerId, name, lastName, avatar } = payload;
 
     const oauthKey = provider === AuthProvider.GOOGLE ? 'google' : 'apple';
 
     const newUser = new this.userModel({
       name,
+      lastName,
       email,
       avatar,
       authProvider: provider,
@@ -123,6 +125,10 @@ export class UserService {
       .findOne({ email, deletedAt: { $exists: false } })
       .select('+password +refreshTokenHash +emailVerificationCode +emailVerificationExpires')
       .exec();
+  }
+
+  async findByIdWithPassword(id: string) {
+    return this.userModel.findById(id).select('+password').exec();
   }
 
   async findAll() {
