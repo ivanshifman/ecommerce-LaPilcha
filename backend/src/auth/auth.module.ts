@@ -8,6 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { AppleStrategy } from './strategies/apple.strategy';
+import { JwtOptionalStrategy } from '../cart/strategies/jwt-opcional.strategy';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
 import { CartModule } from '../cart/cart.module';
@@ -43,6 +44,7 @@ import { OAuthService } from './oAuth.service';
     GoogleStrategy,
     AppleStrategy,
     JwtStrategy,
+    JwtOptionalStrategy,
   ],
   exports: [AuthService, TokenService, PasswordService, EmailVerificationService, OAuthService],
 })
