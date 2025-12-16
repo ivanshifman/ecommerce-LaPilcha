@@ -40,13 +40,13 @@ export class TokenService {
   }
 
   async refreshTokens(userId: string, refreshToken: string): Promise<AuthTokens> {
-    const user = await this.userService.findById(userId);
+    const user = await this.userService.findByIdWithRefreshToken(userId);
     if (!user || !user.refreshTokenHash) {
       throw new UnauthorizedException('Sesión invalida');
     }
 
     const matches = await bcrypt.compare(refreshToken, user.refreshTokenHash);
-    if (!matches) throw new ForbiddenException('Invalid refresh token');
+    if (!matches) throw new ForbiddenException('Token de actualización inválido');
 
     const userDto: AuthenticatedUserDto = {
       id: String(user._id),

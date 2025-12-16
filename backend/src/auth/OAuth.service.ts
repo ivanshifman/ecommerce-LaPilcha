@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserDocument } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
 import { TokenService } from './token.service';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
@@ -12,10 +11,6 @@ export class OAuthService {
     private userService: UserService,
     private tokenService: TokenService,
   ) {}
-
-  toDto(user: UserDocument): AuthenticatedUserDto {
-    return UserMapper.toAuthenticatedDto(user);
-  }
 
   async oauthLogin(dto: OAuthUserDto) {
     const existing = await this.userService.findByEmail(dto.email);
@@ -34,7 +29,7 @@ export class OAuthService {
       existing.lastLogin = new Date();
       await existing.save();
 
-      const userDto = this.toDto(existing);
+      const userDto = UserMapper.toAuthenticatedDto(existing);
       const tokens = await this.tokenService.createTokensForUser(userDto);
       return { user: userDto, ...tokens };
     }

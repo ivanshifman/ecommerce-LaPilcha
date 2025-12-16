@@ -7,7 +7,6 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
-import { UserDocument } from '../user/schemas/user.schema';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import { UserService } from '../user/user.service';
@@ -101,7 +100,7 @@ export class AuthService {
     await userDoc.save();
 
     return {
-      user: this.toUserResponseDto(userDoc),
+      user: UserMapper.toUserResponseDto(userDoc),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
@@ -152,9 +151,5 @@ export class AuthService {
     const userDoc = await this.userService.findById(user.id);
     if (!userDoc) throw new NotFoundException('Usuario no encontrado');
     return UserMapper.toProfileResponseDto(userDoc);
-  }
-
-  private toUserResponseDto(doc: UserDocument): UserResponseDto {
-    return UserMapper.toUserResponseDto(doc);
   }
 }

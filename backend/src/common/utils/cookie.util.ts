@@ -3,6 +3,7 @@ import { CookieOptions } from 'express';
 
 export const ACCESS_COOKIE = 'access_token';
 export const REFRESH_COOKIE = 'refresh_token';
+export const CART_COOKIE = 'cart_id';
 
 export function cookieOptions(config: ConfigService, isRefresh = false): CookieOptions {
   const isProd = config.get<string>('NODE_ENV') === 'production';
@@ -18,6 +19,18 @@ export function cookieOptions(config: ConfigService, isRefresh = false): CookieO
     opts.maxAge = parseDurationToMs(config.get<string>('JWT_ACCESS_EXPIRATION') ?? '15m');
   }
   return opts;
+}
+
+export function cartCookieOptions(config: ConfigService): CookieOptions {
+  const isProd = config.get<string>('NODE_ENV') === 'production';
+
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: '/',
+  };
 }
 
 function parseDurationToMs(str: string) {

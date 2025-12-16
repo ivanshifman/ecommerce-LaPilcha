@@ -119,7 +119,7 @@ UserSchema.pre('save', function (next) {
     return next(new Error('La contraseña es obligatoria para usuarios locales'));
   }
 
-  if (this.authProvider !== AuthProvider.LOCAL) {
+  if (this.isNew && this.authProvider !== AuthProvider.LOCAL) {
     this.emailVerified = true;
   }
 

@@ -5,6 +5,7 @@ import {
   ProfileResponseDto,
   UserResponseDto,
 } from '../../auth/dto/auth-response.dto';
+import { DateFormatUtil } from '../utils/date-format.util';
 
 export class UserMapper {
   static toAuthenticatedDto(user: UserDocument): AuthenticatedUserDto {
@@ -28,6 +29,8 @@ export class UserMapper {
       phone: user.phone,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      createdAtLocal: DateFormatUtil.toReadable(user.createdAt),
+      updatedAtLocal: DateFormatUtil.toReadable(user.updatedAt),
     };
   }
 
@@ -49,6 +52,7 @@ export class UserMapper {
       totalOrders: user.totalOrders,
       totalSpent: user.totalSpent,
       lastLogin: user.lastLogin,
+      lastLoginLocal: DateFormatUtil.toReadable(user.lastLogin),
     };
   }
 }

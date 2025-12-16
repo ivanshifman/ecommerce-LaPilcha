@@ -13,7 +13,7 @@ export class WishlistService {
 
   async getWishlist(userId: string) {
     const user = await this.userModel
-      .findById(userId)
+      .findOne({ _id: userId, deletedAt: { $exists: false }, isActive: true })
       .populate({
         path: 'wishlist',
         match: { status: true },
@@ -25,7 +25,7 @@ export class WishlistService {
     return user.wishlist.filter(Boolean);
   }
 
-  async addToWishlist(userId: string, productId: string) {
+  private async validateProductExists(productId: string): Promise<void> {
     const productExists = await this.productModel.exists({
       _id: productId,
       status: true,
@@ -34,10 +34,14 @@ export class WishlistService {
     if (!productExists) {
       throw new NotFoundException('Producto no encontrado');
     }
+  }
+
+  async addToWishlist(userId: string, productId: string) {
+    await this.validateProductExists(productId);
 
     const result = await this.userModel
       .findByIdAndUpdate(
-        userId,
+        { _id: userId, deletedAt: { $exists: false }, isActive: true },
         { $addToSet: { wishlist: productId } },
         { new: true, select: 'wishlist' },
       )
@@ -51,18 +55,11 @@ export class WishlistService {
   }
 
   async removeFromWishlist(userId: string, productId: string) {
-    const productExists = await this.productModel.exists({
-      _id: productId,
-      status: true,
-    });
-
-    if (!productExists) {
-      throw new NotFoundException('Producto no encontrado');
-    }
+    await this.validateProductExists(productId);
 
     const result = await this.userModel
       .findByIdAndUpdate(
-        userId,
+        { _id: userId, deletedAt: { $exists: false }, isActive: true },
         { $pull: { wishlist: productId } },
         { new: true, select: 'wishlist' },
       )
@@ -77,7 +74,11 @@ export class WishlistService {
 
   async clearWishlist(userId: string) {
     const result = await this.userModel
-      .findByIdAndUpdate(userId, { wishlist: [] }, { new: true, select: 'wishlist' })
+      .findByIdAndUpdate(
+        { _id: userId, deletedAt: { $exists: false }, isActive: true },
+        { wishlist: [] },
+        { new: true, select: 'wishlist' },
+      )
       .exec();
 
     if (!result) {

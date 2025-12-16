@@ -1,6 +1,6 @@
 import { IsMongoId, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CartVariantDto } from './add-cart.dto';
+import { CartVariantDto } from './cart-variant.dto';
 
 export class RemoveCartItemDto {
   @IsMongoId({ message: 'ID de producto inválido' })

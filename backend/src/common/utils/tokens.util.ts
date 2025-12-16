@@ -4,7 +4,7 @@ import { JwtPayloadDto } from '../../auth/dto/jwt-payload.dto';
 
 export class TokensUtil {
   constructor(
-    private config: ConfigService,
+    private configService: ConfigService,
     private jwtService: JwtService,
   ) {}
 
@@ -13,17 +13,19 @@ export class TokensUtil {
   }
 
   async signAccessToken(payload: JwtPayloadDto) {
-    const exp = this.toExpiresIn(this.config.get<string>('JWT_ACCESS_EXPIRATION') ?? '15m');
+    const exp = this.toExpiresIn(this.configService.get<string>('JWT_ACCESS_EXPIRATION') ?? '15m');
     return await this.jwtService.signAsync(payload, { expiresIn: exp });
   }
 
   async signRefreshToken(payload: JwtPayloadDto) {
-    const exp = this.toExpiresIn(this.config.get<string>('JWT_REFRESH_EXPIRATION') ?? '7d');
+    const exp = this.toExpiresIn(this.configService.get<string>('JWT_REFRESH_EXPIRATION') ?? '7d');
     return await this.jwtService.signAsync(payload, { expiresIn: exp });
   }
 
   async signVerificationToken(payload: JwtPayloadDto) {
-    const exp = this.toExpiresIn(this.config.get<string>('JWT_VERIFICATION_EXPIRATION') ?? '1h');
+    const exp = this.toExpiresIn(
+      this.configService.get<string>('JWT_VERIFICATION_EXPIRATION') ?? '1h',
+    );
     return await this.jwtService.signAsync(payload, { expiresIn: exp });
   }
 

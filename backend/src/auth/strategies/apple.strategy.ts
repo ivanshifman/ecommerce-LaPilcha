@@ -35,45 +35,35 @@ export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple')
     } as any);
   }
 
-  async validate(
-    _accessToken: string,
-    _refreshToken: string,
-    profile: AppleProfile,
-    done: (err: unknown, user?: unknown) => void,
-  ) {
-    try {
-      const email = profile.email;
-      if (!email) {
-        return done(
-          new Error('Se requiere acceso al email. Por favor permite el acceso al email en Apple.'),
-          undefined,
-        );
-      }
-
-      const providerId = profile.sub ?? profile.id;
-      if (!providerId) {
-        return done(new Error('Error de autenticación con Apple. Intenta de nuevo.'), undefined);
-      }
-
-      const firstName = profile.name?.firstName ?? '';
-      const lastName = profile.name?.lastName ?? '';
-
-      const name = firstName || lastName ? `${firstName} ${lastName}`.trim() : email.split('@')[0];
-
-      const dto: OAuthUserDto = {
-        name,
-        lastName: lastName || undefined,
-        email,
-        authProvider: AuthProvider.APPLE,
-        providerId,
-        avatar: undefined,
-      };
-
-      const result = await this.OAuthService.oauthLogin(dto);
-
-      return done(null, result.user);
-    } catch (err) {
-      return done(err, false);
+  async validate(_accessToken: string, _refreshToken: string, profile: AppleProfile) {
+    const email = profile.email;
+    if (!email) {
+      throw new Error(
+        'Se requiere acceso al email. Por favor permite el acceso al email en Apple.',
+      );
     }
+
+    const providerId = profile.sub ?? profile.id;
+    if (!providerId) {
+      throw new Error('Error de autenticación con Apple. Intenta de nuevo.');
+    }
+
+    const firstName = profile.name?.firstName ?? '';
+    const lastName = profile.name?.lastName ?? '';
+
+    const name = firstName || lastName ? `${firstName} ${lastName}`.trim() : email.split('@')[0];
+
+    const dto: OAuthUserDto = {
+      name,
+      lastName: lastName || undefined,
+      email,
+      authProvider: AuthProvider.APPLE,
+      providerId,
+      avatar: undefined,
+    };
+
+    const result = await this.OAuthService.oauthLogin(dto);
+
+    return result.user;
   }
 }

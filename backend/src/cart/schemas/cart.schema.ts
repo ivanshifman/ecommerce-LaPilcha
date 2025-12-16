@@ -5,8 +5,11 @@ export type CartDocument = HydratedDocument<Cart>;
 
 @Schema({ timestamps: true, versionKey: false, collection: 'carts' })
 export class Cart {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user!: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user?: Types.ObjectId;
+
+  @Prop({ type: String, sparse: true })
+  anonymousId?: string;
 
   @Prop({
     type: [
@@ -18,6 +21,7 @@ export class Cart {
           _id: false,
         },
         quantity: { type: Number, required: true, min: 1, default: 1 },
+        addedAt: { type: Date, default: Date.now },
       },
     ],
     default: [],
@@ -26,9 +30,27 @@ export class Cart {
     product: Types.ObjectId;
     variant?: { size?: string; color?: string };
     quantity: number;
+    addedAt: Date;
   }[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
+
+  @Prop({ type: Date, default: null })
+  expiresAt?: Date;
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);
 
 CartSchema.index({ user: 1 });
+CartSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+CartSchema.pre('save', function (next) {
+  if (this.anonymousId && !this.user) {
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    this.expiresAt = new Date(Date.now() + thirtyDays);
+  } else {
+    this.expiresAt = undefined;
+  }
+  next();
+});

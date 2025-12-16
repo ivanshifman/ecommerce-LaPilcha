@@ -16,7 +16,9 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './emailVerification.service';
 import { PasswordService } from './password.service';
-import { REFRESH_COOKIE } from '../common/utils/cookie.util';
+import { CartService } from '../cart/cart.service';
+import { CART_COOKIE, REFRESH_COOKIE } from '../common/utils/cookie.util';
+import { getCookieCart } from '../common/utils/request.util';
 import { RegisterDto } from '../user/dto/create-user.dto';
 import { RegisterResponseDto } from '../user/dto/register-response.dto';
 import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/update-password.dto';
@@ -30,6 +32,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly cartService: CartService,
     private readonly emailVerificationService: EmailVerificationService,
     private passwordService: PasswordService,
   ) {}
@@ -46,6 +49,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     const user = req.user as AuthenticatedUserDto;
+    const anonymousCartId = getCookieCart(req, CART_COOKIE);
+
+    if (anonymousCartId) {
+      await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+    }
     return await this.authService.loginLocal(user, res);
   }
 

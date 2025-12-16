@@ -3,10 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UserDocument } from '../user/schemas/user.schema';
 import { UserService } from '../user/user.service';
+import { TokenService } from './token.service';
 import { MailService } from '../common/mail/mail.service';
 import { parseDurationToMs } from '../common/utils/parseDuration.util';
 import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/update-password.dto';
-import { TokenService } from './token.service';
 
 @Injectable()
 export class PasswordService {
@@ -30,7 +30,7 @@ export class PasswordService {
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.userService.findByIdWithPassword(userId);
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) throw new BadRequestException('Usuario no encontrado');
 
     const ok = await this.validatePassword(user, dto.currentPassword);
     if (!ok) throw new BadRequestException('Contraseña actual incorrecta');

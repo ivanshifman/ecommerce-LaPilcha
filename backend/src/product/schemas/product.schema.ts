@@ -92,6 +92,9 @@ export class Product {
     stock: number;
     minStock: number;
   }>;
+
+  totalStock!: number;
+  availableSizes!: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

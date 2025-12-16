@@ -21,7 +21,7 @@ export class UserService {
   }): Promise<UserResponseDto> {
     const created = new this.userModel(data);
     const saved = await created.save();
-    return this.toUserResponseDto(saved);
+    return UserMapper.toUserResponseDto(saved);
   }
 
   async createOAuthUser(payload: {
@@ -50,17 +50,11 @@ export class UserService {
     });
 
     const saved = await newUser.save();
-    return this.toUserResponseDto(saved);
+    return UserMapper.toUserResponseDto(saved);
   }
 
   async setRefreshTokenHash(userId: string, refreshTokenHash: string | null) {
     return this.userModel.findByIdAndUpdate(userId, { refreshTokenHash }, { new: true }).exec();
-  }
-
-  async updateUserAdmin(userId: string, dto: UpdateUserAdminDto): Promise<AdminUserResponseDto> {
-    const updatedDoc = await this.userModel.findByIdAndUpdate(userId, dto, { new: true }).exec();
-    if (!updatedDoc) throw new NotFoundException('Usuario no encontrado');
-    return this.toAdminUserResponseDto(updatedDoc);
   }
 
   async updatePassword(userId: string, hashedPassword: string): Promise<void> {
@@ -102,22 +96,19 @@ export class UserService {
     );
   }
 
-  private toUserResponseDto(doc: UserDocument): UserResponseDto {
-    return UserMapper.toUserResponseDto(doc);
+  private async findByIdOrFail(id: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(id).exec();
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
   }
 
-  private toAdminUserResponseDto(doc: UserDocument): AdminUserResponseDto {
-    return UserMapper.toAdminUserResponseDto(doc);
-  }
-
-  async findById(id: string) {
-    return this.userModel.findById(id).exec();
+  async findById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ _id: id, deletedAt: { $exists: false } }).exec();
   }
 
   async findByIdAsDto(id: string): Promise<UserResponseDto> {
-    const user = await this.userModel.findById(id).exec();
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    return this.toUserResponseDto(user);
+    const user = await this.findByIdOrFail(id);
+    return UserMapper.toUserResponseDto(user);
   }
 
   async findByEmail(email: string) {
@@ -128,7 +119,17 @@ export class UserService {
   }
 
   async findByIdWithPassword(id: string) {
-    return this.userModel.findById(id).select('+password').exec();
+    return this.userModel
+      .findOne({ _id: id, deletedAt: { $exists: false } })
+      .select('+password')
+      .exec();
+  }
+
+  async findByIdWithRefreshToken(id: string): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({ _id: id, deletedAt: { $exists: false } })
+      .select('+refreshTokenHash')
+      .exec();
   }
 
   async findAll() {
@@ -137,7 +138,7 @@ export class UserService {
 
   async findAllAsDto(): Promise<AdminUserResponseDto[]> {
     const users = await this.userModel.find({ deletedAt: { $exists: false } }).exec();
-    return users.map((user) => this.toAdminUserResponseDto(user));
+    return users.map((user) => UserMapper.toAdminUserResponseDto(user));
   }
 
   async findByResetToken(token: string) {
@@ -154,7 +155,13 @@ export class UserService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    return this.toUserResponseDto(updated);
+    return UserMapper.toUserResponseDto(updated);
+  }
+
+  async updateUserAdmin(userId: string, dto: UpdateUserAdminDto): Promise<AdminUserResponseDto> {
+    const updatedDoc = await this.userModel.findByIdAndUpdate(userId, dto, { new: true }).exec();
+    if (!updatedDoc) throw new NotFoundException('Usuario no encontrado');
+    return UserMapper.toAdminUserResponseDto(updatedDoc);
   }
 
   async delete(id: string): Promise<AdminUserResponseDto> {
@@ -171,6 +178,6 @@ export class UserService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    return this.toAdminUserResponseDto(user);
+    return UserMapper.toAdminUserResponseDto(user);
   }
 }

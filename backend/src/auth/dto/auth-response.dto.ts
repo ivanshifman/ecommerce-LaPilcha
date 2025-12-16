@@ -17,6 +17,8 @@ export class UserResponseDto {
   phone?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  createdAtLocal?: string;
+  updatedAtLocal?: string;
 }
 
 export class ProfileResponseDto extends UserResponseDto {
@@ -28,6 +30,7 @@ export class ProfileResponseDto extends UserResponseDto {
   totalOrders!: number;
   totalSpent!: number;
   lastLogin?: Date;
+  lastLoginLocal?: string;
 }
 
 export class AdminUserResponseDto extends UserResponseDto {

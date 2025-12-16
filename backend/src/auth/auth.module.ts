@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,6 +10,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { AppleStrategy } from './strategies/apple.strategy';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
+import { CartModule } from '../cart/cart.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TokenService } from './token.service';
@@ -29,6 +30,7 @@ import { OAuthService } from './oAuth.service';
     }),
     UserModule,
     MailModule,
+    forwardRef(() => CartModule),
   ],
   controllers: [AuthController],
   providers: [
