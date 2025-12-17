@@ -8,7 +8,7 @@ export class Cart {
   @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   user?: Types.ObjectId;
 
-  @Prop({ type: String, sparse: true })
+  @Prop({ type: String, sparse: true, unique: true })
   anonymousId?: string;
 
   @Prop({
@@ -22,6 +22,7 @@ export class Cart {
         },
         quantity: { type: Number, required: true, min: 1, default: 1 },
         addedAt: { type: Date, default: Date.now },
+        priceAtAdd: { type: Number, required: true },
       },
     ],
     default: [],
@@ -31,6 +32,7 @@ export class Cart {
     variant?: { size?: string; color?: string };
     quantity: number;
     addedAt: Date;
+    priceAtAdd: number;
   }[];
 
   createdAt?: Date;

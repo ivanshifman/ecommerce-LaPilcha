@@ -19,6 +19,9 @@ export class CartItemResponseDto {
   subtotal!: number;
   availableStock!: number;
   isAvailable!: boolean;
+  priceAtAdd!: number;
+  currentPrice!: number;
+  priceChanged!: boolean;
 }
 
 export class CartResponseDto {

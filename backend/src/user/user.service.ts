@@ -6,10 +6,14 @@ import { UpdateUserAdminDto, UpdateUserDto } from './dto/update-user.dto';
 import { AdminUserResponseDto, UserResponseDto } from '../auth/dto/auth-response.dto';
 import { AuthProvider } from './common/enums/authProvider.enum';
 import { UserMapper } from '../common/mappers/user.mapper';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly cartService: CartService,
+  ) {}
 
   async create(data: {
     name: string;
@@ -177,6 +181,8 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
+
+    await this.cartService.deleteCartAndReleaseStockByUser(id);
 
     return UserMapper.toAdminUserResponseDto(user);
   }

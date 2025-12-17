@@ -2,6 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MongooseService } from './database/mongoose.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -38,6 +39,7 @@ import { CartModule } from './cart/cart.module';
         },
       ],
     }),
+    ScheduleModule.forRoot(),
     ProductModule,
     UserModule,
     AuthModule,

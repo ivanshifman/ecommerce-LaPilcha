@@ -21,14 +21,22 @@ export class CartMapper {
         subtotal: 0,
         availableStock: 0,
         isAvailable: false,
+        priceAtAdd: item.priceAtAdd ?? 0,
+        currentPrice: 0,
+        priceChanged: false,
       };
     }
 
     const discount = product.discount ?? 0;
-    const finalPrice = product.price - product.price * (discount / 100);
+    const currentPrice = product.price - product.price * (discount / 100);
+    const priceAtAdd = item.priceAtAdd ?? currentPrice;
+    const priceChanged = Math.abs(currentPrice - priceAtAdd) > 0.01;
 
     const availableStock = item.variant?.size
-      ? (product.sizes.find((s) => s.size === item.variant?.size)?.stock ?? 0)
+      ? (() => {
+          const size = product.sizes.find((s) => s.size === item.variant?.size);
+          return size ? size.stock - (size.reserved ?? 0) : 0;
+        })()
       : product.totalStock;
 
     const isAvailable = product.status === true && availableStock >= item.quantity;
@@ -39,7 +47,7 @@ export class CartMapper {
         name: product.name,
         price: product.price,
         discount: product.discount,
-        finalPrice,
+        finalPrice: currentPrice,
         images: product.images,
         slug: product.slug,
         status: product.status ?? true,
@@ -48,20 +56,21 @@ export class CartMapper {
       },
       variant: item.variant,
       quantity: item.quantity,
-      subtotal: finalPrice * item.quantity,
+      subtotal: currentPrice * item.quantity,
       availableStock,
       isAvailable,
+      priceAtAdd,
+      currentPrice,
+      priceChanged,
     };
   }
 
   static toCartResponseDto(cart: CartPopulated, isAnonymous: boolean): CartResponseDto {
     const items = cart.items.map((item) => CartMapper.toCartItemResponseDto(item));
 
-    const availableItems = items.filter((i) => i.isAvailable);
+    const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
 
-    const subtotal = availableItems.reduce((sum, item) => sum + item.subtotal, 0);
-
-    const discount = availableItems.reduce((sum, item) => {
+    const discount = items.reduce((sum, item) => {
       const original = item.product.price * item.quantity;
       return sum + (original - item.subtotal);
     }, 0);

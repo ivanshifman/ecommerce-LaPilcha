@@ -52,7 +52,15 @@ export class AuthController {
     const anonymousCartId = getCookieCart(req, CART_COOKIE);
 
     if (anonymousCartId) {
-      await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+      try {
+        await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+
+        // if (mergeResult.failedItems && mergeResult.failedItems.length > 0) {
+        //   console.warn('Items no fusionados en el login:', mergeResult.failedItems);
+        // }
+      } catch (error) {
+        console.error('Error al fusionar carritos:', error);
+      }
     }
     return await this.authService.loginLocal(user, res);
   }

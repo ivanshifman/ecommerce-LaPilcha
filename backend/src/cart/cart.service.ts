@@ -37,41 +37,51 @@ export class CartService {
     await this.validateStock(product, dto.variant, dto.quantity);
 
     let cart: CartDocument;
-    let newAnonymousId: string | undefined;
+    let finalAnonymousId: string | undefined;
 
     if (userId) {
       cart = await this.getOrCreateUserCart(userId);
     } else {
       const result = await this.getOrCreateAnonymousCart(anonymousId);
       cart = result.cart;
-      newAnonymousId = result.anonymousId;
-      if (res && newAnonymousId && newAnonymousId !== anonymousId) {
-        res.cookie(CART_COOKIE, newAnonymousId, cartCookieOptions(this.configService));
+      finalAnonymousId = result.anonymousId;
+
+      if (res) {
+        res.cookie(CART_COOKIE, finalAnonymousId, cartCookieOptions(this.configService));
       }
     }
 
     const index = this.findItemIndex(cart, dto.product, dto.variant);
 
     if (index >= 0) {
-      const newQuantity = cart.items[index].quantity + dto.quantity;
-      await this.validateStock(product, dto.variant, newQuantity);
-      cart.items[index].quantity = newQuantity;
+      cart.items[index].quantity += dto.quantity;
     } else {
+      const discount = product.discount ?? 0;
+      const finalPrice = product.price - product.price * (discount / 100);
+
       cart.items.push({
         product: new Types.ObjectId(dto.product),
-        variant: dto.variant,
+        variant: dto.variant
+          ? {
+              size: dto.variant.size?.toUpperCase(),
+              color: dto.variant.color?.toLowerCase(),
+            }
+          : undefined,
         quantity: dto.quantity,
         addedAt: new Date(),
+        priceAtAdd: finalPrice,
       });
     }
 
     await cart.save();
 
-    const populatedCart = await this.getPopulatedCart(userId, newAnonymousId ?? anonymousId);
+    await this.reserveStock(dto.product, dto.variant?.size, dto.quantity);
+
+    const populatedCart = await this.getPopulatedCart(userId, finalAnonymousId ?? anonymousId);
 
     return {
       cart: CartMapper.toCartResponseDto(populatedCart, !userId),
-      anonymousId: newAnonymousId,
+      anonymousId: finalAnonymousId,
     };
   }
 
@@ -79,6 +89,7 @@ export class CartService {
     dto: UpdateCartItemDto,
     userId?: string,
     anonymousId?: string,
+    res?: Response,
   ): Promise<CartResponseDto> {
     const cart = await this.getCartDocument(userId, anonymousId);
 
@@ -90,10 +101,24 @@ export class CartService {
     const product = await this.validateProduct(dto.product);
     await this.validateStock(product, dto.variant, dto.quantity);
 
+    const oldQuantity = cart.items[index].quantity;
+    const quantityDiff = dto.quantity - oldQuantity;
+
+    if (quantityDiff > 0) {
+      await this.reserveStock(dto.product, dto.variant?.size, quantityDiff);
+    } else if (quantityDiff < 0) {
+      await this.releaseStock(dto.product, dto.variant?.size, Math.abs(quantityDiff));
+    }
+
     cart.items[index].quantity = dto.quantity;
     await cart.save();
 
     const populatedCart = await this.getPopulatedCart(userId, anonymousId);
+
+    if (!userId && anonymousId && res) {
+      this.updateAnonymousCookie(anonymousId, res);
+    }
+
     return CartMapper.toCartResponseDto(populatedCart, !userId);
   }
 
@@ -101,6 +126,7 @@ export class CartService {
     dto: RemoveCartItemDto,
     userId?: string,
     anonymousId?: string,
+    res?: Response,
   ): Promise<CartResponseDto> {
     const cart = await this.getCartDocument(userId, anonymousId);
 
@@ -109,87 +135,166 @@ export class CartService {
       throw new NotFoundException('Item no encontrado en el carrito');
     }
 
+    const item = cart.items[index];
+    await this.releaseStock(item.product.toString(), item.variant?.size, item.quantity);
+
     cart.items.splice(index, 1);
     await cart.save();
 
     const populatedCart = await this.getPopulatedCart(userId, anonymousId);
+
+    if (!userId && anonymousId && res) {
+      this.updateAnonymousCookie(anonymousId, res);
+    }
+
     return CartMapper.toCartResponseDto(populatedCart, !userId);
   }
 
-  async getCart(userId?: string, anonymousId?: string): Promise<CartResponseDto> {
+  async getCart(userId?: string, anonymousId?: string, res?: Response): Promise<CartResponseDto> {
+    const cartDoc = await this.getCartDocument(userId, anonymousId);
     const cart = await this.getPopulatedCart(userId, anonymousId);
+
+    const invalidItemsIndices: number[] = [];
+
+    cart.items.forEach((item, index) => {
+      if (!item.product || item.product.status === false) {
+        invalidItemsIndices.push(index);
+        if (item.variant?.size) {
+          this.releaseStock(
+            item.product?._id?.toString() || '',
+            item.variant.size,
+            item.quantity,
+          ).catch(() => {});
+        }
+      }
+    });
+
+    if (invalidItemsIndices.length > 0) {
+      cartDoc.items = cartDoc.items.filter((_, index) => !invalidItemsIndices.includes(index));
+      await cartDoc.save();
+
+      const updatedCart = await this.getPopulatedCart(userId, anonymousId);
+      return CartMapper.toCartResponseDto(updatedCart, !userId);
+    }
+
+    if (!userId && anonymousId && res) {
+      this.updateAnonymousCookie(anonymousId, res);
+    }
+
     return CartMapper.toCartResponseDto(cart, !userId);
   }
 
-  async clearCart(userId?: string, anonymousId?: string): Promise<CartResponseDto> {
+  async clearCart(userId?: string, anonymousId?: string, res?: Response): Promise<CartResponseDto> {
     const cart = await this.getCartDocument(userId, anonymousId);
+
+    for (const item of cart.items) {
+      await this.releaseStock(item.product.toString(), item.variant?.size, item.quantity);
+    }
+
+    if (!userId && anonymousId) {
+      await this.cartModel.findByIdAndDelete(cart._id);
+
+      if (res) {
+        res.clearCookie(CART_COOKIE, {
+          httpOnly: true,
+          path: '/',
+        });
+      }
+
+      return {
+        id: '',
+        items: [],
+        itemCount: 0,
+        subtotal: 0,
+        discount: 0,
+        total: 0,
+        isAnonymous: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdAtLocal: '',
+        updatedAtLocal: '',
+      };
+    }
 
     cart.items = [];
     await cart.save();
 
-    const populatedCart = await this.getPopulatedCart(userId, anonymousId);
-    return CartMapper.toCartResponseDto(populatedCart, !userId);
+    const populatedCart = await this.getPopulatedCart(userId);
+    return CartMapper.toCartResponseDto(populatedCart, false);
   }
 
   async mergeAnonymousCart(
     userId: string,
     anonymousId: string | undefined,
     res?: Response,
-  ): Promise<CartResponseDto> {
+  ): Promise<{ cart: CartResponseDto }> {
     if (!anonymousId) {
       const populatedCart = await this.getPopulatedCart(userId);
-      return CartMapper.toCartResponseDto(populatedCart, false);
+      return { cart: CartMapper.toCartResponseDto(populatedCart, false) };
     }
 
-    const anonymousCart = await this.cartModel
-      .findOne({ anonymousId })
-      .populate('items.product')
-      .exec();
+    const anonymousCart = await this.cartModel.findOne({ anonymousId }).exec();
+
+    if (!anonymousCart || anonymousCart.items.length === 0) {
+      if (res) {
+        res.clearCookie(CART_COOKIE, { httpOnly: true, path: '/' });
+      }
+
+      const populatedCart = await this.getPopulatedCart(userId);
+      return { cart: CartMapper.toCartResponseDto(populatedCart, false) };
+    }
 
     const userCart = await this.getOrCreateUserCart(userId);
 
-    if (anonymousCart && anonymousCart.items.length > 0) {
-      for (const item of anonymousCart.items) {
-        try {
-          const product = await this.validateProduct(item.product.toString());
-          await this.validateStock(product, item.variant, item.quantity);
+    for (const item of anonymousCart.items) {
+      const index = this.findItemIndex(userCart, item.product.toString(), item.variant);
 
-          const index = this.findItemIndex(userCart, item.product.toString(), item.variant);
-
-          if (index >= 0) {
-            const newQty = userCart.items[index].quantity + item.quantity;
-            try {
-              await this.validateStock(product, item.variant, newQty);
-              userCart.items[index].quantity = newQty;
-            } catch {
-              continue;
-            }
-          } else {
-            userCart.items.push({
-              product: item.product,
-              variant: item.variant,
-              quantity: item.quantity,
-              addedAt: item.addedAt,
-            });
-          }
-        } catch {
-          continue;
-        }
+      if (index >= 0) {
+        userCart.items[index].quantity += item.quantity;
+      } else {
+        userCart.items.push({
+          product: item.product,
+          variant: item.variant,
+          quantity: item.quantity,
+          addedAt: item.addedAt,
+          priceAtAdd: item.priceAtAdd,
+        });
       }
-
-      await userCart.save();
-      await this.cartModel.findByIdAndDelete(anonymousCart._id);
     }
 
-    if (res && anonymousCart) {
-      res.clearCookie(CART_COOKIE, {
-        httpOnly: true,
-        path: '/',
-      });
+    await userCart.save();
+    await this.cartModel.findByIdAndDelete(anonymousCart._id);
+
+    if (res) {
+      res.clearCookie(CART_COOKIE, { httpOnly: true, path: '/' });
     }
 
     const populatedCart = await this.getPopulatedCart(userId);
-    return CartMapper.toCartResponseDto(populatedCart, false);
+
+    return {
+      cart: CartMapper.toCartResponseDto(populatedCart, false),
+    };
+  }
+
+  async deleteCartAndReleaseStockByUser(userId: string): Promise<void> {
+    const cart = await this.cartModel.findOne({ user: userId }).exec();
+    if (!cart) return;
+
+    for (const item of cart.items) {
+      if (item.variant?.size) {
+        await this.productModel.findOneAndUpdate(
+          {
+            _id: item.product,
+            'sizes.size': item.variant.size.toUpperCase(),
+          },
+          {
+            $inc: { 'sizes.$.reserved': -item.quantity },
+          },
+        );
+      }
+    }
+
+    await this.cartModel.findByIdAndDelete(cart._id);
   }
 
   private async getOrCreateUserCart(userId: string): Promise<CartDocument> {
@@ -206,7 +311,7 @@ export class CartService {
   private async getOrCreateAnonymousCart(
     anonymousId?: string,
   ): Promise<{ cart: CartDocument; anonymousId: string }> {
-    const id = anonymousId ?? this.generateAnonymousId();
+    const id = anonymousId ?? (await this.generateAnonymousId());
 
     let cart = await this.cartModel.findOne({ anonymousId: id }).exec();
 
@@ -219,14 +324,11 @@ export class CartService {
   }
 
   private async getCartDocument(userId?: string, anonymousId?: string): Promise<CartDocument> {
-    const cart = userId
-      ? await this.cartModel.findOne({ user: userId }).exec()
-      : await this.cartModel.findOne({ anonymousId }).exec();
-
-    if (!cart) {
-      throw new NotFoundException('Carrito no encontrado');
+    if (userId) {
+      return this.getOrCreateUserCart(userId);
     }
 
+    const { cart } = await this.getOrCreateAnonymousCart(anonymousId);
     return cart;
   }
 
@@ -237,6 +339,15 @@ export class CartService {
 
     if (!cart) {
       throw new NotFoundException('Carrito no encontrado');
+    }
+
+    const validItems = cart.items.filter((item) => {
+      return item.product !== null && item.product !== undefined;
+    });
+
+    if (validItems.length !== cart.items.length) {
+      cart.items = validItems;
+      await cart.save();
     }
 
     return cart.toObject() as unknown as CartPopulated;
@@ -256,6 +367,57 @@ export class CartService {
     return product;
   }
 
+  async reserveStock(productId: string, size: string | undefined, quantity: number): Promise<void> {
+    if (!size) return;
+
+    const result = await this.productModel.findOneAndUpdate(
+      {
+        _id: productId,
+        $expr: {
+          $let: {
+            vars: {
+              sizeObj: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: '$sizes',
+                      as: 's',
+                      cond: { $eq: ['$$s.size', size.toUpperCase()] },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+            in: {
+              $gte: [{ $subtract: ['$$sizeObj.stock', '$$sizeObj.reserved'] }, quantity],
+            },
+          },
+        },
+      },
+      {
+        $inc: { 'sizes.$[elem].reserved': quantity },
+      },
+      {
+        arrayFilters: [{ 'elem.size': size.toUpperCase() }],
+        new: true,
+      },
+    );
+
+    if (!result) {
+      throw new ConflictException('No se pudo reservar stock');
+    }
+  }
+
+  async releaseStock(productId: string, size: string | undefined, quantity: number): Promise<void> {
+    if (!size) return;
+
+    await this.productModel.findOneAndUpdate(
+      { _id: productId, 'sizes.size': size.toUpperCase() },
+      { $inc: { 'sizes.$.reserved': -quantity } },
+    );
+  }
+
   private async validateStock(
     product: ProductDocument,
     variant?: { size?: string; color?: string },
@@ -265,15 +427,18 @@ export class CartService {
 
     if (variant?.size) {
       const sizeValue = variant.size.toUpperCase();
-
       const size = product.sizes.find((s) => s.size.toUpperCase() === sizeValue);
 
       if (!size) {
         throw new BadRequestException('Talle no disponible');
       }
 
-      if (size.stock < quantity) {
-        throw new ConflictException('Stock insuficiente');
+      const availableStock = size.stock - (size.reserved ?? 0);
+
+      if (availableStock < quantity) {
+        throw new ConflictException(
+          `Stock insuficiente. Disponible: ${availableStock}, solicitado: ${quantity}`,
+        );
       }
     }
 
@@ -290,21 +455,48 @@ export class CartService {
     return cart.items.findIndex((item) => {
       if (item.product.toString() !== productId) return false;
 
-      if (!variant) return !item.variant;
+      if (!variant || (!variant.size && !variant.color)) {
+        return (
+          !item.variant ||
+          ((!item.variant.size || item.variant.size === '') &&
+            (!item.variant.color || item.variant.color === ''))
+        );
+      }
 
-      const sizeMatch = variant.size
-        ? item.variant?.size?.toUpperCase() === variant.size.toUpperCase()
-        : !item.variant?.size;
+      let sizeMatch = true;
+      let colorMatch = true;
 
-      const colorMatch = variant.color
-        ? item.variant?.color?.toLowerCase() === variant.color.toLowerCase()
-        : !item.variant?.color;
+      if (variant.size !== undefined && variant.size !== '') {
+        sizeMatch = item.variant?.size?.toUpperCase() === variant.size.toUpperCase();
+      }
+
+      if (variant.color !== undefined && variant.color !== '') {
+        colorMatch = item.variant?.color?.toLowerCase() === variant.color.toLowerCase();
+      }
 
       return sizeMatch && colorMatch;
     });
   }
 
-  private generateAnonymousId(): string {
-    return randomUUID();
+  private async generateAnonymousId(): Promise<string> {
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    while (attempts < maxAttempts) {
+      const id = randomUUID();
+      const exists = await this.cartModel.exists({ anonymousId: id });
+      if (!exists) {
+        return id;
+      }
+      attempts++;
+    }
+
+    throw new Error('No se pudo generar un ID único para el carrito');
+  }
+
+  private updateAnonymousCookie(anonymousId: string | undefined, res?: Response): void {
+    if (anonymousId && res) {
+      res.cookie(CART_COOKIE, anonymousId, cartCookieOptions(this.configService));
+    }
   }
 }

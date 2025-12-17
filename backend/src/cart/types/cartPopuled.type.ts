@@ -8,6 +8,8 @@ export type CartItemPopulated = {
     color?: string;
   };
   quantity: number;
+  addedAt: Date;
+  priceAtAdd: number;
 };
 
 export type CartPopulated = {

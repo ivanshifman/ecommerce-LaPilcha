@@ -4,10 +4,15 @@ import { User, UserSchema } from './schemas/user.schema';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { WishlistService } from './wishList.service';
-import { ProductModule } from 'src/product/product.module';
+import { CartModule } from '../cart/cart.module';
+import { ProductModule } from '../product/product.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), ProductModule],
+  imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    CartModule,
+    ProductModule,
+  ],
   controllers: [UserController],
   providers: [UserService, WishlistService],
   exports: [UserService, WishlistService],

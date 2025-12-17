@@ -28,11 +28,11 @@ export class CartController {
 
   @UseGuards(OptionalJwtAuthGuard)
   @Get()
-  async getCart(@Req() req: Request) {
+  async getCart(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = req.user as AuthenticatedUserDto | undefined;
     const anonymousId = getCookieCart(req, CART_COOKIE);
 
-    return this.cartService.getCart(user?.id, anonymousId);
+    return this.cartService.getCart(user?.id, anonymousId, res);
   }
 
   @UseGuards(OptionalJwtAuthGuard)
@@ -50,21 +50,29 @@ export class CartController {
 
   @UseGuards(OptionalJwtAuthGuard)
   @Patch('items')
-  async updateCartItem(@Body() dto: UpdateCartItemDto, @Req() req: Request) {
+  async updateCartItem(
+    @Body() dto: UpdateCartItemDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = req.user as AuthenticatedUserDto | undefined;
     const anonymousId = getCookieCart(req, CART_COOKIE);
 
-    return this.cartService.updateCartItem(dto, user?.id, anonymousId);
+    return this.cartService.updateCartItem(dto, user?.id, anonymousId, res);
   }
 
   @UseGuards(OptionalJwtAuthGuard)
   @Delete('items')
   @HttpCode(HttpStatus.OK)
-  async removeFromCart(@Body() dto: RemoveCartItemDto, @Req() req: Request) {
+  async removeFromCart(
+    @Body() dto: RemoveCartItemDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const user = req.user as AuthenticatedUserDto | undefined;
     const anonymousId = getCookieCart(req, CART_COOKIE);
 
-    return this.cartService.removeFromCart(dto, user?.id, anonymousId);
+    return this.cartService.removeFromCart(dto, user?.id, anonymousId, res);
   }
 
   @UseGuards(OptionalJwtAuthGuard)

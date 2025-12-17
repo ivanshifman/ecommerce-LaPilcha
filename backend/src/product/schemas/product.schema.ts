@@ -83,6 +83,7 @@ export class Product {
         size: { type: String, required: true, match: /^([A-Z]{1,4}|[0-9]{1,3})$/ },
         stock: { type: Number, required: true, min: 0 },
         minStock: { type: Number, default: 5 },
+        reserved: { type: Number, default: 0 },
       },
     ],
     default: [],
@@ -91,6 +92,7 @@ export class Product {
     size: string;
     stock: number;
     minStock: number;
+    reserved: number;
   }>;
 
   totalStock!: number;
@@ -123,7 +125,7 @@ ProductSchema.pre('save', function (next) {
 
 ProductSchema.virtual('totalStock').get(function () {
   if (!this.sizes || this.sizes.length === 0) return 0;
-  return this.sizes.reduce((sum, s) => sum + s.stock, 0);
+  return this.sizes.reduce((sum, s) => sum + (s.stock - (s.reserved ?? 0)), 0);
 });
 
 ProductSchema.virtual('availableSizes').get(function () {
