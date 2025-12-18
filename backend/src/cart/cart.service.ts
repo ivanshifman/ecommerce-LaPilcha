@@ -285,14 +285,10 @@ export class CartService {
 
     for (const item of cart.items) {
       if (item.variant?.size) {
-        await this.productModel.findOneAndUpdate(
-          {
-            _id: item.product,
-            'sizes.size': item.variant.size.toUpperCase(),
-          },
-          {
-            $inc: { 'sizes.$.reserved': -item.quantity },
-          },
+        await this.stockService.releaseStock(
+          item.product.toString(),
+          item.variant?.size,
+          item.quantity,
         );
       }
     }
