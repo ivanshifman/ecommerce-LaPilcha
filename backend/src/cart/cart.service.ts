@@ -1,22 +1,18 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { Model, Types } from 'mongoose';
+import { randomUUID } from 'crypto';
 import { Cart, CartDocument } from './schemas/cart.schema';
 import { Product, ProductDocument } from '../product/schemas/product.schema';
+import { StockService } from './stock.service';
 import { AddToCartDto } from './dto/add-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { RemoveCartItemDto } from './dto/remove-cart-item.dto';
 import { CartResponseDto } from './dto/cart-response.dto';
 import { CartPopulated } from './types/cartPopuled.type';
 import { CartMapper } from './mappers/cart.mapper';
-import { randomUUID } from 'crypto';
 import { CART_COOKIE, cartCookieOptions } from '../common/utils/cookie.util';
 
 @Injectable()
@@ -25,6 +21,7 @@ export class CartService {
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     private configService: ConfigService,
+    private stockService: StockService,
   ) {}
 
   async addToCart(
@@ -33,8 +30,8 @@ export class CartService {
     anonymousId?: string,
     res?: Response,
   ): Promise<{ cart: CartResponseDto; anonymousId?: string }> {
-    const product = await this.validateProduct(dto.product);
-    await this.validateStock(product, dto.variant, dto.quantity);
+    const product = await this.stockService.validateProduct(dto.product);
+    await this.stockService.validateStock(product, dto.variant, dto.quantity);
 
     let cart: CartDocument;
     let finalAnonymousId: string | undefined;
@@ -75,7 +72,7 @@ export class CartService {
 
     await cart.save();
 
-    await this.reserveStock(dto.product, dto.variant?.size, dto.quantity);
+    await this.stockService.reserveStock(dto.product, dto.variant?.size, dto.quantity);
 
     const populatedCart = await this.getPopulatedCart(userId, finalAnonymousId ?? anonymousId);
 
@@ -98,16 +95,16 @@ export class CartService {
       throw new NotFoundException('Item no encontrado en el carrito');
     }
 
-    const product = await this.validateProduct(dto.product);
-    await this.validateStock(product, dto.variant, dto.quantity);
+    const product = await this.stockService.validateProduct(dto.product);
+    await this.stockService.validateStock(product, dto.variant, dto.quantity);
 
     const oldQuantity = cart.items[index].quantity;
     const quantityDiff = dto.quantity - oldQuantity;
 
     if (quantityDiff > 0) {
-      await this.reserveStock(dto.product, dto.variant?.size, quantityDiff);
+      await this.stockService.reserveStock(dto.product, dto.variant?.size, quantityDiff);
     } else if (quantityDiff < 0) {
-      await this.releaseStock(dto.product, dto.variant?.size, Math.abs(quantityDiff));
+      await this.stockService.releaseStock(dto.product, dto.variant?.size, Math.abs(quantityDiff));
     }
 
     cart.items[index].quantity = dto.quantity;
@@ -136,7 +133,11 @@ export class CartService {
     }
 
     const item = cart.items[index];
-    await this.releaseStock(item.product.toString(), item.variant?.size, item.quantity);
+    await this.stockService.releaseStock(
+      item.product.toString(),
+      item.variant?.size,
+      item.quantity,
+    );
 
     cart.items.splice(index, 1);
     await cart.save();
@@ -160,11 +161,9 @@ export class CartService {
       if (!item.product || item.product.status === false) {
         invalidItemsIndices.push(index);
         if (item.variant?.size) {
-          this.releaseStock(
-            item.product?._id?.toString() || '',
-            item.variant.size,
-            item.quantity,
-          ).catch(() => {});
+          this.stockService
+            .releaseStock(item.product?._id?.toString() || '', item.variant.size, item.quantity)
+            .catch(() => {});
         }
       }
     });
@@ -188,7 +187,11 @@ export class CartService {
     const cart = await this.getCartDocument(userId, anonymousId);
 
     for (const item of cart.items) {
-      await this.releaseStock(item.product.toString(), item.variant?.size, item.quantity);
+      await this.stockService.releaseStock(
+        item.product.toString(),
+        item.variant?.size,
+        item.quantity,
+      );
     }
 
     if (!userId && anonymousId) {
@@ -351,100 +354,6 @@ export class CartService {
     }
 
     return cart.toObject() as unknown as CartPopulated;
-  }
-
-  private async validateProduct(productId: string): Promise<ProductDocument> {
-    const product = await this.productModel.findById(productId).exec();
-
-    if (!product) {
-      throw new NotFoundException('Producto no encontrado');
-    }
-
-    if (!product.status) {
-      throw new BadRequestException('El producto no está disponible');
-    }
-
-    return product;
-  }
-
-  async reserveStock(productId: string, size: string | undefined, quantity: number): Promise<void> {
-    if (!size) return;
-
-    const result = await this.productModel.findOneAndUpdate(
-      {
-        _id: productId,
-        $expr: {
-          $let: {
-            vars: {
-              sizeObj: {
-                $arrayElemAt: [
-                  {
-                    $filter: {
-                      input: '$sizes',
-                      as: 's',
-                      cond: { $eq: ['$$s.size', size.toUpperCase()] },
-                    },
-                  },
-                  0,
-                ],
-              },
-            },
-            in: {
-              $gte: [{ $subtract: ['$$sizeObj.stock', '$$sizeObj.reserved'] }, quantity],
-            },
-          },
-        },
-      },
-      {
-        $inc: { 'sizes.$[elem].reserved': quantity },
-      },
-      {
-        arrayFilters: [{ 'elem.size': size.toUpperCase() }],
-        new: true,
-      },
-    );
-
-    if (!result) {
-      throw new ConflictException('No se pudo reservar stock');
-    }
-  }
-
-  async releaseStock(productId: string, size: string | undefined, quantity: number): Promise<void> {
-    if (!size) return;
-
-    await this.productModel.findOneAndUpdate(
-      { _id: productId, 'sizes.size': size.toUpperCase() },
-      { $inc: { 'sizes.$.reserved': -quantity } },
-    );
-  }
-
-  private async validateStock(
-    product: ProductDocument,
-    variant?: { size?: string; color?: string },
-    quantity = 1,
-  ): Promise<void> {
-    await Promise.resolve();
-
-    if (variant?.size) {
-      const sizeValue = variant.size.toUpperCase();
-      const size = product.sizes.find((s) => s.size.toUpperCase() === sizeValue);
-
-      if (!size) {
-        throw new BadRequestException('Talle no disponible');
-      }
-
-      const availableStock = size.stock - (size.reserved ?? 0);
-
-      if (availableStock < quantity) {
-        throw new ConflictException(
-          `Stock insuficiente. Disponible: ${availableStock}, solicitado: ${quantity}`,
-        );
-      }
-    }
-
-    if (variant?.color && product.color.toLowerCase() !== variant.color.toLowerCase()) {
-      throw new BadRequestException('Color no disponible');
-    }
   }
 
   private findItemIndex(
