@@ -54,10 +54,6 @@ export class AuthController {
     if (anonymousCartId) {
       try {
         await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
-
-        // if (mergeResult.failedItems && mergeResult.failedItems.length > 0) {
-        //   console.warn('Items no fusionados en el login:', mergeResult.failedItems);
-        // }
       } catch (error) {
         console.error('Error al fusionar carritos:', error);
       }

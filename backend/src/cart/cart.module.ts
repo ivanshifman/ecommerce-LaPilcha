@@ -11,6 +11,6 @@ import { CleanExpiredReservationsJob } from './jobs/clean-expired-reservations.j
   imports: [MongooseModule.forFeature([{ name: Cart.name, schema: CartSchema }]), ProductModule],
   controllers: [CartController],
   providers: [CartService, StockService, CleanExpiredReservationsJob],
-  exports: [CartService, StockService],
+  exports: [MongooseModule, CartService, StockService],
 })
 export class CartModule {}

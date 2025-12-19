@@ -11,6 +11,7 @@ import { ProductModule } from './product/product.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CartModule } from './cart/cart.module';
     UserModule,
     AuthModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [

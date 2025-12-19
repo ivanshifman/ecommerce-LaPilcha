@@ -14,7 +14,6 @@ export class CleanExpiredReservationsJob {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   @Cron(CronExpression.EVERY_DAY_AT_3AM, {
     name: 'clean-expired-reservations',
     timeZone: 'America/Argentina/Buenos_Aires',
@@ -60,7 +59,6 @@ export class CleanExpiredReservationsJob {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   @Cron(CronExpression.EVERY_6_HOURS, {
     name: 'partial-cleanup',
     timeZone: 'America/Argentina/Buenos_Aires',

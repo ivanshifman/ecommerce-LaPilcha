@@ -2,16 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { SentMessageInfo } from 'nodemailer';
+import { OrderMailDto } from './dto/order-mail.dto';
+import { OrderMailTemplates } from './templates/order-mail.templates';
 
 @Injectable()
 export class MailService {
   constructor(
-    private readonly mailer: MailerService,
-    private readonly config: ConfigService,
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
   ) {}
 
   async sendMail(to: string, subject: string, html: string): Promise<SentMessageInfo> {
-    return this.mailer.sendMail({
+    return this.mailerService.sendMail({
       to,
       subject,
       html,
@@ -19,7 +21,7 @@ export class MailService {
   }
 
   async sendResetPasswordEmail(to: string, token: string): Promise<SentMessageInfo> {
-    const frontend = this.config.get<string>('FRONTEND_URL') ?? '';
+    const frontend = this.configService.get<string>('FRONTEND_URL') ?? '';
     const url = `${frontend}/reset-password?token=${encodeURIComponent(token)}`;
 
     const html = `
@@ -41,11 +43,47 @@ export class MailService {
   }
 
   async sendVerificationLink(to: string, token: string): Promise<SentMessageInfo> {
-    const frontend = this.config.get<string>('FRONTEND_URL') ?? '';
+    const frontend = this.configService.get<string>('FRONTEND_URL') ?? '';
     const url = `${frontend}/verify-email?token=${encodeURIComponent(token)}`;
 
     const html = `<p>Verifica tu correo haciendo click <a href="${url}">aquí</a>.</p>`;
 
     return this.sendMail(to, 'Verificar correo', html);
+  }
+
+  async sendOrderConfirmation(email: string, order: OrderMailDto): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Confirmación de orden ${order.orderNumber}`,
+      OrderMailTemplates.confirmation(order),
+    );
+  }
+
+  async sendOrderCancellation(email: string, orderNumber: string): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Orden ${orderNumber} cancelada`,
+      OrderMailTemplates.cancelled(orderNumber),
+    );
+  }
+
+  async sendOrderShipped(
+    email: string,
+    orderNumber: string,
+    trackingNumber?: string,
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Tu orden ${orderNumber} fue enviada`,
+      OrderMailTemplates.shipped(orderNumber, trackingNumber),
+    );
+  }
+
+  async sendOrderDelivered(email: string, orderNumber: string): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Orden ${orderNumber} entregada`,
+      OrderMailTemplates.delivered(orderNumber),
+    );
   }
 }
