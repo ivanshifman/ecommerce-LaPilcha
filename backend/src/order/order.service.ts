@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -30,132 +31,132 @@ export class OrderService {
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderResponseDto> {
-    const cart = await this.cartModel.findOne({ user: userId }).populate('items.product').exec();
+    const session = await this.orderModel.db.startSession();
+    session.startTransaction();
 
-    if (!cart || cart.items.length === 0) {
-      throw new BadRequestException('El carrito está vacío');
-    }
+    try {
+      const cart = await this.cartModel
+        .findOne({ user: userId })
+        .populate('items.product')
+        .session(session)
+        .exec();
 
-    const orderItems: OrderDocument['items'] = [];
-    let subtotal = 0;
-    let totalDiscount = 0;
-
-    for (const cartItem of cart.items) {
-      const product = cartItem.product as unknown as ProductDocument;
-
-      if (!product) {
-        throw new BadRequestException('Producto no encontrado en el carrito');
+      if (!cart || cart.items.length === 0) {
+        throw new BadRequestException('El carrito está vacío');
       }
 
-      if (!product.status) {
-        throw new BadRequestException(`El producto "${product.name}" ya no está disponible`);
-      }
+      const orderItems: OrderDocument['items'] = [];
+      let subtotal = 0;
+      let totalDiscount = 0;
 
-      if (cartItem.variant?.size) {
-        const size = product.sizes.find((s) => s.size === cartItem.variant?.size?.toUpperCase());
+      for (const cartItem of cart.items) {
+        const product = cartItem.product as unknown as ProductDocument;
 
-        if (!size) {
-          throw new BadRequestException(
-            `Talle ${cartItem.variant.size} no disponible para "${product.name}"`,
-          );
+        if (!product) {
+          throw new BadRequestException('Producto no encontrado en el carrito');
         }
 
-        const availableStock = size.stock - (size.reserved ?? 0);
-        if (availableStock < cartItem.quantity) {
-          throw new BadRequestException(
-            `Stock insuficiente para "${product.name}" talle ${cartItem.variant.size}. Disponible: ${availableStock}`,
-          );
+        if (!product.status) {
+          throw new BadRequestException(`El producto "${product.name}" ya no está disponible`);
         }
+
+        if (cartItem.variant?.size) {
+          const size = product.sizes.find((s) => s.size === cartItem.variant?.size?.toUpperCase());
+          const availableStock = size ? size.stock - (size.reserved ?? 0) : 0;
+
+          if (availableStock < cartItem.quantity) {
+            throw new ConflictException(
+              `Stock insuficiente para "${product.name}" talle ${cartItem.variant.size}. ` +
+                `Disponible: ${availableStock}, solicitado: ${cartItem.quantity}`,
+            );
+          }
+        }
+
+        const discount = product.discount ?? 0;
+        const unitPrice = product.price - product.price * (discount / 100);
+        const itemSubtotal = unitPrice * cartItem.quantity;
+        const itemDiscount = product.price * cartItem.quantity - itemSubtotal;
+
+        subtotal += itemSubtotal;
+        totalDiscount += itemDiscount;
+
+        orderItems.push({
+          product: new Types.ObjectId(product._id),
+          name: product.name,
+          code: product.code,
+          variant: cartItem.variant,
+          quantity: cartItem.quantity,
+          unitPrice,
+          discount,
+          subtotal: itemSubtotal,
+          image: product.images?.[0],
+        });
       }
 
-      const discount = product.discount ?? 0;
-      const unitPrice = product.price - product.price * (discount / 100);
-      const itemSubtotal = unitPrice * cartItem.quantity;
-      const itemDiscount = product.price * cartItem.quantity - itemSubtotal;
+      const shippingCost = this.calculateShipping(subtotal);
+      const total = subtotal + shippingCost;
 
-      subtotal += itemSubtotal;
-      totalDiscount += itemDiscount;
-
-      orderItems.push({
-        product: new Types.ObjectId(product._id),
-        name: product.name,
-        code: product.code,
-        variant: cartItem.variant,
-        quantity: cartItem.quantity,
-        unitPrice,
-        discount,
-        subtotal: itemSubtotal,
-        image: product.images?.[0],
-      });
-    }
-
-    const shippingCost = this.calculateShipping(subtotal);
-    const total = subtotal + shippingCost;
-
-    const newOrder = new this.orderModel({
-      user: new Types.ObjectId(userId),
-      items: orderItems,
-      subtotal,
-      discount: totalDiscount,
-      shippingCost,
-      total,
-      status: OrderStatus.PENDING,
-      paymentMethod: dto.paymentMethod,
-      shippingAddress: {
-        ...dto.shippingAddress,
-        country: dto.shippingAddress.country || 'Argentina',
-      },
-      notes: dto.notes,
-    });
-
-    await newOrder.save();
-
-    for (const item of cart.items) {
-      if (item.variant?.size) {
-        await this.productModel.findOneAndUpdate(
-          {
-            _id: item.product,
-            'sizes.size': item.variant.size.toUpperCase(),
-          },
-          {
-            $inc: {
-              'sizes.$.stock': -item.quantity,
-              'sizes.$.reserved': -item.quantity,
-              salesCount: item.quantity,
-            },
-          },
-        );
-      }
-    }
-
-    cart.items = [];
-    await cart.save();
-
-    await this.userService.incrementOrders(userId, 1);
-
-    const user = await this.userService.findById(userId);
-    if (user) {
-      await this.mailService.sendOrderConfirmation(user.email, {
-        orderNumber: newOrder.orderNumber,
-        createdAt: newOrder.createdAt ?? new Date(),
-        items: newOrder.items,
+      const newOrder = new this.orderModel({
+        user: new Types.ObjectId(userId),
+        items: orderItems,
         subtotal,
         discount: totalDiscount,
         shippingCost,
         total,
-        paymentMethod: newOrder.paymentMethod,
+        status: OrderStatus.PENDING,
+        paymentMethod: dto.paymentMethod,
         shippingAddress: {
-          fullName: newOrder.shippingAddress.fullName,
-          address: newOrder.shippingAddress.address,
-          city: newOrder.shippingAddress.city,
-          province: newOrder.shippingAddress.state,
-          postalCode: newOrder.shippingAddress.zipCode,
-          country: newOrder.shippingAddress.country,
+          ...dto.shippingAddress,
+          country: dto.shippingAddress.country || 'Argentina',
         },
+        notes: dto.notes,
       });
-    }
 
-    return OrderMapper.toOrderResponseDto(newOrder);
+      await newOrder.save({ session });
+
+      for (const item of cart.items) {
+        if (item.variant?.size) {
+          const result = await this.productModel.findOneAndUpdate(
+            {
+              _id: item.product,
+              'sizes.size': item.variant.size.toUpperCase(),
+            },
+            {
+              $inc: {
+                'sizes.$.stock': -item.quantity,
+                'sizes.$.reserved': -item.quantity,
+                salesCount: item.quantity,
+              },
+            },
+            { session, new: true },
+          );
+
+          if (!result) {
+            throw new ConflictException(
+              `No se pudo actualizar el stock. Stock insuficiente para el producto.`,
+            );
+          }
+        }
+      }
+
+      cart.items = [];
+      await cart.save({ session });
+
+      await session.commitTransaction();
+
+      try {
+        await this.userService.incrementOrders(userId, 1);
+      } catch (error) {
+        console.warn(`No se pudo incrementar contador de órdenes para ${userId}`, error);
+      }
+
+      return OrderMapper.toOrderResponseDto(newOrder);
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async getMyOrders(userId: string, query: OrderQueryDto): Promise<PaginatedOrderResponseDto> {
@@ -236,6 +237,12 @@ export class OrderService {
 
     if (!CANCELLABLE_STATUSES.includes(order.status)) {
       throw new BadRequestException('Esta orden no puede ser cancelada en su estado actual');
+    }
+
+    if (order.paymentDetails?.status === 'paid' || order.paymentDetails?.status === 'delivered') {
+      throw new BadRequestException(
+        'Esta orden tiene un pago aprobado. Para cancelarla, contacta con soporte para iniciar el reembolso.',
+      );
     }
 
     for (const item of order.items) {
@@ -428,6 +435,10 @@ export class OrderService {
     await order.save();
 
     return OrderMapper.toOrderResponseDto(order, true);
+  }
+
+  async findById(orderId: string): Promise<OrderDocument | null> {
+    return this.orderModel.findById(orderId).exec();
   }
 
   private calculateShipping(subtotal: number): number {
