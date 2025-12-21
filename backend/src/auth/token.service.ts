@@ -16,9 +16,9 @@ export class TokenService {
   private saltRounds = 10;
 
   constructor(
-    private configService: ConfigService,
-    private jwtService: JwtService,
-    private userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {
     this.tokensUtil = new TokensUtil(this.configService, this.jwtService);
   }

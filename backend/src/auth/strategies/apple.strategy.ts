@@ -20,8 +20,8 @@ interface AppleProfile {
 @Injectable()
 export class AppleStrategy extends PassportStrategy(AppleOAuthStrategy, 'apple') {
   constructor(
-    private OAuthService: OAuthService,
-    private configService: ConfigService,
+    private readonly OAuthService: OAuthService,
+    private readonly configService: ConfigService,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     super({

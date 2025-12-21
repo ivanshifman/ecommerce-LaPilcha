@@ -17,7 +17,7 @@ export class MercadoPagoStrategy implements PaymentStrategy {
   private readonly logger = new Logger(MercadoPagoStrategy.name);
   private client: MercadoPagoConfig;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const accessToken = this.configService.get<string>('MERCADO_PAGO_ACCESS_TOKEN');
     if (!accessToken) {
       throw new Error('MERCADO_PAGO_ACCESS_TOKEN no configurado');
@@ -69,12 +69,9 @@ export class MercadoPagoStrategy implements PaymentStrategy {
 
     const response = await preference.create({ body });
 
-    this.logger.log(`✅ Preferencia de MP creada: ${response.id ?? 'unknown'}`);
-
     return {
       checkoutUrl: response.init_point!,
       preferenceId: response.id,
-      externalId: response.id,
     };
   }
 
@@ -89,20 +86,48 @@ export class MercadoPagoStrategy implements PaymentStrategy {
       throw new Error('Payment ID no encontrado en webhook');
     }
 
-    const payment = new MPPayment(this.client);
-    const paymentInfo = await payment.get({ id: paymentId });
+    try {
+      const payment = new MPPayment(this.client);
+      const paymentInfo = await payment.get({ id: paymentId });
+      const status = this.mapMercadoPagoStatus(paymentInfo.status!);
 
-    const status = this.mapMercadoPagoStatus(paymentInfo.status!);
+      return {
+        externalId: paymentInfo.id!.toString(),
+        status,
+        metadata: {
+          statusDetail: paymentInfo.status_detail,
+          paymentMethodId: paymentInfo.payment_method_id,
+          paymentTypeId: paymentInfo.payment_type_id,
+          transactionAmount: paymentInfo.transaction_amount,
+          dateApproved: paymentInfo.date_approved,
+          external_reference: paymentInfo.external_reference,
+        },
+      };
+    } catch (error) {
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.error(`❌ Error consultando pago ${paymentId} en MP:`, error);
+      }
 
-    return {
-      externalId: paymentInfo.id!.toString(),
-      status,
-      metadata: {
-        statusDetail: paymentInfo.status_detail,
-        paymentMethodId: paymentInfo.payment_method_id,
-        paymentTypeId: paymentInfo.payment_type_id,
-      },
-    };
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'object' && error !== null && 'error' in error
+            ? String((error as Record<string, unknown>).error)
+            : '';
+      if (errorMessage.includes('resource not found') || errorMessage.includes('not_found')) {
+        if (this.configService.get('NODE_ENV') !== 'production') {
+          this.logger.warn(`⚠️ Pago ${paymentId} no encontrado en MP`);
+        }
+
+        return {
+          externalId: paymentId,
+          status: PaymentStatus.PENDING,
+          metadata: { error: 'Payment not yet created in MP' },
+        };
+      }
+
+      throw error;
+    }
   }
 
   async refundPayment(externalId: string): Promise<void> {

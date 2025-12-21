@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
@@ -26,8 +27,9 @@ export class OrderService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    private userService: UserService,
-    private mailService: MailService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -147,7 +149,9 @@ export class OrderService {
       try {
         await this.userService.incrementOrders(userId, 1);
       } catch (error) {
-        console.warn(`No se pudo incrementar contador de órdenes para ${userId}`, error);
+        if (this.configService.get('NODE_ENV') !== 'production') {
+          console.warn(`No se pudo incrementar contador de órdenes para ${userId}`, error);
+        }
       }
 
       return OrderMapper.toOrderResponseDto(newOrder);
@@ -435,6 +439,21 @@ export class OrderService {
     await order.save();
 
     return OrderMapper.toOrderResponseDto(order, true);
+  }
+
+  async markEmailSentIfNotSent(orderId: string): Promise<boolean> {
+    const result = await this.orderModel.findOneAndUpdate(
+      {
+        _id: orderId,
+        emailSent: false,
+      },
+      {
+        $set: { emailSent: true },
+      },
+      { new: true },
+    );
+
+    return !!result;
   }
 
   async findById(orderId: string): Promise<OrderDocument | null> {

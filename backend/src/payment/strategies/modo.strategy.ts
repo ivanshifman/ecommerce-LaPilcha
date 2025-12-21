@@ -29,7 +29,7 @@ export class ModoStrategy implements PaymentStrategy {
   private readonly logger = new Logger(ModoStrategy.name);
   private client: AxiosInstance;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('MODO_API_KEY');
     if (!apiKey) {
       throw new Error('MODO_API_KEY no configurado');

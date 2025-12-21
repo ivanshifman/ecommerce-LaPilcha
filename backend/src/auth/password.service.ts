@@ -13,10 +13,10 @@ export class PasswordService {
   private saltRounds = 10;
 
   constructor(
-    private configService: ConfigService,
-    private userService: UserService,
-    private mailService: MailService,
-    private tokenService: TokenService,
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async hashPassword(password: string): Promise<string> {

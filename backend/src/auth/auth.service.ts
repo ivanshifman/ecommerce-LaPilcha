@@ -29,13 +29,13 @@ export class AuthService {
   private tokensUtil: TokensUtil;
 
   constructor(
-    private userService: UserService,
-    private configService: ConfigService,
-    private mailService: MailService,
-    private emailVerificationService: EmailVerificationService,
-    private jwtService: JwtService,
-    private passwordService: PasswordService,
-    private tokenService: TokenService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly emailVerificationService: EmailVerificationService,
+    private readonly jwtService: JwtService,
+    private readonly passwordService: PasswordService,
+    private readonly tokenService: TokenService,
   ) {
     this.tokensUtil = new TokensUtil(this.configService, this.jwtService);
   }

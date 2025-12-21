@@ -8,8 +8,8 @@ import { UserMapper } from '../common/mappers/user.mapper';
 @Injectable()
 export class OAuthService {
   constructor(
-    private userService: UserService,
-    private tokenService: TokenService,
+    private readonly userService: UserService,
+    private readonly tokenService: TokenService,
   ) {}
 
   async oauthLogin(dto: OAuthUserDto) {

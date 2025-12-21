@@ -34,12 +34,12 @@ export class PaymentService {
 
   constructor(
     @InjectModel(Payment.name) private paymentModel: Model<PaymentDocument>,
-    private configService: ConfigService,
-    private mercadoPagoStrategy: MercadoPagoStrategy,
-    private modoStrategy: ModoStrategy,
-    private mailService: MailService,
-    private orderService: OrderService,
-    private userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly mercadoPagoStrategy: MercadoPagoStrategy,
+    private readonly modoStrategy: ModoStrategy,
+    private readonly mailService: MailService,
+    private readonly orderService: OrderService,
+    private readonly userService: UserService,
   ) {
     this.strategies = new Map<PaymentMethod, PaymentStrategy>();
     this.strategies.set(PaymentMethod.MERCADO_PAGO, this.mercadoPagoStrategy);
@@ -47,7 +47,9 @@ export class PaymentService {
   }
 
   async createPayment(userId: string, dto: CreatePaymentDto): Promise<PaymentResponseDto> {
-    this.logger.log(`💳 Creando pago para orden ${dto.orderId} - Usuario: ${userId}`);
+    if (this.configService.get('NODE_ENV') !== 'production') {
+      this.logger.log(`💳 Creando pago para orden ${dto.orderId}`);
+    }
 
     const order = await this.orderService.findById(dto.orderId);
 
@@ -100,24 +102,23 @@ export class PaymentService {
       const paymentData = await strategy.createPayment(payment, user.email);
 
       payment.checkoutUrl = paymentData.checkoutUrl;
-      payment.externalId = paymentData.externalId ?? paymentData.preferenceId;
       payment.preferenceId = paymentData.preferenceId;
+      payment.externalId = paymentData.externalId;
       await payment.save();
 
       order.status = OrderStatus.PAYMENT_PENDING;
       order.paymentMethod = dto.method;
       await order.save();
 
-      this.logger.log(`✅ Pago creado exitosamente: ${payment._id.toString()}`);
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.log(`✅ Pago creado: ${payment._id.toString()}`);
+      }
 
       return this.toPaymentResponseDto(payment);
     } catch (error) {
-      this.logger.error(`❌ Error creando pago en proveedor:`, error);
-
       payment.status = PaymentStatus.REJECTED;
       payment.errorMessage = error instanceof Error ? error.message : 'Error al crear el pago';
       await payment.save();
-
       throw new BadRequestException('No se pudo crear el pago. Intenta nuevamente.');
     }
   }
@@ -127,7 +128,9 @@ export class PaymentService {
     payload: any,
     headers?: MercadoPagoWebhookHeaders,
   ): Promise<void> {
-    this.logger.log(`📥 Webhook recibido de ${method}`);
+    if (this.configService.get('NODE_ENV') !== 'production') {
+      this.logger.log(`📥 Webhook recibido de ${method}`);
+    }
 
     if (
       method === PaymentMethod.MERCADO_PAGO &&
@@ -144,20 +147,42 @@ export class PaymentService {
     try {
       const webhookData = await strategy.processWebhook(payload);
 
-      const payment = await this.paymentModel
-        .findOne({ externalId: webhookData.externalId })
+      let payment: PaymentDocument | null = await this.paymentModel
+        .findOne({
+          $or: [{ externalId: webhookData.externalId }, { preferenceId: webhookData.externalId }],
+        })
         .exec();
 
+      if (!payment && webhookData.metadata?.external_reference) {
+        payment = await this.paymentModel.findById(webhookData.metadata.external_reference).exec();
+      }
+
       if (!payment) {
-        this.logger.warn(`⚠️ Pago no encontrado para externalId: ${webhookData.externalId}`);
+        payment = await this.paymentModel
+          .findOne({
+            status: PaymentStatus.PENDING,
+            externalId: { $exists: false },
+            method: method,
+          })
+          .sort({ createdAt: -1 })
+          .exec();
+      }
+
+      if (!payment) {
+        if (this.configService.get('NODE_ENV') !== 'production') {
+          this.logger.error(`❌ Pago no encontrado para externalId: ${webhookData.externalId}`);
+        }
         return;
+      }
+
+      if (!payment.externalId) {
+        payment.externalId = webhookData.externalId;
       }
 
       const oldStatus = payment.status;
       const newStatus = webhookData.status as PaymentStatus;
 
       if (oldStatus === newStatus) {
-        this.logger.log(`ℹ️ Estado sin cambios para pago ${payment._id.toString()}: ${newStatus}`);
         return;
       }
 
@@ -171,13 +196,11 @@ export class PaymentService {
       }
 
       await payment.save();
-
-      this.logger.log(`🔄 Pago ${payment._id.toString()} actualizado: ${oldStatus} → ${newStatus}`);
-
       await this.updateOrderByPaymentStatus(payment);
     } catch (error) {
-      this.logger.error(`❌ Error procesando webhook:`, error);
-      throw error;
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.error(`❌ Error procesando webhook:`, error);
+      }
     }
   }
 
@@ -185,7 +208,9 @@ export class PaymentService {
     const order = await this.orderService.findById(payment.order.toString());
 
     if (!order) {
-      this.logger.error(`❌ Orden no encontrada: ${payment.order.toString()}`);
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.error(`❌ Orden no encontrada: ${payment.order.toString()}`);
+      }
       return;
     }
 
@@ -193,6 +218,10 @@ export class PaymentService {
 
     switch (payment.status) {
       case PaymentStatus.APPROVED:
+        if (order.status === OrderStatus.PAID) {
+          return;
+        }
+
         order.status = OrderStatus.PAID;
         order.paymentDetails = {
           transactionId: payment.externalId,
@@ -202,33 +231,37 @@ export class PaymentService {
         };
         await order.save();
 
-        this.logger.log(`✅ Orden ${order.orderNumber} marcada como PAID`);
+        if (user && payment.status === PaymentStatus.APPROVED) {
+          const shouldSendEmail = await this.orderService.markEmailSentIfNotSent(
+            order._id.toString(),
+          );
 
-        if (user) {
-          try {
-            await this.mailService.sendOrderConfirmation(user.email, {
-              orderNumber: order.orderNumber,
-              createdAt: order.createdAt ?? new Date(),
-              items: order.items,
-              subtotal: order.subtotal,
-              discount: order.discount,
-              shippingCost: order.shippingCost,
-              total: order.total,
-              paymentMethod: order.paymentMethod,
-              shippingAddress: {
-                fullName: order.shippingAddress.fullName,
-                address: order.shippingAddress.address,
-                city: order.shippingAddress.city,
-                province: order.shippingAddress.state,
-                postalCode: order.shippingAddress.zipCode,
-                country: order.shippingAddress.country,
-              },
-            });
-          } catch (emailError) {
-            this.logger.error(
-              `Error enviando email de pago aprobado para orden ${order.orderNumber}`,
-              emailError,
-            );
+          if (shouldSendEmail) {
+            try {
+              await this.mailService.sendOrderConfirmation(user.email, {
+                orderNumber: order.orderNumber,
+                createdAt: order.createdAt ?? new Date(),
+                items: order.items,
+                subtotal: order.subtotal,
+                discount: order.discount,
+                shippingCost: order.shippingCost,
+                total: order.total,
+                paymentMethod: order.paymentMethod,
+                shippingAddress: {
+                  fullName: order.shippingAddress.fullName,
+                  address: order.shippingAddress.address,
+                  city: order.shippingAddress.city,
+                  province: order.shippingAddress.state,
+                  postalCode: order.shippingAddress.zipCode,
+                  country: order.shippingAddress.country,
+                },
+              });
+            } catch (emailError) {
+              this.logger.error(
+                `❌ Error enviando email para orden ${order.orderNumber}`,
+                emailError,
+              );
+            }
           }
         }
         break;
@@ -238,14 +271,12 @@ export class PaymentService {
         if (order.status === OrderStatus.PAYMENT_PENDING) {
           order.status = OrderStatus.FAILED;
           await order.save();
-          this.logger.log(`❌ Orden ${order.orderNumber} marcada como FAILED`);
         }
         break;
 
       case PaymentStatus.REFUNDED:
         order.status = OrderStatus.REFUNDED;
         await order.save();
-        this.logger.log(`💰 Orden ${order.orderNumber} marcada como REFUNDED`);
         break;
 
       case PaymentStatus.IN_PROCESS:

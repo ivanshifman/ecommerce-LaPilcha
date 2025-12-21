@@ -7,7 +7,7 @@ import { JwtPayloadDto } from '../../auth/dto/jwt-payload.dto';
 
 @Injectable()
 export class JwtOptionalStrategy extends PassportStrategy(Strategy, 'jwt-opcional') {
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     const options: StrategyOptions = {
       jwtFromRequest: (req?: Request): string | null => {
         if (!req) return null;

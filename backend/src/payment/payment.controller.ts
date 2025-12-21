@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
@@ -35,30 +36,53 @@ export class PaymentController {
     return await this.paymentService.createPayment(user.id, dto);
   }
 
+  @Get('webhook/mercadopago')
+  @HttpCode(HttpStatus.OK)
+  async mercadoPagoWebhookGet(
+    @Req() req: Request,
+    @Query('id') id?: string,
+    @Query('topic') topic?: string,
+    @Query('data.id') dataId?: string,
+  ) {
+    return this.processMercadoPagoWebhook(req, {}, id, topic, dataId);
+  }
+
   @Post('webhook/mercadopago')
   @HttpCode(HttpStatus.OK)
-  async mercadoPagoWebhook(
+  async mercadoPagoWebhookPost(
     @Req() req: Request,
     @Body() payload: any,
     @Query('id') id?: string,
     @Query('topic') topic?: string,
+    @Query('data.id') dataId?: string,
   ) {
-    console.log(`Webhook MP recibido: id=${id}, topic=${topic}`);
-    console.log('Body:', payload);
+    return this.processMercadoPagoWebhook(req, payload, id, topic, dataId);
+  }
 
+  private async processMercadoPagoWebhook(
+    req: Request,
+    payload: any,
+    id?: string,
+    topic?: string,
+    dataId?: string,
+  ) {
     const headers: MercadoPagoWebhookHeaders = {
       signature: req.headers['x-signature'] as string | undefined,
       requestId: req.headers['x-request-id'] as string | undefined,
     };
 
-    const paymentId =
-      payload?.data?.id || // webhook real de payment
-      id || // query param simple
-      payload?.['data.id']; // algunas pruebas lo mandan así
+    const paymentId = payload?.data?.id || dataId || id;
 
     if (!paymentId) {
-      console.warn('No se encontró el ID del pago en webhook');
-      return { message: 'Webhook recibido sin ID' };
+      return { message: 'Webhook recibido sin ID de pago' };
+    }
+
+    if (topic && topic !== 'payment') {
+      return { message: `Topic ${topic} ignorado, esperando topic "payment"` };
+    }
+
+    if (paymentId.includes('-') && paymentId.split('-').length > 2) {
+      return { message: 'PreferenceId recibido, esperando payment ID real' };
     }
 
     const normalizedPayload = { data: { id: paymentId } };
@@ -69,10 +93,12 @@ export class PaymentController {
         normalizedPayload,
         headers,
       );
-      return { message: 'Webhook procesado correctamente' };
-    } catch (error) {
-      console.error('Error procesando webhook:', error);
-      return { message: 'Error procesando webhook', error: (error as Error)?.message };
+      return { message: 'Webhook procesado correctamente', paymentId };
+    } catch {
+      return {
+        message: 'Webhook recibido pero pendiente de procesamiento',
+        note: 'Se procesará cuando el pago se complete en MP',
+      };
     }
   }
 

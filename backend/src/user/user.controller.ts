@@ -14,8 +14,8 @@ import { UserRole } from './common/enums/userRole.enum';
 @Controller('users')
 export class UserController {
   constructor(
-    private userService: UserService,
-    private wishlistService: WishlistService,
+    private readonly userService: UserService,
+    private readonly wishlistService: WishlistService,
   ) {}
 
   @UseGuards(JwtAuthGuard)

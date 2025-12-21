@@ -14,9 +14,9 @@ import { AuthProvider } from '../user/common/enums/authProvider.enum';
 export class EmailVerificationService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private configService: ConfigService,
-    private userService: UserService,
-    private mailService: MailService,
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+    private readonly mailService: MailService,
   ) {}
 
   async generateAndSaveVerificationCode(userId: string) {

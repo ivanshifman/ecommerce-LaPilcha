@@ -150,7 +150,11 @@ export class Order {
   @Prop()
   cancellationReason?: string;
 
+  @Prop({ default: false })
+  emailSent?: boolean;
+
   createdAt?: Date;
+
   updatedAt?: Date;
 }
 

@@ -20,8 +20,8 @@ export class CartService {
   constructor(
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    private configService: ConfigService,
-    private stockService: StockService,
+    private readonly configService: ConfigService,
+    private readonly stockService: StockService,
   ) {}
 
   async addToCart(

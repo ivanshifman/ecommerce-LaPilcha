@@ -4,8 +4,8 @@ import { JwtPayloadDto } from '../../auth/dto/jwt-payload.dto';
 
 export class TokensUtil {
   constructor(
-    private configService: ConfigService,
-    private jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   private toExpiresIn(value: string) {

@@ -9,6 +9,7 @@ import {
   Patch,
   Get,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -34,7 +35,8 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly cartService: CartService,
     private readonly emailVerificationService: EmailVerificationService,
-    private passwordService: PasswordService,
+    private readonly passwordService: PasswordService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('register')
@@ -55,7 +57,9 @@ export class AuthController {
       try {
         await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
       } catch (error) {
-        console.error('Error al fusionar carritos:', error);
+        if (this.configService.get('NODE_ENV') !== 'production') {
+          console.error('Error al fusionar carritos:', error);
+        }
       }
     }
     return await this.authService.loginLocal(user, res);
