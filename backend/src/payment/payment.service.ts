@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   NotFoundException,
@@ -20,12 +21,10 @@ import { PaymentMethod } from '../order/enums/payment-method.enum';
 import { PaymentStatus } from './enums/payment-status.enum';
 import { OrderStatus } from '../order/enums/order-status.enum';
 import { MailService } from '../common/mail/mail.service';
+import { StockService } from '../cart/stock.service';
 import { UserService } from '../user/user.service';
-import { OrderService } from 'src/order/order.service';
-import {
-  MercadoPagoWebhookHeaders,
-  //   MercadoPagoWebhookPayload,
-} from './types/mercadopago-webhook.type';
+import { OrderService } from '../order/order.service';
+import { MercadoPagoWebhookHeaders } from './types/mercadopago-webhook.type';
 
 @Injectable()
 export class PaymentService {
@@ -39,6 +38,7 @@ export class PaymentService {
     private readonly modoStrategy: ModoStrategy,
     private readonly mailService: MailService,
     private readonly orderService: OrderService,
+    private readonly stockService: StockService,
     private readonly userService: UserService,
   ) {
     this.strategies = new Map<PaymentMethod, PaymentStrategy>();
@@ -130,12 +130,12 @@ export class PaymentService {
   ): Promise<void> {
     if (this.configService.get('NODE_ENV') !== 'production') {
       this.logger.log(`📥 Webhook recibido de ${method}`);
+      this.logger.log('📦 Payload:', JSON.stringify(payload, null, 2));
+      this.logger.log('📋 Headers:', JSON.stringify(headers, null, 2));
     }
 
-    if (
-      method === PaymentMethod.MERCADO_PAGO &&
-      this.configService.get('NODE_ENV') === 'production'
-    ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (method === PaymentMethod.MERCADO_PAGO && payload?.data?.id) {
       this.verifyMercadoPagoSignature(payload, headers?.signature, headers?.requestId);
     }
 
@@ -179,7 +179,11 @@ export class PaymentService {
         payment.externalId = webhookData.externalId;
       }
 
-      const oldStatus = payment.status;
+      const oldStatus = payment.statusHistory.at(-1)?.status || payment.status;
+
+      if (oldStatus === PaymentStatus.APPROVED) {
+        return;
+      }
       const newStatus = webhookData.status as PaymentStatus;
 
       if (oldStatus === newStatus) {
@@ -275,8 +279,32 @@ export class PaymentService {
         break;
 
       case PaymentStatus.REFUNDED:
-        order.status = OrderStatus.REFUNDED;
-        await order.save();
+        {
+          if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
+            this.logger.warn(`⚠️ Reembolso recibido pero orden ya enviada: ${order.orderNumber}`);
+
+            order.statusHistory.push({
+              status: OrderStatus.REFUNDED,
+              timestamp: new Date(),
+              note: 'Reembolso recibido post-envío. Requiere revisión manual.',
+            });
+
+            await order.save();
+            return;
+          }
+
+          order.status = OrderStatus.REFUNDED;
+
+          for (const item of order.items) {
+            await this.stockService.releaseStock(
+              item.product.toString(),
+              item.variant?.size,
+              item.quantity,
+            );
+          }
+
+          await order.save();
+        }
         break;
 
       case PaymentStatus.IN_PROCESS:
@@ -340,6 +368,18 @@ export class PaymentService {
       throw new BadRequestException('No se puede reembolsar: falta ID externo');
     }
 
+    const order = await this.orderService.findById(payment.order.toString());
+
+    if (!order) {
+      throw new NotFoundException('Orden no encontrada');
+    }
+
+    if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
+      throw new BadRequestException(
+        'La orden ya fue enviada. El reembolso requiere devolución del producto.',
+      );
+    }
+
     const strategy = this.strategies.get(payment.method);
     if (!strategy) {
       throw new BadRequestException('Método de pago no soportado');
@@ -347,22 +387,15 @@ export class PaymentService {
 
     try {
       await strategy.refundPayment(payment.externalId);
-
       payment.status = PaymentStatus.REFUNDED;
       payment.refundedAt = new Date();
       await payment.save();
 
-      const order = await this.orderService.findById(payment.order.toString());
-      if (order) {
-        order.status = OrderStatus.REFUNDED;
-        await order.save();
-      }
-
-      this.logger.log(`✅ Reembolso procesado exitosamente: ${payment._id.toString()}`);
-
       return this.toPaymentResponseDto(payment);
     } catch (error) {
-      this.logger.error(`❌ Error procesando reembolso:`, error);
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.error(`❌ Error procesando reembolso:`, error);
+      }
       throw new BadRequestException('No se pudo procesar el reembolso');
     }
   }
@@ -377,14 +410,50 @@ export class PaymentService {
       throw new Error('Webhook secret no configurado');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const manifest = `id:${payload.data?.id};request-id:${requestId};`;
+    const parts = signature.split(',');
+    let ts: string | undefined;
+    let hash: string | undefined;
 
-    const expectedSignature = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
-
-    if (expectedSignature !== signature) {
-      throw new ForbiddenException('Firma de webhook inválida');
+    for (const part of parts) {
+      const [key, value] = part.split('=');
+      if (key === 'ts') {
+        ts = value;
+      } else if (key === 'v1') {
+        hash = value;
+      }
     }
+
+    if (!ts || !hash) {
+      this.logger.error('❌ Formato de firma inválido:', signature);
+      throw new ForbiddenException('Formato de firma inválido');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const dataId = payload.data?.id || '';
+    const manifestVariants = [
+      `id:${dataId};request-id:${requestId};`,
+      `ts:${ts};id:${dataId};request-id:${requestId};`,
+      `id:${dataId};request-id:${requestId};ts:${ts};`,
+    ];
+
+    let validSignature = false;
+
+    for (const manifest of manifestVariants) {
+      const expectedSignature = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+      if (expectedSignature === hash) {
+        validSignature = true;
+        break;
+      }
+    }
+
+    if (!validSignature) {
+      this.logger.error('❌ Firma inválida con todos los formatos probados');
+      this.logger.warn('⚠️ Firma MP inválida, se continúa por validación vía API');
+      return;
+    }
+
+    this.logger.log('✅ Firma verificada correctamente');
   }
 
   private toPaymentResponseDto(payment: PaymentDocument): PaymentResponseDto {

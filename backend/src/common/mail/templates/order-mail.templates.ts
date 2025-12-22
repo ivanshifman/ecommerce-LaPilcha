@@ -159,4 +159,40 @@ Gracias por confiar en La Pilcha.
 </p>
 `);
   }
+
+  static refunded(order: { orderNumber: string; total: number; paymentMethod: string }) {
+    return baseTemplate(`
+<h2>Reembolso procesado</h2>
+
+<p>
+El reembolso de tu orden <strong>${order.orderNumber}</strong> fue procesado correctamente.
+</p>
+
+<table width="100%" style="margin:16px 0;">
+<tr>
+  <td>Total reembolsado</td>
+  <td align="right"><strong>${money(order.total)}</strong></td>
+</tr>
+<tr>
+  <td>Método de pago</td>
+  <td align="right">${order.paymentMethod}</td>
+</tr>
+</table>
+
+<p style="margin-top:16px;">
+El dinero será acreditado en el mismo medio de pago utilizado en la compra.
+</p>
+
+<p style="color:#6b7280;font-size:13px;">
+El plazo de acreditación puede demorar entre <strong>5 y 10 días hábiles</strong>,
+dependiendo del medio de pago y la entidad bancaria.
+</p>
+
+<hr style="margin:24px 0;" />
+
+<p style="font-size:13px;color:#6b7280;">
+Si tenés alguna consulta, podés responder este correo y nuestro equipo te va a ayudar.
+</p>
+`);
+  }
 }

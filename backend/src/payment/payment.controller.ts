@@ -66,6 +66,10 @@ export class PaymentController {
     topic?: string,
     dataId?: string,
   ) {
+    if (topic && topic !== 'payment') {
+      return { message: `Topic ${topic} ignorado, esperando topic "payment"` };
+    }
+
     const headers: MercadoPagoWebhookHeaders = {
       signature: req.headers['x-signature'] as string | undefined,
       requestId: req.headers['x-request-id'] as string | undefined,
@@ -75,10 +79,6 @@ export class PaymentController {
 
     if (!paymentId) {
       return { message: 'Webhook recibido sin ID de pago' };
-    }
-
-    if (topic && topic !== 'payment') {
-      return { message: `Topic ${topic} ignorado, esperando topic "payment"` };
     }
 
     if (paymentId.includes('-') && paymentId.split('-').length > 2) {

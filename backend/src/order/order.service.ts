@@ -243,12 +243,6 @@ export class OrderService {
       throw new BadRequestException('Esta orden no puede ser cancelada en su estado actual');
     }
 
-    if (order.paymentDetails?.status === 'paid' || order.paymentDetails?.status === 'delivered') {
-      throw new BadRequestException(
-        'Esta orden tiene un pago aprobado. Para cancelarla, contacta con soporte para iniciar el reembolso.',
-      );
-    }
-
     for (const item of order.items) {
       if (item.variant?.size) {
         await this.productModel.findOneAndUpdate(

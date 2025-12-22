@@ -59,6 +59,21 @@ export class MailService {
     );
   }
 
+  async sendOrderRefunded(
+    email: string,
+    order: {
+      orderNumber: string;
+      total: number;
+      paymentMethod: string;
+    },
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Reembolso de orden ${order.orderNumber}`,
+      OrderMailTemplates.refunded(order),
+    );
+  }
+
   async sendOrderCancellation(email: string, orderNumber: string): Promise<SentMessageInfo> {
     return this.sendMail(
       email,

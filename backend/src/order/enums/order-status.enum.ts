@@ -22,10 +22,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.FAILED]: 'Fallido',
 };
 
-export const CANCELLABLE_STATUSES = [
-  OrderStatus.PENDING,
-  OrderStatus.PAYMENT_PENDING,
-  OrderStatus.PAID,
-];
+export const CANCELLABLE_STATUSES = [OrderStatus.PENDING, OrderStatus.PAYMENT_PENDING];
 
 export const FINAL_STATUSES = [OrderStatus.DELIVERED, OrderStatus.CANCELLED, OrderStatus.REFUNDED];

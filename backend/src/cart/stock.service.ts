@@ -74,6 +74,7 @@ export class StockService {
     await this.productModel.findOneAndUpdate(
       { _id: productId, 'sizes.size': size.toUpperCase() },
       { $inc: { 'sizes.$.reserved': -quantity } },
+      { new: true },
     );
   }
 
