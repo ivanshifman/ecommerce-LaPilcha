@@ -34,13 +34,30 @@ export class OrderService {
     private readonly userService: UserService,
   ) {}
 
-  async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderResponseDto> {
+  async createOrder(
+    dto: CreateOrderDto,
+    userId?: string,
+    anonymousCartId?: string,
+  ): Promise<OrderResponseDto> {
     const session = await this.orderModel.db.startSession();
     session.startTransaction();
 
     try {
+      if (!userId && !dto.guestInfo) {
+        throw new BadRequestException(
+          'Debes proporcionar información de contacto o iniciar sesión',
+        );
+      }
+
+      if (userId && dto.guestInfo) {
+        throw new BadRequestException(
+          'No puedes proporcionar información de contacto si estás logueado',
+        );
+      }
+
+      const query = userId ? { user: userId } : { anonymousId: anonymousCartId };
       const cart = await this.cartModel
-        .findOne({ user: userId })
+        .findOne(query)
         .populate('items.product')
         .session(session)
         .exec();
@@ -101,7 +118,8 @@ export class OrderService {
       const total = subtotal + shippingCost;
 
       const newOrder = new this.orderModel({
-        user: new Types.ObjectId(userId),
+        user: userId ? new Types.ObjectId(userId) : undefined,
+        guestInfo: userId ? undefined : dto.guestInfo,
         items: orderItems,
         subtotal,
         discount: totalDiscount,
@@ -114,6 +132,7 @@ export class OrderService {
           country: dto.shippingAddress.country || 'Argentina',
         },
         notes: dto.notes,
+        isGuest: !userId,
       });
 
       await newOrder.save({ session });
@@ -148,11 +167,13 @@ export class OrderService {
 
       await session.commitTransaction();
 
-      try {
-        await this.userService.incrementOrders(userId, 1);
-      } catch (error) {
-        if (this.configService.get('NODE_ENV') !== 'production') {
-          console.warn(`No se pudo incrementar contador de órdenes para ${userId}`, error);
+      if (userId) {
+        try {
+          await this.userService.incrementOrders(userId, 1);
+        } catch (error) {
+          if (this.configService.get('NODE_ENV') !== 'production') {
+            console.warn(`No se pudo incrementar contador de órdenes para ${userId}`, error);
+          }
         }
       }
 
@@ -169,14 +190,16 @@ export class OrderService {
     const { page = 1, limit = 10, status, paymentMethod, startDate, endDate } = query;
 
     const filter: {
-      user?: string;
+      user?: Types.ObjectId;
       status?: OrderStatus;
       paymentMethod?: PaymentMethod;
       createdAt?: {
         $gte?: Date;
         $lte?: Date;
       };
-    } = {};
+    } = {
+      user: new Types.ObjectId(userId),
+    };
 
     if (status) {
       filter.status = status;
@@ -212,14 +235,14 @@ export class OrderService {
     };
   }
 
-  async getOrderById(orderId: string, userId: string, isAdmin = false): Promise<OrderResponseDto> {
+  async getOrderById(orderId: string, userId?: string, isAdmin = false): Promise<OrderResponseDto> {
     const order = await this.orderModel.findById(orderId).exec();
 
     if (!order) {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    if (!isAdmin && order.user.toString() !== userId) {
+    if (!isAdmin && userId && order.user && order.user.toString() !== userId) {
       throw new ForbiddenException('No tienes permiso para ver esta orden');
     }
 
@@ -237,7 +260,7 @@ export class OrderService {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    if (order.user.toString() !== userId) {
+    if (order.user && order.user.toString() !== userId) {
       throw new ForbiddenException('No tienes permiso para cancelar esta orden');
     }
 
@@ -268,8 +291,10 @@ export class OrderService {
     await order.save();
 
     const user = await this.userService.findById(userId);
-    if (user) {
-      await this.mailService.sendOrderCancellation(user.email, order.orderNumber);
+    const email = order.user ? (user?.email ?? null) : this.getOrderEmail(order);
+
+    if (email) {
+      await this.mailService.sendOrderCancellation(email, order.orderNumber);
     }
 
     return OrderMapper.toOrderResponseDto(order);
@@ -320,7 +345,7 @@ export class OrderService {
     const { page = 1, limit = 10, status, paymentMethod, startDate, endDate, userId } = query;
 
     const filter: {
-      user?: string;
+      user?: Types.ObjectId;
       status?: OrderStatus;
       paymentMethod?: PaymentMethod;
       createdAt?: {
@@ -330,7 +355,7 @@ export class OrderService {
     } = {};
 
     if (userId) {
-      filter.user = userId;
+      filter.user = new Types.ObjectId(userId);
     }
 
     if (status) {
@@ -397,16 +422,19 @@ export class OrderService {
 
     await order.save();
 
-    const user = await this.userService.findById(order.user.toString());
-    if (user) {
+    let email: string | null = null;
+    if (order.user) {
+      const user = await this.userService.findById(order.user.toString());
+      email = user?.email ?? null;
+    } else {
+      email = this.getOrderEmail(order);
+    }
+
+    if (email) {
       if (dto.status === OrderStatus.SHIPPED) {
-        await this.mailService.sendOrderShipped(
-          user.email,
-          order.orderNumber,
-          order.trackingNumber,
-        );
+        await this.mailService.sendOrderShipped(email, order.orderNumber, order.trackingNumber);
       } else if (dto.status === OrderStatus.DELIVERED) {
-        await this.mailService.sendOrderDelivered(user.email, order.orderNumber);
+        await this.mailService.sendOrderDelivered(email, order.orderNumber);
       }
     }
 
@@ -483,6 +511,10 @@ export class OrderService {
 
   async findById(orderId: string): Promise<OrderDocument | null> {
     return this.orderModel.findById(orderId).exec();
+  }
+
+  getOrderEmail(order: OrderDocument): string | null {
+    return order.guestInfo?.email ?? null;
   }
 
   private calculateShipping(subtotal: number): number {

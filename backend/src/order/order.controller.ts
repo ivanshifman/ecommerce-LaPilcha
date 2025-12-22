@@ -2,10 +2,13 @@ import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Req } from
 import { Request } from 'express';
 import { OrderService } from './order.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../cart/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { MongoIdDto } from '../common/dto/mongo-id.dto';
+import { getCookieCart } from '../common/utils/request.util';
+import { CART_COOKIE } from '../common/utils/cookie.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CancelOrderDto, UpdateOrderStatusDto, UpdateShippingDto } from './dto/update-order.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
@@ -15,11 +18,12 @@ import { UserRole } from '../user/common/enums/userRole.enum';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Post()
   async createOrder(@Req() req: Request, @Body() dto: CreateOrderDto) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.orderService.createOrder(user.id, dto);
+    const user = req.user as AuthenticatedUserDto | undefined;
+    const anonymousCartId = getCookieCart(req, CART_COOKIE);
+    return await this.orderService.createOrder(dto, user?.id, anonymousCartId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -58,7 +62,7 @@ export class OrderController {
   @Roles(UserRole.ADMIN)
   @Get(':id')
   async getOrderByIdAdmin(@Param() params: MongoIdDto) {
-    return await this.orderService.getOrderById(params.id, '', true);
+    return await this.orderService.getOrderById(params.id, undefined, true);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

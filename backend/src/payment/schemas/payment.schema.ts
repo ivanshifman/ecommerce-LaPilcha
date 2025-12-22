@@ -10,8 +10,11 @@ export class Payment {
   @Prop({ type: Types.ObjectId, ref: 'Order', required: true, index: true })
   order!: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
-  user!: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true })
+  user?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, index: true })
+  anonymousId?: Types.ObjectId;
 
   @Prop({ required: true, min: 0 })
   amount!: number;

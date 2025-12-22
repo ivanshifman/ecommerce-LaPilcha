@@ -6,6 +6,8 @@ import {
   MaxLength,
   MinLength,
   Matches,
+  IsEmail,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../enums/payment-method.enum';
@@ -54,6 +56,23 @@ export class ShippingAddressDto {
   additionalInfo?: string;
 }
 
+class GuestInfoDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3, { message: 'El nombre completo debe tener al menos 3 caracteres' })
+  fullName!: string;
+
+  @IsString()
+  @Matches(/^\+[1-9]\d{7,14}$/, {
+    message: 'Formato de teléfono inválido',
+  })
+  phone!: string;
+}
+
 export class CreateOrderDto {
   @ValidateNested()
   @Type(() => ShippingAddressDto)
@@ -69,4 +88,9 @@ export class CreateOrderDto {
   @IsString()
   @MaxLength(1000)
   notes?: string;
+
+  @ValidateNested()
+  @Type(() => GuestInfoDto)
+  @IsOptional()
+  guestInfo?: GuestInfoDto;
 }

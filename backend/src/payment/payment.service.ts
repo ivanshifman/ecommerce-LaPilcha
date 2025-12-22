@@ -46,69 +46,97 @@ export class PaymentService {
     this.strategies.set(PaymentMethod.MODO, this.modoStrategy);
   }
 
-  async createPayment(userId: string, dto: CreatePaymentDto): Promise<PaymentResponseDto> {
-    if (this.configService.get('NODE_ENV') !== 'production') {
-      this.logger.log(`💳 Creando pago para orden ${dto.orderId}`);
-    }
-
-    const order = await this.orderService.findById(dto.orderId);
-
-    if (!order) {
-      throw new NotFoundException('Orden no encontrada');
-    }
-
-    if (order.user.toString() !== userId) {
-      throw new BadRequestException('No tienes permiso para pagar esta orden');
-    }
-
-    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.PAYMENT_PENDING) {
-      throw new BadRequestException(
-        `No se puede crear un pago para una orden en estado: ${order.status}`,
-      );
-    }
-
-    const existingPayment = await this.paymentModel
-      .findOne({
-        order: dto.orderId,
-        status: { $in: [PaymentStatus.PENDING, PaymentStatus.APPROVED, PaymentStatus.IN_PROCESS] },
-      })
-      .exec();
-
-    if (existingPayment) {
-      throw new ConflictException('Ya existe un pago activo para esta orden');
-    }
-
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const payment = new this.paymentModel({
-      order: new Types.ObjectId(dto.orderId),
-      user: new Types.ObjectId(userId),
-      amount: order.total,
-      method: dto.method,
-      status: PaymentStatus.PENDING,
-    });
-
-    await payment.save();
-
-    const strategy = this.strategies.get(dto.method);
-    if (!strategy) {
-      throw new BadRequestException('Método de pago no soportado');
-    }
+  async createPayment(
+    dto: CreatePaymentDto,
+    userId?: string,
+    anonymousCartId?: string,
+  ): Promise<PaymentResponseDto> {
+    const session = await this.paymentModel.db.startSession();
+    session.startTransaction();
 
     try {
-      const paymentData = await strategy.createPayment(payment, user.email);
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.log(`💳 Creando pago para orden ${dto.orderId}`);
+      }
+
+      const order = await this.orderService.findById(dto.orderId);
+      if (!order) throw new NotFoundException('Orden no encontrada');
+
+      if (userId && order.user && order.user.toString() !== userId) {
+        throw new BadRequestException('No tienes permiso para pagar esta orden');
+      }
+      if (!userId && !order.isGuest) {
+        throw new BadRequestException('Esta orden pertenece a un usuario registrado');
+      }
+      if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.PAYMENT_PENDING) {
+        throw new BadRequestException(
+          `No se puede crear un pago para una orden en estado: ${order.status}`,
+        );
+      }
+
+      const existingPayment = await this.paymentModel
+        .findOne({
+          order: dto.orderId,
+          status: {
+            $in: [PaymentStatus.PENDING, PaymentStatus.APPROVED, PaymentStatus.IN_PROCESS],
+          },
+        })
+        .session(session);
+
+      if (existingPayment) {
+        throw new ConflictException('Ya existe un pago activo para esta orden');
+      }
+
+      let email: string;
+      if (order.guestInfo?.email) {
+        email = order.guestInfo.email;
+      } else if (order.user) {
+        const user = await this.userService.findById(order.user.toString());
+        if (!user) throw new NotFoundException('Usuario no encontrado');
+        email = user.email;
+      } else {
+        throw new BadRequestException('No se pudo determinar el email para el pago');
+      }
+
+      const orderObjectId = Types.ObjectId.isValid(dto.orderId)
+        ? new Types.ObjectId(dto.orderId)
+        : null;
+      if (!orderObjectId) throw new BadRequestException('orderId inválido');
+
+      const userObjectId =
+        userId && Types.ObjectId.isValid(userId) ? new Types.ObjectId(userId) : undefined;
+      const anonymousObjectId =
+        anonymousCartId && Types.ObjectId.isValid(anonymousCartId)
+          ? new Types.ObjectId(anonymousCartId)
+          : undefined;
+
+      const payment = new this.paymentModel({
+        order: orderObjectId,
+        user: userObjectId,
+        anonymousId: anonymousObjectId,
+        amount: order.total,
+        method: dto.method,
+        status: PaymentStatus.PENDING,
+      });
+
+      await payment.save({ session });
+
+      const strategy = this.strategies.get(dto.method);
+      if (!strategy) throw new BadRequestException('Método de pago no soportado');
+
+      const paymentData = await strategy.createPayment(payment, email);
 
       payment.checkoutUrl = paymentData.checkoutUrl;
       payment.preferenceId = paymentData.preferenceId;
       payment.externalId = paymentData.externalId;
-      await payment.save();
+      await payment.save({ session });
 
       order.status = OrderStatus.PAYMENT_PENDING;
       order.paymentMethod = dto.method;
-      await order.save();
+      await order.save({ session });
+
+      await session.commitTransaction();
+      await session.endSession();
 
       if (this.configService.get('NODE_ENV') !== 'production') {
         this.logger.log(`✅ Pago creado: ${payment._id.toString()}`);
@@ -116,10 +144,14 @@ export class PaymentService {
 
       return this.toPaymentResponseDto(payment);
     } catch (error) {
-      payment.status = PaymentStatus.REJECTED;
-      payment.errorMessage = error instanceof Error ? error.message : 'Error al crear el pago';
-      await payment.save();
-      throw new BadRequestException('No se pudo crear el pago. Intenta nuevamente.');
+      await session.abortTransaction();
+      await session.endSession();
+
+      if (error instanceof ConflictException) throw error;
+
+      throw new BadRequestException(
+        error instanceof Error ? error.message : 'No se pudo crear el pago. Intenta nuevamente.',
+      );
     }
   }
 
@@ -218,7 +250,13 @@ export class PaymentService {
       return;
     }
 
-    const user = await this.userService.findById(order.user.toString());
+    let email: string | null = null;
+    if (order.user) {
+      const user = await this.userService.findById(order.user.toString());
+      email = user?.email ?? null;
+    } else {
+      email = this.orderService.getOrderEmail(order);
+    }
 
     switch (payment.status) {
       case PaymentStatus.APPROVED:
@@ -235,14 +273,14 @@ export class PaymentService {
         };
         await order.save();
 
-        if (user && payment.status === PaymentStatus.APPROVED) {
+        if (email && payment.status === PaymentStatus.APPROVED) {
           const shouldSendEmail = await this.orderService.markEmailSentIfNotSent(
             order._id.toString(),
           );
 
           if (shouldSendEmail) {
             try {
-              await this.mailService.sendOrderConfirmation(user.email, {
+              await this.mailService.sendOrderConfirmation(email, {
                 orderNumber: order.orderNumber,
                 createdAt: order.createdAt ?? new Date(),
                 items: order.items,
@@ -318,13 +356,15 @@ export class PaymentService {
           }
           await order.save();
 
-          const user = await this.userService.findById(order.user.toString());
-          if (user) {
-            await this.mailService.sendOrderRefunded(user.email, {
-              orderNumber: order.orderNumber,
-              total: order.total,
-              paymentMethod: order.paymentMethod || 'N/A',
-            });
+          if (order.user) {
+            const user = await this.userService.findById(order.user.toString());
+            if (user) {
+              await this.mailService.sendOrderRefunded(user.email, {
+                orderNumber: order.orderNumber,
+                total: order.total,
+                paymentMethod: order.paymentMethod || 'N/A',
+              });
+            }
           }
         }
         break;
@@ -346,7 +386,7 @@ export class PaymentService {
       throw new NotFoundException('Orden no encontrada');
     }
 
-    if (order.user.toString() !== userId) {
+    if (order.user && order.user.toString() !== userId) {
       throw new BadRequestException('No tienes permiso para ver este pago');
     }
 
@@ -432,9 +472,17 @@ export class PaymentService {
       });
       await order.save();
 
-      const user = await this.userService.findById(order.user.toString());
-      if (user) {
-        await this.mailService.sendOrderRefunded(user.email, {
+      let email: string | null = null;
+
+      if (order.user) {
+        const user = await this.userService.findById(order.user.toString());
+        email = user?.email ?? null;
+      } else {
+        email = this.orderService.getOrderEmail(order);
+      }
+
+      if (email) {
+        await this.mailService.sendOrderRefunded(email, {
           orderNumber: order.orderNumber,
           total: order.total,
           paymentMethod: order.paymentMethod || 'N/A',

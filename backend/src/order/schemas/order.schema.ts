@@ -7,11 +7,25 @@ export type OrderDocument = HydratedDocument<Order>;
 
 @Schema({ timestamps: true, versionKey: false, collection: 'orders' })
 export class Order {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
-  user!: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'User', index: true })
+  user?: Types.ObjectId;
 
   @Prop({ unique: true, uppercase: true })
   orderNumber!: string;
+
+  @Prop({
+    type: {
+      email: { type: String, required: true, lowercase: true, trim: true },
+      fullName: { type: String, required: true },
+      phone: { type: String, required: true },
+    },
+    _id: false,
+  })
+  guestInfo?: {
+    email: string;
+    fullName: string;
+    phone: string;
+  };
 
   @Prop({
     type: [
@@ -153,6 +167,9 @@ export class Order {
   @Prop({ default: false })
   emailSent?: boolean;
 
+  @Prop({ default: false, index: true })
+  isGuest!: boolean;
+
   createdAt?: Date;
 
   updatedAt?: Date;
@@ -184,6 +201,12 @@ OrderSchema.pre('save', function (next) {
       timestamp: new Date(),
     });
   }
+
+  if (!this.user && !this.guestInfo) {
+    return next(new Error('La orden debe tener un usuario registrado o información de invitado'));
+  }
+
+  this.isGuest = !this.user;
 
   next();
 });

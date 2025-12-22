@@ -16,11 +16,14 @@ import {
 import { Request } from 'express';
 import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../cart/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { MongoIdDto } from '../common/dto/mongo-id.dto';
+import { getCookieCart } from '../common/utils/request.util';
+import { CART_COOKIE } from '../common/utils/cookie.util';
 import { PaymentMethod } from '../order/enums/payment-method.enum';
 import { UserRole } from '../user/common/enums/userRole.enum';
 import { MercadoPagoWebhookHeaders } from './types/mercadopago-webhook.type';
@@ -29,11 +32,12 @@ import { MercadoPagoWebhookHeaders } from './types/mercadopago-webhook.type';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Post()
   async createPayment(@Req() req: Request, @Body() dto: CreatePaymentDto) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.paymentService.createPayment(user.id, dto);
+    const user = req.user as AuthenticatedUserDto | undefined;
+    const anonymousCartId = getCookieCart(req, CART_COOKIE);
+    return await this.paymentService.createPayment(dto, user?.id, anonymousCartId);
   }
 
   @Get('webhook/mercadopago')

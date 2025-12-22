@@ -72,7 +72,8 @@ export class OrderMapper {
     return {
       id: order._id.toString(),
       orderNumber: order.orderNumber,
-      userId: order.user.toString(),
+      userId: order.user?.toString() || '',
+      guestInfo: order.guestInfo,
       items: order.items.map((item) => OrderMapper.toOrderItemResponseDto(item)),
       subtotal: order.subtotal,
       discount: order.discount,

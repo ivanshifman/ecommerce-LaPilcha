@@ -43,10 +43,17 @@ export class StatusHistoryResponseDto {
   updatedBy?: string;
 }
 
+export class GuestInfoDto {
+  fullName!: string;
+  email!: string;
+  phone!: string;
+}
+
 export class OrderResponseDto {
   id!: string;
   orderNumber!: string;
-  userId!: string;
+  userId?: string;
+  guestInfo?: GuestInfoDto;
   items!: OrderItemResponseDto[];
   subtotal!: number;
   discount!: number;
