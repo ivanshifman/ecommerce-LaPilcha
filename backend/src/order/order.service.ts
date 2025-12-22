@@ -11,6 +11,7 @@ import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { Cart, CartDocument } from '../cart/schemas/cart.schema';
 import { Product, ProductDocument } from '../product/schemas/product.schema';
+import { StockService } from '../cart/stock.service';
 import { UserService } from '../user/user.service';
 import { MailService } from '../common/mail/mail.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -27,9 +28,10 @@ export class OrderService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    private readonly userService: UserService,
-    private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly stockService: StockService,
+    private readonly userService: UserService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -430,6 +432,35 @@ export class OrderService {
       order.adminNotes = dto.adminNotes;
     }
 
+    await order.save();
+
+    return OrderMapper.toOrderResponseDto(order, true);
+  }
+
+  async confirmProductReturn(orderId: string): Promise<OrderResponseDto> {
+    const order = await this.orderModel.findById(orderId).exec();
+
+    if (!order) throw new NotFoundException('Orden no encontrada');
+    if (order.status !== OrderStatus.REFUND_PENDING) {
+      throw new BadRequestException('La orden no está pendiente de devolución');
+    }
+
+    for (const item of order.items) {
+      if (item.variant?.size) {
+        await this.stockService.releaseStock(
+          item.product.toString(),
+          item.variant.size,
+          item.quantity,
+        );
+      }
+    }
+
+    order.status = OrderStatus.REFUNDED;
+    order.statusHistory.push({
+      status: OrderStatus.REFUNDED,
+      timestamp: new Date(),
+      note: 'Producto devuelto físicamente. Stock restaurado.',
+    });
     await order.save();
 
     return OrderMapper.toOrderResponseDto(order, true);

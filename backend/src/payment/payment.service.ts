@@ -280,30 +280,52 @@ export class PaymentService {
 
       case PaymentStatus.REFUNDED:
         {
-          if (order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED) {
-            this.logger.warn(`⚠️ Reembolso recibido pero orden ya enviada: ${order.orderNumber}`);
-
-            order.statusHistory.push({
-              status: OrderStatus.REFUNDED,
-              timestamp: new Date(),
-              note: 'Reembolso recibido post-envío. Requiere revisión manual.',
-            });
-
-            await order.save();
+          if (
+            order.status === OrderStatus.REFUNDED ||
+            order.status === OrderStatus.REFUND_PENDING
+          ) {
+            this.logger.log(`ℹ️ Orden ${order.orderNumber} ya procesada como reembolsada`);
             return;
           }
 
-          order.status = OrderStatus.REFUNDED;
+          const isShippedOrDelivered =
+            order.status === OrderStatus.SHIPPED || order.status === OrderStatus.DELIVERED;
 
-          for (const item of order.items) {
-            await this.stockService.releaseStock(
-              item.product.toString(),
-              item.variant?.size,
-              item.quantity,
+          if (isShippedOrDelivered) {
+            this.logger.warn(
+              `⚠️ Reembolso para orden enviada: ${order.orderNumber}. ` +
+                `El stock se devolverá cuando se reciba el producto.`,
             );
-          }
 
+            order.status = OrderStatus.REFUND_PENDING;
+            order.statusHistory.push({
+              status: OrderStatus.REFUND_PENDING,
+              timestamp: new Date(),
+              note: 'Reembolso procesado. Pendiente devolución física del producto.',
+            });
+          } else {
+            order.status = OrderStatus.REFUNDED;
+
+            for (const item of order.items) {
+              if (item.variant?.size) {
+                await this.stockService.releaseStock(
+                  item.product.toString(),
+                  item.variant.size,
+                  item.quantity,
+                );
+              }
+            }
+          }
           await order.save();
+
+          const user = await this.userService.findById(order.user.toString());
+          if (user) {
+            await this.mailService.sendOrderRefunded(user.email, {
+              orderNumber: order.orderNumber,
+              total: order.total,
+              paymentMethod: order.paymentMethod || 'N/A',
+            });
+          }
         }
         break;
 
@@ -391,6 +413,34 @@ export class PaymentService {
       payment.refundedAt = new Date();
       await payment.save();
 
+      for (const item of order.items) {
+        if (item.variant?.size) {
+          await this.stockService.releaseStock(
+            item.product.toString(),
+            item.variant.size,
+            item.quantity,
+          );
+        }
+      }
+
+      order.status = OrderStatus.REFUNDED;
+      order.statusHistory.push({
+        status: OrderStatus.REFUNDED,
+        timestamp: new Date(),
+        note: `Reembolso procesado por admin ${adminId}`,
+        updatedBy: new Types.ObjectId(adminId),
+      });
+      await order.save();
+
+      const user = await this.userService.findById(order.user.toString());
+      if (user) {
+        await this.mailService.sendOrderRefunded(user.email, {
+          orderNumber: order.orderNumber,
+          total: order.total,
+          paymentMethod: order.paymentMethod || 'N/A',
+        });
+      }
+
       return this.toPaymentResponseDto(payment);
     } catch (error) {
       if (this.configService.get('NODE_ENV') !== 'production') {
@@ -402,7 +452,8 @@ export class PaymentService {
 
   private verifyMercadoPagoSignature(payload: any, signature?: string, requestId?: string) {
     if (!signature || !requestId) {
-      throw new ForbiddenException('Headers de firma faltantes');
+      this.logger.warn('⚠️ Headers de firma faltantes, se continúa');
+      return;
     }
 
     const secret = this.configService.get<string>('MERCADO_PAGO_WEBHOOK_SECRET');

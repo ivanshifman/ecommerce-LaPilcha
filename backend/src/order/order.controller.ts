@@ -79,4 +79,11 @@ export class OrderController {
   async updateShippingInfo(@Param() params: MongoIdDto, @Body() dto: UpdateShippingDto) {
     return await this.orderService.updateShippingInfo(params.id, dto);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Post(':id/confirm-return')
+  async confirmProductReturn(@Param() params: MongoIdDto) {
+    return await this.orderService.confirmProductReturn(params.id);
+  }
 }

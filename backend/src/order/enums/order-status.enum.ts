@@ -6,6 +6,7 @@ export enum OrderStatus {
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
   CANCELLED = 'cancelled',
+  REFUND_PENDING = 'refund_pending',
   REFUNDED = 'refunded',
   FAILED = 'failed',
 }
@@ -18,6 +19,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.SHIPPED]: 'Enviado',
   [OrderStatus.DELIVERED]: 'Entregado',
   [OrderStatus.CANCELLED]: 'Cancelado',
+  [OrderStatus.REFUND_PENDING]: 'Reembolso Pendiente',
   [OrderStatus.REFUNDED]: 'Reembolsado',
   [OrderStatus.FAILED]: 'Fallido',
 };
