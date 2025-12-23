@@ -9,11 +9,11 @@ export class OrderJob {
 
   constructor(private readonly orderService: OrderService) {}
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_HOUR)
   async cancelExpiredPendingOrders() {
     const cancelledCount = await this.orderService.cancelExpiredOrders({
       status: OrderStatus.PENDING,
-      minutes: 30,
+      minutes: 60,
     });
 
     if (cancelledCount > 0) {

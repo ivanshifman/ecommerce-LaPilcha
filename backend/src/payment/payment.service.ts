@@ -181,7 +181,11 @@ export class PaymentService {
 
       let payment: PaymentDocument | null = await this.paymentModel
         .findOne({
-          $or: [{ externalId: webhookData.externalId }, { preferenceId: webhookData.externalId }],
+          $or: [
+            { externalId: webhookData.externalId },
+            { preferenceId: webhookData.externalId },
+            { 'metadata.external_reference': webhookData.metadata?.external_reference },
+          ],
         })
         .exec();
 
