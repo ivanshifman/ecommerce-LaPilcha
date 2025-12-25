@@ -15,15 +15,17 @@ import { Payment, PaymentDocument } from './schemas/payment.schema';
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { ModoStrategy } from './strategies/modo.strategy';
 import { PaymentStrategy } from './strategies/payment-strategy.interface';
+import { StockService } from '../cart/stock.service';
+import { ShippingService } from '../shipping/shipping.service';
+import { UserService } from '../user/user.service';
+import { OrderService } from '../order/order.service';
+import { MailService } from '../common/mail/mail.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import { PaymentMethod } from '../order/enums/payment-method.enum';
 import { PaymentStatus } from './enums/payment-status.enum';
 import { OrderStatus } from '../order/enums/order-status.enum';
-import { MailService } from '../common/mail/mail.service';
-import { StockService } from '../cart/stock.service';
-import { UserService } from '../user/user.service';
-import { OrderService } from '../order/order.service';
+import { ShippingMethod } from '../shipping/enums/shipping.enum';
 import { MercadoPagoWebhookHeaders } from './types/mercadopago-webhook.type';
 
 @Injectable()
@@ -38,6 +40,7 @@ export class PaymentService {
     private readonly modoStrategy: ModoStrategy,
     private readonly mailService: MailService,
     private readonly orderService: OrderService,
+    private readonly shippingService: ShippingService,
     private readonly stockService: StockService,
     private readonly userService: UserService,
   ) {
@@ -276,6 +279,28 @@ export class PaymentService {
           metadata: payment.metadata,
         };
         await order.save();
+
+        try {
+          const existingShipping = await this.shippingService.getShippingByOrderId(
+            order._id.toString(),
+          );
+
+          if (!existingShipping) {
+            await this.shippingService.createShipping({
+              orderId: order._id.toString(),
+              method: order.shippingMethod || ShippingMethod.STANDARD,
+              cost: order.shippingCost,
+              weight: undefined,
+              carrier: undefined,
+              notes: undefined,
+              adminNotes: `Creado automáticamente al confirmar pago`,
+            });
+
+            this.logger.log(`✅ Shipping creado automáticamente para orden ${order.orderNumber}`);
+          }
+        } catch (error) {
+          this.logger.error(`❌ Error creando shipping automático:`, error);
+        }
 
         if (email && payment.status === PaymentStatus.APPROVED) {
           const shouldSendEmail = await this.orderService.markEmailSentIfNotSent(

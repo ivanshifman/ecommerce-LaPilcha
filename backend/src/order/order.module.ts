@@ -5,6 +5,7 @@ import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { CartModule } from '../cart/cart.module';
 import { ProductModule } from '../product/product.module';
+import { ShippingModule } from '../shipping/shipping.module';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
 import { OrderJob } from './jobs/order.job';
@@ -14,6 +15,7 @@ import { OrderJob } from './jobs/order.job';
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     CartModule,
     ProductModule,
+    ShippingModule,
     UserModule,
     MailModule,
   ],

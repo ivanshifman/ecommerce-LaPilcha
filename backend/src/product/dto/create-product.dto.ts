@@ -105,4 +105,9 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => CreateSizeDto)
   sizes?: CreateSizeDto[];
+
+  @IsOptional()
+  @IsNumber({}, { message: 'peso debe ser un número.' })
+  @Min(0, { message: 'weight mínimo 0.' })
+  weight?: number;
 }

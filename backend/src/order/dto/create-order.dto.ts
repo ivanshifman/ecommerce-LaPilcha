@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../enums/payment-method.enum';
+import { ShippingMethod } from '../../shipping/enums/shipping.enum';
 
 export class ShippingAddressDto {
   @IsString()
@@ -83,6 +84,12 @@ export class CreateOrderDto {
     message: 'Método de pago inválido',
   })
   paymentMethod?: PaymentMethod;
+
+  @IsOptional()
+  @IsEnum(ShippingMethod, {
+    message: 'Método de envío inválido',
+  })
+  shippingMethod?: ShippingMethod;
 
   @IsOptional()
   @IsString()

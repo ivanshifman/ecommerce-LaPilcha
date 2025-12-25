@@ -101,4 +101,12 @@ export class MailService {
       OrderMailTemplates.delivered(orderNumber),
     );
   }
+
+  async sendReadyForPickup(email: string, orderNumber: string): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Orden ${orderNumber} lista para retirar`,
+      OrderMailTemplates.readyForPickup(orderNumber),
+    );
+  }
 }

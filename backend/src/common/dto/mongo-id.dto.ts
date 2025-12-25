@@ -9,3 +9,8 @@ export class ProductIdDto {
   @IsMongoId({ message: 'ID de producto inválido' })
   productId!: string;
 }
+
+export class OrderIdDto {
+  @IsMongoId({ message: 'ID de orden inválido' })
+  orderId!: string;
+}

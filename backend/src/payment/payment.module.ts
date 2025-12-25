@@ -6,6 +6,7 @@ import { PaymentController } from './payment.controller';
 import { MailModule } from '../common/mail/mail.module';
 import { CartModule } from '../cart/cart.module';
 import { OrderModule } from '../order/order.module';
+import { ShippingModule } from '../shipping/shipping.module';
 import { UserModule } from '../user/user.module';
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { ModoStrategy } from './strategies/modo.strategy';
@@ -16,6 +17,7 @@ import { ModoStrategy } from './strategies/modo.strategy';
     CartModule,
     OrderModule,
     MailModule,
+    ShippingModule,
     UserModule,
   ],
   controllers: [PaymentController],

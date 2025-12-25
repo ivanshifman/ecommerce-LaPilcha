@@ -95,6 +95,9 @@ export class Product {
     reserved: number;
   }>;
 
+  @Prop({ min: 0, default: 0.3 })
+  weight?: number;
+
   totalStock!: number;
   availableSizes!: string[];
 }

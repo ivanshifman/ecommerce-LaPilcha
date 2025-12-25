@@ -1,5 +1,6 @@
 import { OrderStatus } from '../enums/order-status.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
+import { ShippingMethod } from '../../shipping/enums/shipping.enum';
 
 export class OrderItemResponseDto {
   productId!: string;
@@ -63,6 +64,8 @@ export class OrderResponseDto {
   statusLabel!: string;
   paymentMethod?: PaymentMethod;
   paymentMethodLabel?: string;
+  shippingMethod?: ShippingMethod;
+  shippingMethodLabel?: string;
   paymentDetails?: PaymentDetailsResponseDto;
   shippingAddress!: ShippingAddressResponseDto;
   statusHistory!: StatusHistoryResponseDto[];

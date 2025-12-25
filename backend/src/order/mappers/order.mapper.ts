@@ -8,6 +8,7 @@ import {
 } from '../dto/order-response.dto';
 import { ORDER_STATUS_LABELS, CANCELLABLE_STATUSES } from '../enums/order-status.enum';
 import { PAYMENT_METHOD_LABELS } from '../enums/payment-method.enum';
+import { SHIPPING_METHOD_LABELS } from '../../shipping/enums/shipping.enum';
 import { DateFormatUtil } from '../../common/utils/date-format.util';
 
 export class OrderMapper {
@@ -84,6 +85,10 @@ export class OrderMapper {
       paymentMethod: order.paymentMethod,
       paymentMethodLabel: order.paymentMethod
         ? PAYMENT_METHOD_LABELS[order.paymentMethod]
+        : undefined,
+      shippingMethod: order.shippingMethod,
+      shippingMethodLabel: order.shippingMethod
+        ? SHIPPING_METHOD_LABELS[order.shippingMethod]
         : undefined,
       paymentDetails: OrderMapper.toPaymentDetailsResponseDto(order.paymentDetails),
       shippingAddress: OrderMapper.toShippingAddressResponseDto(order.shippingAddress),

@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { OrderStatus } from '../enums/order-status.enum';
+import { ShippingMethod } from '../../shipping/enums/shipping.enum';
 
 export type OrderDocument = HydratedDocument<Order>;
 
@@ -83,6 +84,12 @@ export class Order {
     required: false,
   })
   paymentMethod?: PaymentMethod;
+
+  @Prop({
+    enum: Object.values(ShippingMethod),
+    required: false,
+  })
+  shippingMethod?: ShippingMethod;
 
   @Prop({
     type: {

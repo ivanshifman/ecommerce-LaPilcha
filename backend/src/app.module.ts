@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
+import { ShippingModule } from './shipping/shipping.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PaymentModule } from './payment/payment.module';
     CartModule,
     OrderModule,
     PaymentModule,
+    ShippingModule,
   ],
   controllers: [],
   providers: [

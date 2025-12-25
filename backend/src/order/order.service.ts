@@ -11,6 +11,7 @@ import { Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { Cart, CartDocument } from '../cart/schemas/cart.schema';
 import { Product, ProductDocument } from '../product/schemas/product.schema';
+import { ShippingCalculatorService } from '../shipping/shipping-calculator.service';
 import { StockService } from '../cart/stock.service';
 import { UserService } from '../user/user.service';
 import { MailService } from '../common/mail/mail.service';
@@ -21,6 +22,7 @@ import { OrderResponseDto, PaginatedOrderResponseDto } from './dto/order-respons
 import { OrderMapper } from './mappers/order.mapper';
 import { OrderStatus, CANCELLABLE_STATUSES, FINAL_STATUSES } from './enums/order-status.enum';
 import { PaymentMethod } from './enums/payment-method.enum';
+import { ShippingMethod } from '../shipping/enums/shipping.enum';
 
 @Injectable()
 export class OrderService {
@@ -30,6 +32,7 @@ export class OrderService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
+    private readonly shippingCalculatorService: ShippingCalculatorService,
     private readonly stockService: StockService,
     private readonly userService: UserService,
   ) {}
@@ -69,6 +72,7 @@ export class OrderService {
       const orderItems: OrderDocument['items'] = [];
       let subtotal = 0;
       let totalDiscount = 0;
+      let totalWeight = 0;
 
       for (const cartItem of cart.items) {
         const product = cartItem.product as unknown as ProductDocument;
@@ -101,6 +105,9 @@ export class OrderService {
         subtotal += itemSubtotal;
         totalDiscount += itemDiscount;
 
+        const productWeight = product.weight || 0.3;
+        totalWeight += productWeight * cartItem.quantity;
+
         orderItems.push({
           product: new Types.ObjectId(product._id),
           name: product.name,
@@ -114,7 +121,21 @@ export class OrderService {
         });
       }
 
-      const shippingCost = this.calculateShipping(subtotal);
+      let shippingCost = 0;
+
+      if (dto.shippingMethod !== ShippingMethod.PICKUP) {
+        try {
+          shippingCost = await this.shippingCalculatorService.getShippingCost(
+            dto.shippingAddress.state,
+            dto.shippingMethod || ShippingMethod.STANDARD,
+            subtotal,
+            totalWeight,
+          );
+        } catch {
+          shippingCost = this.calculateShippingFallback(subtotal);
+        }
+      }
+
       const total = subtotal + shippingCost;
 
       const newOrder = new this.orderModel({
@@ -127,6 +148,7 @@ export class OrderService {
         total,
         status: OrderStatus.PENDING,
         paymentMethod: dto.paymentMethod,
+        shippingMethod: dto.shippingMethod || ShippingMethod.STANDARD,
         shippingAddress: {
           ...dto.shippingAddress,
           country: dto.shippingAddress.country || 'Argentina',
@@ -541,10 +563,7 @@ export class OrderService {
     return order.guestInfo?.email ?? null;
   }
 
-  private calculateShipping(subtotal: number): number {
-    if (subtotal >= 50000) {
-      return 0;
-    }
-    return 5000;
+  private calculateShippingFallback(subtotal: number): number {
+    return subtotal >= 50000 ? 0 : 5000;
   }
 }

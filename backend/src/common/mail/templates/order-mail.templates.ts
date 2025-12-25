@@ -15,9 +15,6 @@ const baseTemplate = (content: string) => `
   <tr>
     <td style="background:#111827;color:#fff;padding:20px;">
       <h1 style="margin:0;font-size:20px;">La Pilcha</h1>
-      <p style="margin:4px 0 0;font-size:13px;color:#d1d5db;">
-        Confirmación de compra
-      </p>
     </td>
   </tr>
 
@@ -193,6 +190,50 @@ dependiendo del medio de pago y la entidad bancaria.
 <p style="font-size:13px;color:#6b7280;">
 Si tenés alguna consulta, podés responder este correo y nuestro equipo te va a ayudar.
 </p>
+`);
+  }
+
+  static readyForPickup(orderNumber: string) {
+    return baseTemplate(`
+<div style="padding: 30px; background-color: #f9f9f9;">
+          <h2 style="color: #333;">¡Tu pedido está listo! 🎉</h2>
+          <p style="font-size: 16px; color: #555;">
+            Tu pedido <strong>#${orderNumber}</strong> está listo para ser retirado.
+          </p>
+          
+          <div style="background-color: #fff; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <h3 style="margin-top: 0; color: #333;">Información de retiro</h3>
+            <p style="color: #555; line-height: 1.8;">
+              <strong>Dirección:</strong><br>
+              [TU DIRECCIÓN DE SUCURSAL]<br>
+              Buenos Aires, Argentina<br><br>
+              
+              <strong>Horarios de atención:</strong><br>
+              Lunes a Viernes: 10:00 - 18:00hs<br>
+              Sábados: 10:00 - 14:00hs<br><br>
+
+              <strong>¿Qué necesitás traer?</strong><br>
+              - DNI del titular de la compra<br>
+              - Número de pedido: <strong>${orderNumber}</strong>
+            </p>
+          </div>
+
+          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #856404;">
+              <strong>⚠️ Importante:</strong> Tenés 7 días para retirar tu pedido. 
+              Pasado ese tiempo, la compra será cancelada automáticamente.
+            </p>
+          </div>
+
+          <p style="text-align: center; color: #777; font-size: 14px; margin-top: 30px;">
+            ¡Te esperamos!
+          </p>
+        </div>
+
+        <div style="background-color: #000; color: #fff; padding: 15px; text-align: center; font-size: 12px;">
+          <p style="margin: 5px 0;">&copy; 2025 La Pilcha. Todos los derechos reservados.</p>
+        </div>
+      </div>
 `);
   }
 }
