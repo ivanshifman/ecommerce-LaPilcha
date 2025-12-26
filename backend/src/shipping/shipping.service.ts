@@ -39,20 +39,27 @@ export class ShippingService {
       dto.estimatedDaysMax || 7,
     );
 
-    const shipping = new this.shippingModel({
-      order: new Types.ObjectId(dto.orderId),
-      method: dto.method,
-      status: ShippingStatus.PENDING,
-      cost: dto.cost,
-      weight: dto.weight,
-      address: order.shippingAddress,
-      estimatedDeliveryDate: estimatedDelivery,
-      carrier: dto.carrier,
-      notes: dto.notes,
-      adminNotes: dto.adminNotes,
-    });
-
-    await shipping.save();
+    const shipping = await this.shippingModel.findOneAndUpdate(
+      { order: dto.orderId },
+      {
+        $setOnInsert: {
+          order: new Types.ObjectId(dto.orderId),
+          method: dto.method,
+          status: ShippingStatus.PENDING,
+          cost: dto.cost,
+          weight: dto.weight,
+          address: order.shippingAddress,
+          estimatedDeliveryDate: estimatedDelivery,
+          carrier: dto.carrier,
+          notes: dto.notes,
+          adminNotes: dto.adminNotes,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
 
     return ShippingMapper.toShippingResponseDto(shipping);
   }
@@ -136,6 +143,14 @@ export class ShippingService {
     await shipping.save();
 
     return ShippingMapper.toShippingResponseDto(shipping);
+  }
+
+  async findShippingByOrderId(orderId: string): Promise<ShippingResponseDto | null> {
+    const shipping = await this.shippingModel
+      .findOne({ order: new Types.ObjectId(orderId) })
+      .exec();
+
+    return shipping ? ShippingMapper.toShippingResponseDto(shipping) : null;
   }
 
   async getShippingByOrderId(orderId: string): Promise<ShippingResponseDto | null> {

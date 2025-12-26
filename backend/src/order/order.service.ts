@@ -105,7 +105,12 @@ export class OrderService {
         subtotal += itemSubtotal;
         totalDiscount += itemDiscount;
 
-        const productWeight = product.weight || 0.3;
+        let productWeight = 0.3;
+
+        if (product.weight && product.weight > 0) {
+          productWeight = product.weight;
+        }
+
         totalWeight += productWeight * cartItem.quantity;
 
         orderItems.push({
@@ -145,6 +150,7 @@ export class OrderService {
         subtotal,
         discount: totalDiscount,
         shippingCost,
+        totalWeight,
         total,
         status: OrderStatus.PENDING,
         paymentMethod: dto.paymentMethod,

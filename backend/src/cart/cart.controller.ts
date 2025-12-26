@@ -20,7 +20,7 @@ import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { RemoveCartItemDto } from './dto/remove-cart-item.dto';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { CART_COOKIE } from '../common/utils/cookie.util';
-import { getCookieCart } from 'src/common/utils/request.util';
+import { getCookieCart } from '../common/utils/request.util';
 
 @Controller('cart')
 export class CartController {

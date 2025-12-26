@@ -52,10 +52,14 @@ export class ShippingCalculatorService {
         cost += weight * rate.pricePerKg;
       }
 
-      const isFree =
+      const isFreeByThreshold =
         rate.freeShippingThreshold !== undefined &&
         rate.freeShippingThreshold > 0 &&
         subtotal >= rate.freeShippingThreshold;
+
+      const isPickup = rate.method === ShippingMethod.PICKUP;
+
+      const isFree = isFreeByThreshold || isPickup;
 
       if (isFree) {
         cost = 0;
@@ -123,10 +127,16 @@ export class ShippingCalculatorService {
     );
 
     if (!provinceEnum) {
-      return ShippingZone.CENTRO;
+      throw new NotFoundException(`Provincia inválida: ${province}`);
     }
 
-    return PROVINCE_TO_ZONE[provinceEnum] || ShippingZone.CENTRO;
+    const zone = PROVINCE_TO_ZONE[provinceEnum];
+
+    if (!zone) {
+      throw new NotFoundException(`No hay zona configurada para la provincia ${province}`);
+    }
+
+    return zone;
   }
 
   private getMethodLabel(method: ShippingMethod): string {

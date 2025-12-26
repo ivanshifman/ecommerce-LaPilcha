@@ -281,7 +281,7 @@ export class PaymentService {
         await order.save();
 
         try {
-          const existingShipping = await this.shippingService.getShippingByOrderId(
+          const existingShipping = await this.shippingService.findShippingByOrderId(
             order._id.toString(),
           );
 
@@ -290,7 +290,7 @@ export class PaymentService {
               orderId: order._id.toString(),
               method: order.shippingMethod || ShippingMethod.STANDARD,
               cost: order.shippingCost,
-              weight: undefined,
+              weight: order.totalWeight || 0,
               carrier: undefined,
               notes: undefined,
               adminNotes: `Creado automáticamente al confirmar pago`,

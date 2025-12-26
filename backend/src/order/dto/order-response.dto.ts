@@ -59,6 +59,7 @@ export class OrderResponseDto {
   subtotal!: number;
   discount!: number;
   shippingCost!: number;
+  totalWeight?: number;
   total!: number;
   status!: OrderStatus;
   statusLabel!: string;

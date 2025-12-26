@@ -69,6 +69,9 @@ export class Order {
   @Prop({ default: 0, min: 0 })
   shippingCost!: number;
 
+  @Prop({ min: 0, default: 0 })
+  totalWeight?: number;
+
   @Prop({ required: true, min: 0 })
   total!: number;
 
