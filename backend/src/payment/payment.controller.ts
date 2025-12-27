@@ -22,7 +22,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { MongoIdDto } from '../common/dto/mongo-id.dto';
-import { getCookieCart } from '../common/utils/request.util';
+import { getCookie } from '../common/utils/request.util';
 import { CART_COOKIE } from '../common/utils/cookie.util';
 import { PaymentMethod } from '../order/enums/payment-method.enum';
 import { UserRole } from '../user/common/enums/userRole.enum';
@@ -36,7 +36,7 @@ export class PaymentController {
   @Post()
   async createPayment(@Req() req: Request, @Body() dto: CreatePaymentDto) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousCartId = getCookieCart(req, CART_COOKIE);
+    const anonymousCartId = getCookie(req, CART_COOKIE);
     return await this.paymentService.createPayment(dto, user?.id, anonymousCartId);
   }
 

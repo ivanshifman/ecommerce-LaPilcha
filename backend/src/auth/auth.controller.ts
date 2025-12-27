@@ -19,7 +19,7 @@ import { EmailVerificationService } from './emailVerification.service';
 import { PasswordService } from './password.service';
 import { CartService } from '../cart/cart.service';
 import { CART_COOKIE, REFRESH_COOKIE } from '../common/utils/cookie.util';
-import { getCookieCart } from '../common/utils/request.util';
+import { getCookie } from '../common/utils/request.util';
 import { RegisterDto } from '../user/dto/create-user.dto';
 import { RegisterResponseDto } from '../user/dto/register-response.dto';
 import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/update-password.dto';
@@ -51,7 +51,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
     const user = req.user as AuthenticatedUserDto;
-    const anonymousCartId = getCookieCart(req, CART_COOKIE);
+    const anonymousCartId = getCookie(req, CART_COOKIE);
 
     if (anonymousCartId) {
       try {

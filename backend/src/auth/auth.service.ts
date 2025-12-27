@@ -6,10 +6,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import { UserService } from '../user/user.service';
+import { WishlistService } from '../user/wishList.service';
 import { MailService } from '../common/mail/mail.service';
 import { EmailVerificationService } from '../auth/emailVerification.service';
 import { TokensUtil } from '../common/utils/tokens.util';
@@ -21,7 +22,12 @@ import { RegisterResponseDto } from '../user/dto/register-response.dto';
 import { AuthProvider } from '../user/common/enums/authProvider.enum';
 import { AuthTokens } from './types/auth-tokens.type';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
-import { ACCESS_COOKIE, cookieOptions, REFRESH_COOKIE } from '../common/utils/cookie.util';
+import {
+  ACCESS_COOKIE,
+  cookieOptions,
+  REFRESH_COOKIE,
+  WISHLIST_COOKIE,
+} from '../common/utils/cookie.util';
 import { UserMapper } from '../common/mappers/user.mapper';
 
 @Injectable()
@@ -36,6 +42,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
+    private readonly wishlistService: WishlistService,
   ) {
     this.tokensUtil = new TokensUtil(this.configService, this.jwtService);
   }
@@ -98,6 +105,17 @@ export class AuthService {
 
     userDoc.lastLogin = new Date();
     await userDoc.save();
+
+    const req = res.req as Request | undefined;
+    if (req?.cookies?.[WISHLIST_COOKIE]) {
+      try {
+        await this.wishlistService.mergeAnonymousWishlist(user.id, req, res);
+      } catch (error) {
+        if (this.configService.get('NODE_ENV') !== 'production') {
+          console.error('Error merging wishlist:', error);
+        }
+      }
+    }
 
     return {
       user: UserMapper.toUserResponseDto(userDoc),

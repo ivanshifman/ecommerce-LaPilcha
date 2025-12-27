@@ -4,6 +4,7 @@ import { CookieOptions } from 'express';
 export const ACCESS_COOKIE = 'access_token';
 export const REFRESH_COOKIE = 'refresh_token';
 export const CART_COOKIE = 'cart_id';
+export const WISHLIST_COOKIE = 'wishlist_items';
 
 export function cookieOptions(config: ConfigService, isRefresh = false): CookieOptions {
   const isProd = config.get<string>('NODE_ENV') === 'production';
@@ -29,6 +30,18 @@ export function cartCookieOptions(config: ConfigService): CookieOptions {
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000,
+    path: '/',
+  };
+}
+
+export function wishlistCookieOptions(config: ConfigService): CookieOptions {
+  const isProd = config.get<string>('NODE_ENV') === 'production';
+
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 90 * 24 * 60 * 60 * 1000,
     path: '/',
   };
 }

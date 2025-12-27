@@ -1,6 +1,18 @@
-import { Controller, Get, Patch, UseGuards, Body, Param, Delete, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Controller,
+  Get,
+  Patch,
+  UseGuards,
+  Body,
+  Param,
+  Delete,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../cart/guards/optional-jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserService } from './user.service';
@@ -18,31 +30,40 @@ export class UserController {
     private readonly wishlistService: WishlistService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('me/wishlist')
   async getMyWishlist(@Req() req: Request) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.getWishlist(user.id);
+    const user = req.user as AuthenticatedUserDto | undefined;
+    return await this.wishlistService.getWishlist(user?.id, req);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Post('me/wishlist/:productId')
-  async addToMyWishlist(@Req() req: Request, @Param() params: ProductIdDto) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.addToWishlist(user.id, params.productId);
+  async addToMyWishlist(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Param() params: ProductIdDto,
+  ) {
+    const user = req.user as AuthenticatedUserDto | undefined;
+    return await this.wishlistService.addToWishlist(params.productId, user?.id, req, res);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @Delete('me/wishlist/:productId')
-  async removeFromMyWishlist(@Req() req: Request, @Param() params: ProductIdDto) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.removeFromWishlist(user.id, params.productId);
+  async removeFromMyWishlist(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Param() params: ProductIdDto,
+  ) {
+    const user = req.user as AuthenticatedUserDto | undefined;
+    return await this.wishlistService.removeFromWishlist(params.productId, user?.id, req, res);
   }
-  @UseGuards(JwtAuthGuard)
+
+  @UseGuards(OptionalJwtAuthGuard)
   @Delete('me/wishlist')
-  async clearMyWishlist(@Req() req: Request) {
-    const user = req.user as AuthenticatedUserDto;
-    return await this.wishlistService.clearWishlist(user.id);
+  async clearWishlist(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const user = req.user as AuthenticatedUserDto | undefined;
+    return await this.wishlistService.clearWishlist(user?.id, res);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

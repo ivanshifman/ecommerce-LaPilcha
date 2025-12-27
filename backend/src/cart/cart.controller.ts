@@ -20,7 +20,7 @@ import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { RemoveCartItemDto } from './dto/remove-cart-item.dto';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { CART_COOKIE } from '../common/utils/cookie.util';
-import { getCookieCart } from '../common/utils/request.util';
+import { getCookie } from '../common/utils/request.util';
 
 @Controller('cart')
 export class CartController {
@@ -30,7 +30,7 @@ export class CartController {
   @Get()
   async getCart(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.getCart(user?.id, anonymousId, res);
   }
@@ -43,7 +43,7 @@ export class CartController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.addToCart(dto, user?.id, anonymousId, res);
   }
@@ -56,7 +56,7 @@ export class CartController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.updateCartItem(dto, user?.id, anonymousId, res);
   }
@@ -70,7 +70,7 @@ export class CartController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.removeFromCart(dto, user?.id, anonymousId, res);
   }
@@ -80,7 +80,7 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   async clearCart(@Req() req: Request) {
     const user = req.user as AuthenticatedUserDto | undefined;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.clearCart(user?.id, anonymousId);
   }
@@ -90,7 +90,7 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   async mergeCart(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = req.user as AuthenticatedUserDto;
-    const anonymousId = getCookieCart(req, CART_COOKIE);
+    const anonymousId = getCookie(req, CART_COOKIE);
 
     return this.cartService.mergeAnonymousCart(user.id, anonymousId, res);
   }
