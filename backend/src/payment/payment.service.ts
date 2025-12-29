@@ -527,6 +527,19 @@ export class PaymentService {
     }
   }
 
+  async getPaymentByOrderIdAdmin(orderId: string): Promise<PaymentDocument> {
+    const payment = await this.paymentModel
+      .findOne({ order: new Types.ObjectId(orderId) })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    if (!payment) {
+      throw new NotFoundException('No se encontró un pago para esta orden');
+    }
+
+    return payment;
+  }
+
   private verifyMercadoPagoSignature(payload: any, signature?: string, requestId?: string) {
     if (!signature || !requestId) {
       this.logger.warn('⚠️ Headers de firma faltantes, se continúa');

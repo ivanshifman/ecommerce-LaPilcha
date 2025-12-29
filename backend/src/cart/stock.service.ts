@@ -78,6 +78,51 @@ export class StockService {
     );
   }
 
+  async restockProduct(
+    productId: string,
+    size: string | undefined,
+    quantity: number,
+  ): Promise<void> {
+    if (!size) return;
+
+    const result = await this.productModel.findOneAndUpdate(
+      { _id: productId, 'sizes.size': size.toUpperCase() },
+      {
+        $inc: {
+          'sizes.$.stock': quantity,
+          'sizes.$.reserved': -quantity,
+        },
+      },
+      { new: true },
+    );
+
+    if (!result) {
+      throw new BadRequestException('No se pudo reponer el stock');
+    }
+  }
+
+  async restoreStockFromReturn(
+    productId: string,
+    size: string | undefined,
+    quantity: number,
+  ): Promise<void> {
+    if (!size) return;
+
+    const result = await this.productModel.findOneAndUpdate(
+      { _id: productId, 'sizes.size': size.toUpperCase() },
+      {
+        $inc: {
+          'sizes.$.stock': quantity,
+        },
+      },
+      { new: true },
+    );
+
+    if (!result) {
+      throw new BadRequestException('No se pudo restaurar el stock desde devolución');
+    }
+  }
+
   async validateStock(
     product: ProductDocument,
     variant?: { size?: string; color?: string },

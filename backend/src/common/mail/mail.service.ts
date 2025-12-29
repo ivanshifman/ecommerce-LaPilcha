@@ -109,4 +109,61 @@ export class MailService {
       OrderMailTemplates.readyForPickup(orderNumber),
     );
   }
+
+  async sendReturnRequested(
+    email: string,
+    returnNumber: string,
+    orderNumber: string,
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Solicitud de devolución ${returnNumber}`,
+      OrderMailTemplates.returnRequested(returnNumber, orderNumber),
+    );
+  }
+
+  async sendReturnApproved(
+    email: string,
+    returnNumber: string,
+    approvedAmount: number,
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Devolución aprobada ${returnNumber}`,
+      OrderMailTemplates.returnApproved(returnNumber, approvedAmount),
+    );
+  }
+
+  async sendReturnRejected(
+    email: string,
+    returnNumber: string,
+    reason: string,
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Devolución rechazada ${returnNumber}`,
+      OrderMailTemplates.returnRejected(returnNumber, reason),
+    );
+  }
+
+  async sendReturnReceived(email: string, returnNumber: string): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Producto recibido - ${returnNumber}`,
+      OrderMailTemplates.returnReceived(returnNumber),
+    );
+  }
+
+  async sendReturnRefundProcessed(
+    email: string,
+    returnNumber: string,
+    refundedAmount: number,
+    paymentMethod: string,
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Reembolso procesado - ${returnNumber}`,
+      OrderMailTemplates.refundProcessed(returnNumber, refundedAmount, paymentMethod),
+    );
+  }
 }

@@ -236,4 +236,131 @@ Si tenés alguna consulta, podés responder este correo y nuestro equipo te va a
       </div>
 `);
   }
+
+  static returnRequested(returnNumber: string, orderNumber: string) {
+    return baseTemplate(`
+<h2>Solicitud de Devolución Recibida</h2>
+
+<p>Hemos recibido tu solicitud de devolución.</p>
+
+<table width="100%" style="margin:16px 0;">
+<tr>
+  <td><strong>Número de RMA:</strong></td>
+  <td>${returnNumber}</td>
+</tr>
+<tr>
+  <td><strong>Orden:</strong></td>
+  <td>${orderNumber}</td>
+</tr>
+</table>
+
+<div style="background:#e0f2fe;border-left:4px solid #0284c7;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>📋 Próximos pasos:</strong></p>
+  <ol style="margin:8px 0;padding-left:20px;">
+    <li>Nuestro equipo revisará tu solicitud en las próximas 24-48 horas</li>
+    <li>Recibirás un email con la aprobación o más instrucciones</li>
+    <li>Si es aprobada, te enviaremos las instrucciones de envío</li>
+  </ol>
+</div>
+
+<p style="color:#6b7280;font-size:13px;">
+Si tienes dudas, responde este correo y te ayudaremos.
+</p>
+`);
+  }
+
+  static returnApproved(returnNumber: string, approvedAmount: number) {
+    return baseTemplate(`
+<h2 style="color:#16a34a;">✅ Devolución Aprobada</h2>
+
+<p>Tu solicitud de devolución <strong>${returnNumber}</strong> ha sido aprobada.</p>
+
+<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>Monto aprobado: ${money(approvedAmount)}</strong></p>
+</div>
+
+<h3 style="margin-top:24px;">Instrucciones de envío:</h3>
+<div style="background:#f9fafb;padding:16px;border-radius:6px;">
+  <p><strong>Dirección de retorno:</strong><br>
+  Franklin 1872 CP 1406<br>
+  Buenos Aires, Argentina</p>
+  
+  <p style="margin-top:12px;">Por favor, incluye el número de RMA <strong>${returnNumber}</strong> en el paquete.</p>
+</div>
+
+<div style="background:#fef9c3;border-left:4px solid #eab308;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>⚠️ Importante:</strong></p>
+  <ul style="margin:8px 0;padding-left:20px;">
+    <li>El producto debe estar sin usar y con etiquetas originales</li>
+    <li>Incluye el número de RMA en el paquete</li>
+    <li>Conserva el comprobante de envío</li>
+  </ul>
+</div>
+`);
+  }
+
+  static returnRejected(returnNumber: string, reason: string) {
+    return baseTemplate(`
+<h2 style="color:#dc2626;">❌ Devolución Rechazada</h2>
+
+<p>Lamentablemente, tu solicitud de devolución <strong>${returnNumber}</strong> no ha sido aprobada.</p>
+
+<div style="background:#fee2e2;border-left:4px solid #dc2626;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>Motivo:</strong></p>
+  <p style="margin:8px 0;">${reason}</p>
+</div>
+
+<p>Si crees que esto es un error o tienes preguntas, no dudes en contactarnos respondiendo este correo.</p>
+`);
+  }
+
+  static returnReceived(returnNumber: string) {
+    return baseTemplate(`
+<h2 style="color:#0284c7;">📦 Producto Recibido</h2>
+
+<p>Hemos recibido tu producto de la devolución <strong>${returnNumber}</strong>.</p>
+
+<div style="background:#e0f2fe;border-left:4px solid #0284c7;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>📋 Próximos pasos:</strong></p>
+  <ol style="margin:8px 0;padding-left:20px;">
+    <li>Inspeccionaremos el producto en las próximas 24-48 horas</li>
+    <li>Te notificaremos el resultado de la inspección</li>
+    <li>Si todo está correcto, procesaremos el reembolso</li>
+  </ol>
+</div>
+
+<p style="color:#6b7280;font-size:13px;">
+El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
+</p>
+`);
+  }
+
+  static refundProcessed(returnNumber: string, refundedAmount: number, paymentMethod: string) {
+    return baseTemplate(`
+<h2 style="color:#16a34a;">💰 Reembolso Procesado</h2>
+
+<p>El reembolso de tu devolución <strong>${returnNumber}</strong> ha sido procesado exitosamente.</p>
+
+<table width="100%" style="margin:16px 0;background:#dcfce7;padding:16px;border-radius:6px;">
+<tr>
+  <td><strong>Monto reembolsado:</strong></td>
+  <td><strong style="color:#16a34a;font-size:18px;">${money(refundedAmount)}</strong></td>
+</tr>
+<tr>
+  <td><strong>Método de pago:</strong></td>
+  <td>${paymentMethod}</td>
+</tr>
+</table>
+
+<div style="background:#fef9c3;border-left:4px solid #eab308;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>⏰ Tiempos de acreditación:</strong></p>
+  <p style="margin:8px 0;">El dinero se acreditará en el mismo medio de pago utilizado. 
+  El plazo puede ser de 5 a 10 días hábiles según tu banco o tarjeta.</p>
+</div>
+
+<p style="text-align:center;font-size:14px;color:#6b7280;margin-top:24px;">
+¡Gracias por tu paciencia!
+</p>
+`);
+  }
 }
