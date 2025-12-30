@@ -60,6 +60,22 @@ export class Order {
     image?: string;
   }[];
 
+  @Prop({
+    type: {
+      code: { type: String },
+      couponType: { type: String },
+      discountAmount: { type: Number, min: 0 },
+      freeShipping: { type: Boolean, default: false },
+    },
+    _id: false,
+  })
+  couponApplied?: {
+    code: string;
+    couponType: string;
+    discountAmount: number;
+    freeShipping: boolean;
+  };
+
   @Prop({ required: true, min: 0 })
   subtotal!: number;
 

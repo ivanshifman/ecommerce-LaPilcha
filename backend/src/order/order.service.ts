@@ -12,6 +12,7 @@ import { Order, OrderDocument } from './schemas/order.schema';
 import { Cart, CartDocument } from '../cart/schemas/cart.schema';
 import { Product, ProductDocument } from '../product/schemas/product.schema';
 import { ShippingCalculatorService } from '../shipping/shipping-calculator.service';
+import { CouponService } from '../coupon/coupon.service';
 import { StockService } from '../cart/stock.service';
 import { UserService } from '../user/user.service';
 import { MailService } from '../common/mail/mail.service';
@@ -23,6 +24,7 @@ import { OrderMapper } from './mappers/order.mapper';
 import { OrderStatus, CANCELLABLE_STATUSES, FINAL_STATUSES } from './enums/order-status.enum';
 import { PaymentMethod } from './enums/payment-method.enum';
 import { ShippingMethod } from '../shipping/enums/shipping.enum';
+import { CouponType } from '../coupon/enums/coupon-type.enum';
 
 @Injectable()
 export class OrderService {
@@ -31,6 +33,7 @@ export class OrderService {
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     private readonly configService: ConfigService,
+    private readonly couponService: CouponService,
     private readonly mailService: MailService,
     private readonly shippingCalculatorService: ShippingCalculatorService,
     private readonly stockService: StockService,
@@ -127,8 +130,49 @@ export class OrderService {
       }
 
       let shippingCost = 0;
+      let couponDiscount = 0;
+      let freeShippingFromCoupon = false;
+      let couponApplied: OrderDocument['couponApplied'];
 
-      if (dto.shippingMethod !== ShippingMethod.PICKUP) {
+      if (dto.couponCode) {
+        const cartCategories = Array.from(
+          new Set(
+            cart.items.map((item) => {
+              const prod = item.product as unknown as ProductDocument;
+              return prod.category;
+            }),
+          ),
+        );
+
+        const cartProducts = cart.items.map((item) => item.product.toString());
+
+        const validation = await this.couponService.validateCoupon({
+          code: dto.couponCode,
+          orderTotal: subtotal,
+          userId,
+          guestEmail: dto.guestInfo?.email,
+          cartCategories,
+          cartProducts,
+        });
+
+        if (!validation.valid) {
+          throw new BadRequestException(validation.message || 'Cupón no válido');
+        }
+
+        if (validation.coupon) {
+          couponDiscount = validation.discountAmount;
+          freeShippingFromCoupon = validation.coupon.type === CouponType.FREE_SHIPPING;
+
+          couponApplied = {
+            code: validation.coupon.code,
+            couponType: validation.coupon.type,
+            discountAmount: couponDiscount,
+            freeShipping: freeShippingFromCoupon,
+          };
+        }
+      }
+
+      if (dto.shippingMethod !== ShippingMethod.PICKUP && !freeShippingFromCoupon) {
         try {
           shippingCost = await this.shippingCalculatorService.getShippingCost(
             dto.shippingAddress.state,
@@ -141,7 +185,11 @@ export class OrderService {
         }
       }
 
-      const total = subtotal + shippingCost;
+      const total = subtotal - couponDiscount + shippingCost;
+
+      if (total < 0) {
+        throw new BadRequestException('El total de la orden no puede ser negativo');
+      }
 
       const newOrder = new this.orderModel({
         user: userId ? new Types.ObjectId(userId) : undefined,
@@ -161,6 +209,7 @@ export class OrderService {
         },
         notes: dto.notes,
         isGuest: !userId,
+        couponApplied,
       });
 
       await newOrder.save({ session });
@@ -194,6 +243,21 @@ export class OrderService {
       await cart.save({ session });
 
       await session.commitTransaction();
+
+      if (dto.couponCode && couponDiscount > 0) {
+        try {
+          await this.couponService.applyCoupon(
+            dto.couponCode,
+            newOrder._id.toString(),
+            userId,
+            dto.guestInfo?.email,
+            couponDiscount,
+            subtotal,
+          );
+        } catch (error) {
+          console.error('Error registrando uso de cupón:', error);
+        }
+      }
 
       if (userId) {
         try {

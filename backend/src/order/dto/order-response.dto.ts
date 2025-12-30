@@ -56,6 +56,12 @@ export class OrderResponseDto {
   userId?: string;
   guestInfo?: GuestInfoDto;
   items!: OrderItemResponseDto[];
+  couponApplied?: {
+    code: string;
+    type: string;
+    discountAmount: number;
+    freeShipping: boolean;
+  };
   subtotal!: number;
   discount!: number;
   shippingCost!: number;

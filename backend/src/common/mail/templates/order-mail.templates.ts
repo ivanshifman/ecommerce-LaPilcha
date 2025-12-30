@@ -81,6 +81,11 @@ ${rows}
 <table width="100%">
 <tr><td>Subtotal</td><td align="right">${money(order.subtotal)}</td></tr>
 <tr><td>Descuento</td><td align="right">-${money(order.discount)}</td></tr>
+${
+  order.couponApplied
+    ? `<tr style="color:#16a34a;"><td>Cupón aplicado (${order.couponApplied.code})</td><td align="right">-${money(order.couponApplied.discountAmount)}</td></tr>`
+    : ''
+}
 <tr><td>Envío</td><td align="right">${money(order.shippingCost)}</td></tr>
 <tr>
   <td><strong>Total</strong></td>
@@ -97,6 +102,16 @@ ${order.shippingAddress.postalCode} – ${order.shippingAddress.country}
 </p>
 
 <p><strong>Método de pago:</strong> ${order.paymentMethod}</p>
+${
+  order.couponApplied
+    ? `
+<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>✅ Cupón aplicado: ${order.couponApplied.code}</strong></p>
+  <p style="margin:4px 0;">Ahorraste ${money(order.couponApplied.discountAmount)}</p>
+</div>
+`
+    : ''
+}
 `);
   }
 

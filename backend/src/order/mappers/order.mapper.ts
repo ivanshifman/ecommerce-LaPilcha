@@ -76,6 +76,14 @@ export class OrderMapper {
       userId: order.user?.toString() || '',
       guestInfo: order.guestInfo,
       items: order.items.map((item) => OrderMapper.toOrderItemResponseDto(item)),
+      couponApplied: order.couponApplied
+        ? {
+            code: order.couponApplied.code,
+            type: order.couponApplied.couponType,
+            discountAmount: order.couponApplied.discountAmount,
+            freeShipping: order.couponApplied.freeShipping,
+          }
+        : undefined,
       subtotal: order.subtotal,
       discount: order.discount,
       shippingCost: order.shippingCost,

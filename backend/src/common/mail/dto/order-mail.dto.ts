@@ -16,6 +16,12 @@ export interface OrderMailDto {
   subtotal: number;
   discount: number;
   shippingCost: number;
+  couponApplied?: {
+    code: string;
+    type: string;
+    discountAmount: number;
+    freeShipping: boolean;
+  };
   total: number;
   paymentMethod?: string;
   shippingAddress: {

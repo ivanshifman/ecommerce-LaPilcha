@@ -100,4 +100,8 @@ export class CreateOrderDto {
   @Type(() => GuestInfoDto)
   @IsOptional()
   guestInfo?: GuestInfoDto;
+
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
 }
