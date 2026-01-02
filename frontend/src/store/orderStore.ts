@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { orderService } from '../services/order.service';
 import type { Order, CreateOrderDto, CancelOrderDto, OrderQueryDto } from '../types/order.types';
 import { handleApiError } from '../api/error-handler';
@@ -23,116 +22,73 @@ interface OrderState {
     clearError: () => void;
 }
 
-export const useOrderStore = create<OrderState>()(
-    persist(
-        (set, get) => ({
-            orders: [],
-            currentOrder: null,
-            pagination: null,
-            isLoading: false,
-            error: null,
+export const useOrderStore = create<OrderState>((set, get) => ({
+    orders: [],
+    currentOrder: null,
+    pagination: null,
+    isLoading: false,
+    error: null,
 
-            createOrder: async (data) => {
-                set({ isLoading: true, error: null });
-                try {
-                    const order = await orderService.createOrder(data);
-                    set({
-                        currentOrder: order,
-                        isLoading: false
-                    });
-                    return order;
-                } catch (error: unknown) {
-                    const apiError = handleApiError(error);
-
-                    set({
-                        error: apiError.message,
-                        isLoading: false
-                    });
-
-                    throw error;
-                }
-            },
-
-            fetchMyOrders: async (query) => {
-                set({ isLoading: true, error: null });
-                try {
-                    const response = await orderService.getMyOrders(query);
-                    set({
-                        orders: response.orders,
-                        pagination: {
-                            total: response.total,
-                            page: response.page,
-                            limit: response.limit,
-                            totalPages: response.totalPages,
-                        },
-                        isLoading: false
-                    });
-                } catch (error: unknown) {
-                    const apiError = handleApiError(error);
-
-                    set({
-                        error: apiError.message,
-                        isLoading: false
-                    });
-
-                    throw error;
-                }
-            },
-
-            fetchOrderById: async (id) => {
-                set({ isLoading: true, error: null });
-                try {
-                    const order = await orderService.getMyOrderById(id);
-                    set({
-                        currentOrder: order,
-                        isLoading: false
-                    });
-                } catch (error: unknown) {
-                    const apiError = handleApiError(error);
-
-                    set({
-                        error: apiError.message,
-                        isLoading: false
-                    });
-
-                    throw error;
-                }
-            },
-
-            cancelOrder: async (id, data) => {
-                set({ isLoading: true, error: null });
-                try {
-                    const order = await orderService.cancelMyOrder(id, data);
-                    set({
-                        currentOrder: order,
-                        orders: get().orders.map(o => o.id === id ? order : o),
-                        isLoading: false
-                    });
-                } catch (error: unknown) {
-                    const apiError = handleApiError(error);
-
-                    set({
-                        error: apiError.message,
-                        isLoading: false
-                    });
-
-                    throw error;
-                }
-            },
-
-            clearCurrentOrder: () => set({ currentOrder: null }),
-
-            clearError: () => set({ error: null }),
-        }),
-        {
-            name: 'order-storage',
-            storage: createJSONStorage(() => localStorage),
-            partialize: (state) => ({
-                currentOrder: state.currentOrder
-            }),
+    createOrder: async (data) => {
+        set({ isLoading: true });
+        try {
+            const order = await orderService.createOrder(data);
+            set({ currentOrder: order, isLoading: false });
+            return order;
+        } catch (error) {
+            const apiError = handleApiError(error);
+            set({ error: apiError.message, isLoading: false });
+            throw error;
         }
-    )
-);
+    },
+
+    fetchMyOrders: async (query) => {
+        set({ isLoading: true });
+        try {
+            const res = await orderService.getMyOrders(query);
+            set({
+                orders: res.orders,
+                pagination: res,
+                isLoading: false,
+            });
+        } catch (error) {
+            const apiError = handleApiError(error);
+            set({ error: apiError.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    fetchOrderById: async (id) => {
+        set({ isLoading: true });
+        try {
+            const order = await orderService.getMyOrderById(id);
+            set({ currentOrder: order, isLoading: false });
+        } catch (error) {
+            const apiError = handleApiError(error);
+            set({ error: apiError.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    cancelOrder: async (id, data) => {
+        set({ isLoading: true });
+        try {
+            const order = await orderService.cancelMyOrder(id, data);
+            set({
+                currentOrder: order,
+                orders: get().orders.map((o) => (o.id === id ? order : o)),
+                isLoading: false,
+            });
+        } catch (error) {
+            const apiError = handleApiError(error);
+            set({ error: apiError.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    clearCurrentOrder: () => set({ currentOrder: null }),
+    clearError: () => set({ error: null }),
+}));
 
 export const useOrders = () => useOrderStore((state) => ({
     orders: state.orders,
