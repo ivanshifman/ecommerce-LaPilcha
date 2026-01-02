@@ -4,7 +4,6 @@ import type { Product } from '../types/product.types';
 import type { AdminUserResponse, UpdateUserAdminDto } from '../types/user.types';
 
 export const userService = {
-  // Wishlist
   getWishlist: async (): Promise<Product[]> => {
     try {
       const response = await apiClient.get<Product[]>('/users/me/wishlist');

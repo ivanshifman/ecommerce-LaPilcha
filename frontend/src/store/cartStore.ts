@@ -139,7 +139,6 @@ export const useCartStore = create<CartState>()(
     )
 );
 
-// Selector hooks
 export const useCart = () => useCartStore((state) => ({
     cart: state.cart,
     isLoading: state.isLoading,

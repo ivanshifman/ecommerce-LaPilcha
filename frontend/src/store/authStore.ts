@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { authService } from '../services/auth.service';
-import { cartService } from '../services/cart.service';
 import { userService } from '../services/user.service';
 import type {
     User,
@@ -48,12 +47,6 @@ export const useAuthStore = create<AuthState>()(
                         isAuthenticated: true,
                         isLoading: false
                     });
-
-                    try {
-                        await cartService.mergeCart();
-                    } catch (error) {
-                        console.warn('Failed to merge cart:', error);
-                    }
 
                     try {
                         await userService.getWishlist();
