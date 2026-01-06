@@ -1,11 +1,5 @@
 import { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
 import { UserRole } from '../../types/auth.types';
-
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.NEXT_PUBLIC_JWT_SECRET
-);
 
 export interface DecodedToken {
   sub: string;
@@ -15,16 +9,6 @@ export interface DecodedToken {
   exp: number;
 }
 
-export async function verifyToken(token: string): Promise<DecodedToken | null> {
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as unknown as DecodedToken;
-  } catch (error) {
-    console.error('Token verification failed:', error);
-    return null;
-  }
-}
-
 export async function getCurrentUser(req: NextRequest): Promise<DecodedToken | null> {
   const accessToken = req.cookies.get('access_token')?.value;
   
@@ -32,12 +16,31 @@ export async function getCurrentUser(req: NextRequest): Promise<DecodedToken | n
     return null;
   }
 
-  return await verifyToken(accessToken);
+  try {
+    const payload = JSON.parse(
+      Buffer.from(accessToken.split('.')[1], 'base64').toString()
+    );
+
+    return {
+      sub: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      iat: payload.iat,
+      exp: payload.exp,
+    };
+  } catch (error) {
+    console.error('Token decode failed:', error);
+    return null;
+  }
 }
 
 export async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const user = await getCurrentUser(req);
-  return user !== null;
+  
+  if (!user) return false;
+  
+  const now = Math.floor(Date.now() / 1000);
+  return user.exp > now;
 }
 
 export async function hasRole(req: NextRequest, allowedRoles: UserRole[]): Promise<boolean> {

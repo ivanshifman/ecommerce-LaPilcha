@@ -1,12 +1,13 @@
 import { apiClient } from '../api/axios-client';
 import { handleApiError } from '../api/error-handler';
+import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Payment, CreatePaymentDto } from '../types/payment.types';
 
 export const paymentService = {
   createPayment: async (data: CreatePaymentDto): Promise<Payment> => {
     try {
-      const response = await apiClient.post<Payment>('/payments', data);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<Payment>>('/payments', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -14,8 +15,8 @@ export const paymentService = {
 
   getPaymentByOrderId: async (orderId: string): Promise<Payment> => {
     try {
-      const response = await apiClient.get<Payment>(`/payments/order/${orderId}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Payment>>(`/payments/order/${orderId}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -23,8 +24,8 @@ export const paymentService = {
 
   getMyPayments: async (): Promise<Payment[]> => {
     try {
-      const response = await apiClient.get<Payment[]>('/payments/my-payments');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Payment[]>>('/payments/my-payments');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -33,17 +34,17 @@ export const paymentService = {
   // Admin endpoints
   getAllPayments: async (): Promise<Payment[]> => {
     try {
-      const response = await apiClient.get<Payment[]>('/payments');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Payment[]>>('/payments');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
-      }
+    }
   },
 
   refundPayment: async (paymentId: string): Promise<Payment> => {
     try {
-      const response = await apiClient.post<Payment>(`/payments/${paymentId}/refund`);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<Payment>>(`/payments/${paymentId}/refund`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }

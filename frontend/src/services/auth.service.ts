@@ -1,5 +1,6 @@
 import { apiClient } from '../api/axios-client';
 import { handleApiError } from '../api/error-handler';
+import { ApiResponse, unwrapResponse } from '../api/helper';
 import type {
   RegisterDto,
   LoginDto,
@@ -17,8 +18,8 @@ import type {
 export const authService = {
   register: async (data: RegisterDto): Promise<RegisterResponse> => {
     try {
-      const response = await apiClient.post<RegisterResponse>('/auth/register', data);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<RegisterResponse>>('/auth/register', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -26,8 +27,8 @@ export const authService = {
 
   login: async (data: LoginDto): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/login', data);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -35,8 +36,8 @@ export const authService = {
 
   verifyEmail: async (data: VerifyEmailDto): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/verify-email', data);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/verify-email', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -45,7 +46,7 @@ export const authService = {
   resendCode: async (data: ResendVerificationDto): Promise<{ message: string }> => {
     try {
       const response = await apiClient.post<{ message: string }>('/auth/resend-code', data);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -54,7 +55,7 @@ export const authService = {
   forgotPassword: async (data: ForgotPasswordDto): Promise<{ message: string }> => {
     try {
       const response = await apiClient.post<{ message: string }>('/auth/forgot-password', data);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -63,7 +64,7 @@ export const authService = {
   resetPassword: async (data: ResetPasswordDto): Promise<{ message: string }> => {
     try {
       const response = await apiClient.post<{ message: string }>('/auth/reset-password', data);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -72,7 +73,7 @@ export const authService = {
   changePassword: async (data: ChangePasswordDto): Promise<{ message: string }> => {
     try {
       const response = await apiClient.post<{ message: string }>('/auth/change-password', data);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -81,7 +82,7 @@ export const authService = {
   logout: async (): Promise<{ message: string }> => {
     try {
       const response = await apiClient.post<{ message: string }>('/auth/logout');
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -89,8 +90,8 @@ export const authService = {
 
   refresh: async (): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/refresh');
-      return response.data;
+      const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/refresh');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -98,8 +99,8 @@ export const authService = {
 
   getProfile: async (): Promise<ProfileResponse> => {
     try {
-      const response = await apiClient.get<ProfileResponse>('/auth/profile');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<ProfileResponse>>('/auth/profile');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -107,8 +108,8 @@ export const authService = {
 
   updateProfile: async (data: UpdateUserDto): Promise<ProfileResponse> => {
     try {
-      const response = await apiClient.patch<ProfileResponse>('/auth/profile', data);
-      return response.data;
+      const response = await apiClient.patch<ApiResponse<ProfileResponse>>('/auth/profile', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }

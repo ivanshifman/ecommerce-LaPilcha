@@ -1,14 +1,15 @@
 import { apiClient } from '../api/axios-client';
 import { handleApiError } from '../api/error-handler';
+import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Product, ProductFilters, PaginatedProducts } from '../types/product.types';
 
 export const productService = {
   getAll: async (filters?: ProductFilters): Promise<PaginatedProducts> => {
     try {
-      const response = await apiClient.get<PaginatedProducts>('/products', {
+      const response = await apiClient.get<ApiResponse<PaginatedProducts>>('/products', {
         params: filters,
       });
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -16,8 +17,8 @@ export const productService = {
 
   getById: async (id: string): Promise<Product> => {
     try {
-      const response = await apiClient.get<Product>(`/products/${id}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -25,8 +26,8 @@ export const productService = {
 
   getBySlug: async (slug: string): Promise<Product> => {
     try {
-      const response = await apiClient.get<Product>(`/products/slug/${slug}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Product>>(`/products/slug/${slug}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -34,8 +35,8 @@ export const productService = {
 
   getFeatured: async (): Promise<Product[]> => {
     try {
-      const response = await apiClient.get<Product[]>('/products/featured');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Product[]>>('/products/meta/featured');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -43,10 +44,51 @@ export const productService = {
 
   search: async (query: string): Promise<Product[]> => {
     try {
-      const response = await apiClient.get<Product[]>('/products/search', {
-        params: { q: query },
+      const response = await apiClient.get<ApiResponse<PaginatedProducts>>('/products', {
+        params: { search: query, limit: 10 },
       });
-      return response.data;
+      const paginatedData = unwrapResponse(response.data);
+      return paginatedData.docs;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  getGenders: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/genders');
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  getCategories: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/categories');
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  getCategoriesByGender: async (gender: string): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>(
+        `/products/meta/genders/${gender}/categories`
+      );
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  getSubcategoriesByCategory: async (category: string): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>(
+        `/products/meta/categories/${category}/subcategories`
+      );
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }

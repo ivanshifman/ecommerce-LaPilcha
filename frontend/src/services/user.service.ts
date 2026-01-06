@@ -1,13 +1,14 @@
 import { apiClient } from '../api/axios-client';
 import { handleApiError } from '../api/error-handler';
+import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Product } from '../types/product.types';
 import type { AdminUserResponse, UpdateUserAdminDto } from '../types/user.types';
 
 export const userService = {
   getWishlist: async (): Promise<Product[]> => {
     try {
-      const response = await apiClient.get<Product[]>('/users/me/wishlist');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Product[]>>('/users/me/wishlist');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -16,7 +17,7 @@ export const userService = {
   addToWishlist: async (productId: string): Promise<string[]> => {
     try {
       const response = await apiClient.post<string[]>(`/users/me/wishlist/${productId}`);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -25,7 +26,7 @@ export const userService = {
   removeFromWishlist: async (productId: string): Promise<string[]> => {
     try {
       const response = await apiClient.delete<string[]>(`/users/me/wishlist/${productId}`);
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -34,7 +35,7 @@ export const userService = {
   clearWishlist: async (): Promise<string[]> => {
     try {
       const response = await apiClient.delete<string[]>('/users/me/wishlist');
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -43,8 +44,8 @@ export const userService = {
   // Admin endpoints
   getAllUsers: async (): Promise<AdminUserResponse[]> => {
     try {
-      const response = await apiClient.get<AdminUserResponse[]>('/users');
-      return response.data;
+      const response = await apiClient.get<ApiResponse<AdminUserResponse[]>>('/users');
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -52,8 +53,8 @@ export const userService = {
 
   getUserById: async (id: string): Promise<AdminUserResponse> => {
     try {
-      const response = await apiClient.get<AdminUserResponse>(`/users/${id}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<AdminUserResponse>>(`/users/${id}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -61,8 +62,8 @@ export const userService = {
 
   updateUser: async (id: string, data: UpdateUserAdminDto): Promise<AdminUserResponse> => {
     try {
-      const response = await apiClient.patch<AdminUserResponse>(`/users/${id}`, data);
-      return response.data;
+      const response = await apiClient.patch<ApiResponse<AdminUserResponse>>(`/users/${id}`, data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -70,8 +71,8 @@ export const userService = {
 
   deleteUser: async (id: string): Promise<AdminUserResponse> => {
     try {
-      const response = await apiClient.delete<AdminUserResponse>(`/users/${id}`);
-      return response.data;
+      const response = await apiClient.delete<ApiResponse<AdminUserResponse>>(`/users/${id}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }

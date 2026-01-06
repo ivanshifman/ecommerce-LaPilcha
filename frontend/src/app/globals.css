@@ -1,26 +1,190 @@
+@config "../../tailwind.config.ts";
+
+@plugin "tailwindcss-animate";
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/* ======================================================
+   ROOT – TOKENS DE MARCA (LA PILCHA)
+   ====================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* ===== Fonts ===== */
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* ===== Paleta ===== */
+  --color-primary: #d4a574;
+  --color-primary-dark: #b8885a;
+  --color-primary-light: #e8c9a0;
+
+  --color-secondary: #8b7355;
+  --color-secondary-dark: #6b5942;
+  --color-secondary-light: #a68968;
+
+  --color-accent: #f4e5d3;
+  --color-accent-dark: #e0d1bf;
+
+  /* ===== Neutrales ===== */
+  --color-surface: #ffffff;
+  --color-border: #e5e5e0;
+
+  /* ===== Textos ===== */
+  --color-text-primary: #2c2416;
+  --color-text-secondary: #5c4f3a;
+  --color-text-muted: #8b7e6a;
+
+  /* ===== Estados ===== */
+  --color-success: #6b8e23;
+  --color-error: #b22222;
+  --color-warning: #daa520;
+  --color-info: #4682b4;
+
+  /* ===== UI ===== */
+  --radius: 0.625rem;
+
+  /* ======================================================
+     SHADCN – TOKENS SEMÁNTICOS
+     ====================================================== */
+  --background: #fafaf8;
+  --foreground: var(--color-text-primary);
+
+  --card: #ffffff;
+  --card-foreground: var(--color-text-primary);
+
+  --popover: #ffffff;
+  --popover-foreground: var(--color-text-primary);
+
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-secondary);
+  --secondary-foreground: #ffffff;
+
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-text-primary);
+
+  --muted: #f3f3f0;
+  --muted-foreground: var(--color-text-muted);
+
+  --destructive: #b22222;
+
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-primary);
+
+  /* Charts */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--color-text-primary);
+  --sidebar-primary: var(--color-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-accent);
+  --sidebar-accent-foreground: var(--color-text-primary);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--color-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ======================================================
+   DARK MODE
+   ====================================================== */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  --card: #121212;
+  --card-foreground: #ededed;
+
+  --popover: #121212;
+  --popover-foreground: #ededed;
+
+  --primary: var(--color-primary);
+  --primary-foreground: #2c2416;
+
+  --secondary: var(--color-secondary);
+  --secondary-foreground: #ffffff;
+
+  --accent: var(--color-accent-dark);
+  --accent-foreground: #ededed;
+
+  --muted: #1f1f1f;
+  --muted-foreground: #9a9a9a;
+
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: var(--color-primary);
+
+  --sidebar: #121212;
+  --sidebar-foreground: #ededed;
+}
+
+/* ======================================================
+   BASE
+   ====================================================== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, sans-serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ======================================================
+   COMPONENTES
+   ====================================================== */
+@layer components {
+  .bg-campo-gradient {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      var(--color-primary-light) 100%
+    );
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white font-medium
+      py-2 px-6 rounded-lg
+      transition-colors duration-200;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-primary-dark);
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white font-medium
+      py-2 px-6 rounded-lg
+      transition-colors duration-200;
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-secondary-dark);
+  }
+
+  .input-campo {
+    @apply border border-border rounded-lg
+      px-4 py-2 transition-all duration-200
+      focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+}
+
+/* ======================================================
+   ANIMATIONS
+   ====================================================== */
+@keyframes submenu-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

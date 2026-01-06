@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/shallow';
 import { cartService } from '../services/cart.service';
 import type {
     Cart,
@@ -89,17 +90,21 @@ export const useCartStore = create<CartState>((set) => ({
 }));
 
 
-export const useCart = () => useCartStore((state) => ({
-    cart: state.cart,
-    isLoading: state.isLoading,
-    error: state.error,
-}));
+export const useCart = () => useCartStore(
+    useShallow((state) => ({
+        cart: state.cart,
+        isLoading: state.isLoading,
+        error: state.error,
+    }))
+);
 
-export const useCartActions = () => useCartStore((state) => ({
-    fetchCart: state.fetchCart,
-    addToCart: state.addToCart,
-    updateCartItem: state.updateCartItem,
-    removeFromCart: state.removeFromCart,
-    clearCart: state.clearCart,
-    clearError: state.clearError,
-}));
+export const useCartActions = () => useCartStore(
+    useShallow((state) => ({
+        fetchCart: state.fetchCart,
+        addToCart: state.addToCart,
+        updateCartItem: state.updateCartItem,
+        removeFromCart: state.removeFromCart,
+        clearCart: state.clearCart,
+        clearError: state.clearError,
+    }))
+);

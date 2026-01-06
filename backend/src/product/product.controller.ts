@@ -34,6 +34,36 @@ export class ProductController {
     return this.productService.findAll(query);
   }
 
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.productService.findBySlug(slug);
+  }
+
+  @Get('meta/genders')
+  getGenders() {
+    return this.productService.getGenders();
+  }
+
+  @Get('meta/categories')
+  getCategories() {
+    return this.productService.getCategories();
+  }
+
+  @Get('meta/genders/:gender/categories')
+  getCategoriesByGender(@Param('gender') gender: string) {
+    return this.productService.getCategoriesByGender(gender);
+  }
+
+  @Get('meta/categories/:category/subcategories')
+  getSubcategories(@Param('category') category: string) {
+    return this.productService.getSubcategoriesByCategory(category);
+  }
+
+  @Get('meta/featured')
+  getFeatured() {
+    return this.productService.getFeatured();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productService.findOne(id);

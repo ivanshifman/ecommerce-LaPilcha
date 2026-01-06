@@ -25,7 +25,7 @@ export const responseInterceptor = async (
     _retry?: boolean;
   };
 
-  const { setUser } = useAuthStore.getState();
+  const { logout } = useAuthStore.getState();
 
   if (
     error.response?.status === 401 &&
@@ -51,7 +51,7 @@ export const responseInterceptor = async (
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as AxiosError);
-      setUser(null);
+      await logout();
       window.location.href = "/login";
       return Promise.reject(refreshError);
     } finally {

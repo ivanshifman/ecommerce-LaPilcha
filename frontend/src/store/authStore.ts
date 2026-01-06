@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/shallow';
 import { authService } from '../services/auth.service';
 import type {
   User,
@@ -117,14 +118,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   clearError: () => set({ error: null }),
 }));
 
-export const useAuth = () => useAuthStore((state) => ({
-    user: state.user,
-    isAuthenticated: state.isAuthenticated,
-    isLoading: state.isLoading,
-    error: state.error,
-}));
+export const useAuth = () =>
+  useAuthStore(
+    useShallow((state) => ({
+      user: state.user,
+      isAuthenticated: state.isAuthenticated,
+      isLoading: state.isLoading,
+      error: state.error,
+    }))
+  );
 
-export const useAuthActions = () => useAuthStore((state) => ({
+export const useAuthActions = () => useAuthStore(
+  useShallow((state) => ({
     login: state.login,
     register: state.register,
     logout: state.logout,
@@ -132,4 +137,5 @@ export const useAuthActions = () => useAuthStore((state) => ({
     updateProfile: state.updateProfile,
     clearError: state.clearError,
     checkAuth: state.checkAuth,
-}));
+  }))
+);

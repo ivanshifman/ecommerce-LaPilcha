@@ -34,7 +34,7 @@ export class ProductService {
       order = 'desc',
     } = query;
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = { status: true };
 
     if (search) filter.$text = { $search: search };
 
@@ -76,6 +76,50 @@ export class ProductService {
       limit,
       sort,
     });
+  }
+
+  async findBySlug(slug: string) {
+    const product = await this.productModel.findOne({ slug, status: true });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado.');
+    }
+
+    return product;
+  }
+
+  async getGenders(): Promise<string[]> {
+    const genders = await this.productModel.distinct('gender', { status: true });
+    return genders.filter(Boolean);
+  }
+
+  async getCategories(): Promise<string[]> {
+    const categories = await this.productModel.distinct('category', { status: true });
+    return categories;
+  }
+
+  async getCategoriesByGender(gender: string): Promise<string[]> {
+    const categories = await this.productModel.distinct('category', {
+      gender: { $regex: new RegExp(`^${gender}$`, 'i') },
+      status: true,
+    });
+    return categories;
+  }
+
+  async getSubcategoriesByCategory(category: string): Promise<string[]> {
+    const subcategories = await this.productModel.distinct('subcategory', {
+      category: { $regex: new RegExp(`^${category}$`, 'i') },
+      status: true,
+    });
+    return subcategories.filter(Boolean);
+  }
+
+  async getFeatured() {
+    return this.productModel
+      .find({ featured: true, status: true })
+      .limit(10)
+      .sort({ salesCount: -1 })
+      .exec();
   }
 
   async findOne(id: string) {

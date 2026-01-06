@@ -37,7 +37,7 @@ export class MercadoPagoStrategy implements PaymentStrategy {
     externalId?: string;
     preferenceId?: string;
   }> {
-    const backUrl = this.configService.get<string>('FRONTEND_URL');
+    const backUrl = this.configService.get<string>('BACKEND_URL');
     const notificationUrl = `${this.configService.get<string>('BACKEND_URL')}/payments/webhook/mercadopago`;
     const isProd = this.configService.get('NODE_ENV') === 'production';
     const preference = new Preference(this.client);

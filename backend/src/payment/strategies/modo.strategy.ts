@@ -50,7 +50,7 @@ export class ModoStrategy implements PaymentStrategy {
     externalId?: string;
     preferenceId?: string;
   }> {
-    const backUrl = this.configService.get<string>('FRONTEND_URL');
+    const backUrl = this.configService.get<string>('BACKEND_URL');
     const notificationUrl = `${this.configService.get<string>('BACKEND_URL')}/payments/webhook/modo`;
 
     const response = await this.client.post<ModoCheckoutResponse>('/checkout', {

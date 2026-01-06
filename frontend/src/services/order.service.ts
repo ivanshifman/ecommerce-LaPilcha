@@ -1,12 +1,13 @@
 import { apiClient } from '../api/axios-client';
 import { handleApiError } from '../api/error-handler';
+import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Order, CreateOrderDto, CancelOrderDto, OrderQueryDto, PaginatedOrders } from '../types/order.types';
 
 export const orderService = {
   createOrder: async (data: CreateOrderDto): Promise<Order> => {
     try {
-      const response = await apiClient.post<Order>('/orders', data);
-      return response.data;
+      const response = await apiClient.post<ApiResponse<Order>>('/orders', data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -14,10 +15,10 @@ export const orderService = {
 
   getMyOrders: async (query?: OrderQueryDto): Promise<PaginatedOrders> => {
     try {
-      const response = await apiClient.get<PaginatedOrders>('/orders/my-orders', {
+      const response = await apiClient.get<ApiResponse<PaginatedOrders>>('/orders/my-orders', {
         params: query,
       });
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -25,8 +26,8 @@ export const orderService = {
 
   getMyOrderById: async (id: string): Promise<Order> => {
     try {
-      const response = await apiClient.get<Order>(`/orders/my-orders/${id}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Order>>(`/orders/my-orders/${id}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -34,8 +35,8 @@ export const orderService = {
 
   cancelMyOrder: async (id: string, data: CancelOrderDto): Promise<Order> => {
     try {
-      const response = await apiClient.patch<Order>(`/orders/my-orders/${id}/cancel`, data);
-      return response.data;
+      const response = await apiClient.patch<ApiResponse<Order>>(`/orders/my-orders/${id}/cancel`, data);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -44,10 +45,10 @@ export const orderService = {
   // Admin endpoints
   getAllOrders: async (query?: OrderQueryDto): Promise<PaginatedOrders> => {
     try {
-      const response = await apiClient.get<PaginatedOrders>('/orders', {
+      const response = await apiClient.get<ApiResponse<PaginatedOrders>>('/orders', {
         params: query,
       });
-      return response.data;
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }
@@ -55,8 +56,8 @@ export const orderService = {
 
   getOrderById: async (id: string): Promise<Order> => {
     try {
-      const response = await apiClient.get<Order>(`/orders/${id}`);
-      return response.data;
+      const response = await apiClient.get<ApiResponse<Order>>(`/orders/${id}`);
+      return unwrapResponse(response.data);
     } catch (error) {
       throw handleApiError(error);
     }

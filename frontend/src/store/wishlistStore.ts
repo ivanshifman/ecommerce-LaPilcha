@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/shallow';
 import { userService } from '../services/user.service';
 import type { Product } from '../types/product.types';
 import { handleApiError } from '../api/error-handler';
@@ -54,18 +55,20 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
 }));
 
 
-export const useWishlist = () => useWishlistStore((state) => ({
+export const useWishlist = () => useWishlistStore(
+  useShallow((state) => ({
     items: state.items,
     isLoading: state.isLoading,
     error: state.error,
     count: state.items.length,
-}));
+  }))
+);
 
 export const useWishlistActions = () => useWishlistStore((state) => ({
-    fetchWishlist: state.fetchWishlist,
-    addToWishlist: state.addToWishlist,
-    removeFromWishlist: state.removeFromWishlist,
-    clearWishlist: state.clearWishlist,
-    isInWishlist: state.isInWishlist,
-    clearError: state.clearError,
+  fetchWishlist: state.fetchWishlist,
+  addToWishlist: state.addToWishlist,
+  removeFromWishlist: state.removeFromWishlist,
+  clearWishlist: state.clearWishlist,
+  isInWishlist: state.isInWishlist,
+  clearError: state.clearError,
 }));
