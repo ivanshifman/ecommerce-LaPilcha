@@ -15,7 +15,6 @@ interface Props {
     isActive: boolean;
 }
 
-
 export function MobileGenderAccordion({ gender, label, isActive }: Props) {
     const { fetchCategoriesByGender, fetchSubcategories } = useProductActions();
     const [categories, setCategories] = useState<string[]>([]);
@@ -33,7 +32,6 @@ export function MobileGenderAccordion({ gender, label, isActive }: Props) {
             setSubcategories([]);
         }
     }, [isActive]);
-
 
     const handleCategory = async (category: string) => {
         if (openCategory === category) {
@@ -58,40 +56,57 @@ export function MobileGenderAccordion({ gender, label, isActive }: Props) {
                 {label}
             </AccordionTrigger>
 
-
             {/* CONTENIDO */}
             <AccordionContent className="px-4 overflow-hidden transition-all duration-300 ease-out data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-                <ul className="space-y-2">
+                <ul className="space-y-0 divide-y divide-text-muted/30">
                     {categories.map((cat) => (
-                        <li key={cat}>
+                        <li key={cat} className="py-2">
                             {/* BOTÓN DE CATEGORÍA */}
                             <button
                                 onClick={() => handleCategory(cat)}
-                                className={`relative w-full flex justify-between items-center py-3 text-sm font-medium transition-colors ${openCategory === cat ? 'text-primary' : 'text-text-muted hover:text-text-primary'} after:absolute after:left-0 after:bottom-0 after:h-px after:w-full after:bg-border after:opacity-40`}
+                                className={`relative w-full flex justify-between items-center py-2 text-sm font-medium transition-colors capitalize ${openCategory === cat
+                                        ? 'text-primary'
+                                        : 'text-text-muted hover:text-text-primary'
+                                    }`}
                             >
                                 {cat}
+                                <svg
+                                    className={`w-4 h-4 transition-transform duration-200 ${openCategory === cat ? 'rotate-180' : ''
+                                        }`}
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </button>
 
                             {/* SUBCATEGORÍAS */}
                             <div
                                 className={`grid overflow-hidden transition-all duration-300 ease-out ${openCategory === cat
-                                    ? 'grid-rows-[1fr] opacity-100 translate-y-0'
-                                    : 'grid-rows-[0fr] opacity-0 -translate-y-1'
+                                        ? 'grid-rows-[1fr] opacity-100 translate-y-0'
+                                        : 'grid-rows-[0fr] opacity-0 -translate-y-1'
                                     }`}
                             >
-                                <ul className="overflow-hidden pl-5 space-y-1 py-1">
-                                    {subcategories.map((sub) => (
-                                        <li key={sub}>
-                                            <Link
-                                                href={`/products?gender=${gender}&category=${cat}&subcategory=${sub}`}
-                                                className=" group flex items-center gap-2 py-1.5 text-sm text-text-secondary transition-colors hover:text-primary "
-                                            >
-                                                <span className="h-1.5 w-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                {sub}
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="overflow-hidden">
+                                    {subcategories.length > 0 && (
+                                        <div className="h-px bg-linear-to-r from-transparent via-primary/50 to-transparent my-2" />
+                                    )}
+
+                                    <ul className="pl-5 space-y-1 pb-2">
+                                        {subcategories.map((sub) => (
+                                            <li key={sub}>
+                                                <Link
+                                                    href={`/products?gender=${gender}&category=${cat}&subcategory=${sub}`}
+                                                    className="group flex items-center gap-2 py-1.5 text-sm text-text-secondary transition-colors hover:text-primary capitalize"
+                                                >
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    {sub}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </li>
                     ))}

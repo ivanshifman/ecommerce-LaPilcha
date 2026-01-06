@@ -32,7 +32,7 @@
   /* ===== Textos ===== */
   --color-text-primary: #2c2416;
   --color-text-secondary: #5c4f3a;
-  --color-text-muted: #8b7e6a;
+  --color-text-muted: #3a352d;
 
   /* ===== Estados ===== */
   --color-success: #6b8e23;
@@ -46,7 +46,7 @@
   /* ======================================================
      SHADCN – TOKENS SEMÁNTICOS
      ====================================================== */
-  --background: #fafaf8;
+  --background: #f6f6ef;
   --foreground: var(--color-text-primary);
 
   --card: #ffffff;
@@ -188,3 +188,8 @@
     transform: translateX(0);
   }
 }
+
+.duration-400 {
+  transition-duration: 400ms;
+}
+

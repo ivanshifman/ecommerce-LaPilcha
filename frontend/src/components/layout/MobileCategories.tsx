@@ -16,17 +16,20 @@ export function MobileCategories() {
             collapsible
             value={openGender ?? undefined}
             onValueChange={(value) => setOpenGender(value)}
-            className="divide-y divide-border rounded-xl overflow-hidden"
+            className="space-y-3"
         >
-            {genders.map((gender) => (
-                <MobileGenderAccordion
-                    key={gender}
-                    gender={gender}
-                    label={genderLabels[gender] || gender}
-                    isActive={openGender === gender}
-                />
+            {genders.map((gender, index) => (
+                <div key={gender}>
+                    {index > 0 && (
+                        <div className="h-px bg-linear-to-r from-transparent via-text-muted/40 to-transparent mb-3" />
+                    )}
+                    <MobileGenderAccordion
+                        gender={gender}
+                        label={genderLabels[gender] || gender}
+                        isActive={openGender === gender}
+                    />
+                </div>
             ))}
         </Accordion>
     );
 }
-

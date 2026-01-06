@@ -3,6 +3,7 @@ import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "../components/layout/Navbar";
+import { ScrollToTop } from "../components/layout/ScrollToTop";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${inter.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
+          <ScrollToTop />
           <Navbar />
           <main className="min-h-screen">{children}</main>
         </Providers>
