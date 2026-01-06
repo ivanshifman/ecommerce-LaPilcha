@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/ivane/OneDrive/Escritorio/LaPilcha-Ecommerce/frontend/src/app/page.tsx"],"sourcesContent":["\nexport default function Home() {\n  return (\n    <div>\n\n    </div>\n  );\n}\n"],"names":[],"mappings":";;;;;;AACe,SAAS;IACtB,qBACE,8OAAC;;;;;AAIL"}}]
-}
