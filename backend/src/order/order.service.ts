@@ -133,6 +133,10 @@ export class OrderService {
       let couponDiscount = 0;
       let freeShippingFromCoupon = false;
       let couponApplied: OrderDocument['couponApplied'];
+      let bankTransferDiscount = 0;
+      if (dto.paymentMethod === PaymentMethod.BANK_TRANSFER) {
+        bankTransferDiscount = subtotal * 0.1;
+      }
 
       if (dto.couponCode) {
         const cartCategories = Array.from(
@@ -146,9 +150,11 @@ export class OrderService {
 
         const cartProducts = cart.items.map((item) => item.product.toString());
 
+        const subtotalForCoupon = subtotal - bankTransferDiscount;
+
         const validation = await this.couponService.validateCoupon({
           code: dto.couponCode,
-          orderTotal: subtotal,
+          orderTotal: subtotalForCoupon,
           userId,
           guestEmail: dto.guestInfo?.email,
           cartCategories,
@@ -185,7 +191,7 @@ export class OrderService {
         }
       }
 
-      const total = subtotal - couponDiscount + shippingCost;
+      const total = subtotal - bankTransferDiscount - couponDiscount + shippingCost;
 
       if (total < 0) {
         throw new BadRequestException('El total de la orden no puede ser negativo');
@@ -210,6 +216,7 @@ export class OrderService {
         notes: dto.notes,
         isGuest: !userId,
         couponApplied,
+        bankTransferDiscount: bankTransferDiscount > 0 ? bankTransferDiscount : undefined,
       });
 
       await newOrder.save({ session });

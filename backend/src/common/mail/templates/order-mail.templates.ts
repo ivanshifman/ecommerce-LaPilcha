@@ -80,7 +80,15 @@ ${rows}
 
 <table width="100%">
 <tr><td>Subtotal</td><td align="right">${money(order.subtotal)}</td></tr>
-<tr><td>Descuento</td><td align="right">-${money(order.discount)}</td></tr>
+<tr><td>Descuento productos</td><td align="right">-${money(order.discount)}</td></tr>
+${
+  order.bankTransferDiscount && order.bankTransferDiscount > 0
+    ? `<tr style="color:#16a34a;">
+         <td><strong>🎉 Descuento por transferencia (10%)</strong></td>
+         <td align="right"><strong>-${money(order.bankTransferDiscount)}</strong></td>
+       </tr>`
+    : ''
+}
 ${
   order.couponApplied
     ? `<tr style="color:#16a34a;"><td>Cupón aplicado (${order.couponApplied.code})</td><td align="right">-${money(order.couponApplied.discountAmount)}</td></tr>`
@@ -92,6 +100,16 @@ ${
   <td align="right"><strong>${money(order.total)}</strong></td>
 </tr>
 </table>
+
+${
+  order.bankTransferDiscount && order.bankTransferDiscount > 0
+    ? `
+<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;margin:16px 0;">
+  <p style="margin:0;"><strong>🎉 ¡Ahorraste ${money(order.bankTransferDiscount)} pagando con transferencia!</strong></p>
+</div>
+`
+    : ''
+}
 
 <h3 style="margin-top:24px;">Dirección de envío</h3>
 <p>
@@ -112,6 +130,120 @@ ${
 `
     : ''
 }
+`);
+  }
+
+  static bankTransferInstructions(data: {
+    orderNumber: string;
+    amount: number;
+    paymentId: string;
+    originalAmount?: number;
+    discount?: number;
+  }) {
+    const money = (value: number) =>
+      value.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' });
+
+    return baseTemplate(`
+<h2 style="color:#0284c7;">💳 Instrucciones de Transferencia Bancaria</h2>
+
+<p>Gracias por tu compra. Para completar tu orden <strong>${data.orderNumber}</strong>, 
+por favor realizá la transferencia bancaria con los siguientes datos:</p>
+
+${
+  data.discount && data.discount > 0 && data.originalAmount
+    ? `
+<div style="background:#dcfce7;border:2px solid #16a34a;padding:16px;margin:24px 0;border-radius:8px;text-align:center;">
+  <p style="margin:0;font-size:16px;color:#166534;">🎉 <strong>¡Ahorraste ${money(data.discount)} pagando con transferencia!</strong></p>
+  <p style="margin:8px 0 0 0;font-size:14px;color:#6b7280;">
+    Precio original: <span style="text-decoration:line-through;">${money(data.originalAmount)}</span>
+  </p>
+</div>
+`
+    : ''
+}
+
+<div style="background:#e0f2fe;border-left:4px solid #0284c7;padding:20px;margin:24px 0;border-radius:6px;">
+  <h3 style="margin-top:0;color:#0284c7;">Datos bancarios</h3>
+  
+  <table width="100%" style="font-size:14px;">
+    <tr>
+      <td style="padding:8px 0;"><strong>Banco:</strong></td>
+      <td style="padding:8px 0;">Banco Ejemplo</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;"><strong>Titular:</strong></td>
+      <td style="padding:8px 0;">La Pilcha S.A.</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;"><strong>CUIT:</strong></td>
+      <td style="padding:8px 0;">XX-XXXXXXXX-X</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;"><strong>CBU:</strong></td>
+      <td style="padding:8px 0;font-family:monospace;font-size:16px;">0000000000000000000000</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0;"><strong>Alias:</strong></td>
+      <td style="padding:8px 0;font-family:monospace;font-size:16px;">LAPILCHA.STORE</td>
+    </tr>
+  </table>
+</div>
+
+<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:16px;margin:16px 0;border-radius:6px;">
+  <p style="margin:0;font-size:18px;"><strong>Monto a transferir:</strong></p>
+  <p style="margin:8px 0 0 0;font-size:32px;color:#16a34a;font-weight:bold;">${money(data.amount)}</p>
+  ${
+    data.discount && data.discount > 0
+      ? `<p style="margin:4px 0 0 0;font-size:14px;color:#16a34a;">✅ Ya incluye 10% de descuento por transferencia</p>`
+      : ''
+  }
+</div>
+
+<div style="background:#fef9c3;border-left:4px solid #eab308;padding:16px;margin:24px 0;border-radius:6px;">
+  <p style="margin:0;"><strong>⚠️ Importante:</strong></p>
+  <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
+    <li>Usá como <strong>referencia</strong> tu número de orden: <code style="background:#fff;padding:2px 6px;border-radius:3px;">${data.orderNumber}</code></li>
+    <li>Una vez realizada la transferencia, <strong>enviá el comprobante por WhatsApp</strong> al +54 9 11 XXXX-XXXX</li>
+    <li>El pedido será procesado una vez que confirmemos el pago (24-48hs hábiles)</li>
+    <li>Guardá este email para futura referencia</li>
+  </ul>
+</div>
+
+<div style="background:#f3f4f6;padding:16px;margin:24px 0;border-radius:6px;">
+  <p style="margin:0;font-size:13px;color:#6b7280;">
+    <strong>ID de Pago:</strong> <code>${data.paymentId}</code><br>
+    <strong>Orden:</strong> ${data.orderNumber}
+  </p>
+</div>
+
+<p style="text-align:center;margin-top:32px;">
+  <strong>¿Tenés dudas?</strong><br>
+  Respondé este email o contactanos por WhatsApp
+</p>
+`);
+  }
+
+  static bankTransferConfirmed(orderNumber: string) {
+    return baseTemplate(`
+<h2 style="color:#16a34a;">✅ Pago Confirmado</h2>
+
+<p>¡Excelente noticia! Confirmamos la recepción de tu transferencia bancaria para la orden <strong>${orderNumber}</strong>.</p>
+
+<div style="background:#dcfce7;border-left:4px solid #16a34a;padding:16px;margin:24px 0;border-radius:6px;">
+  <p style="margin:0;"><strong>✓ Tu pago fue verificado exitosamente</strong></p>
+  <p style="margin:8px 0 0 0;color:#166534;">Estamos preparando tu pedido para el envío.</p>
+</div>
+
+<h3 style="margin-top:24px;">Próximos pasos:</h3>
+<ol style="line-height:1.8;color:#374151;">
+  <li>Prepararemos tu pedido en las próximas 24-48 horas</li>
+  <li>Te enviaremos un email cuando sea despachado</li>
+  <li>Recibirás el número de seguimiento para rastrear tu envío</li>
+</ol>
+
+<p style="text-align:center;margin-top:32px;color:#6b7280;font-size:14px;">
+  ¡Gracias por tu compra! 🎉
+</p>
 `);
   }
 

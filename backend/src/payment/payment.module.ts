@@ -10,6 +10,7 @@ import { ShippingModule } from '../shipping/shipping.module';
 import { UserModule } from '../user/user.module';
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { ModoStrategy } from './strategies/modo.strategy';
+import { BankTransferStrategy } from './strategies/bank-transfer.strategy';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { ModoStrategy } from './strategies/modo.strategy';
     UserModule,
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, MercadoPagoStrategy, ModoStrategy],
+  providers: [PaymentService, MercadoPagoStrategy, ModoStrategy, BankTransferStrategy],
   exports: [PaymentService],
 })
 export class PaymentModule {}

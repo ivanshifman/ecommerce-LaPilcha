@@ -88,6 +88,7 @@ export class OrderMapper {
       discount: order.discount,
       shippingCost: order.shippingCost,
       totalWeight: order.totalWeight,
+      bankTransferDiscount: order.bankTransferDiscount,
       total: order.total,
       status: order.status,
       statusLabel: ORDER_STATUS_LABELS[order.status] || order.status,

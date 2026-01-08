@@ -19,7 +19,7 @@ export class CleanExpiredReservationsJob {
     timeZone: 'America/Argentina/Buenos_Aires',
   })
   async handleCleanExpiredReservations() {
-    this.logger.log('Iniciando limpieza de reservas expiradas...');
+    this.logger.log('🧹 Iniciando limpieza de reservas expiradas...');
 
     try {
       const expiredCarts = await this.cartModel
@@ -34,28 +34,34 @@ export class CleanExpiredReservationsJob {
       for (const cart of expiredCarts) {
         for (const item of cart.items) {
           if (item.variant?.size) {
-            const result = await this.productModel.findOneAndUpdate(
-              {
-                _id: item.product,
-                'sizes.size': item.variant.size.toUpperCase(),
-              },
-              {
-                $inc: { 'sizes.$.reserved': -item.quantity },
-              },
-            );
+            try {
+              const result = await this.productModel.findOneAndUpdate(
+                {
+                  _id: item.product,
+                  'sizes.size': item.variant.size.toUpperCase(),
+                },
+                {
+                  $inc: { 'sizes.$.reserved': -item.quantity },
+                },
+              );
 
-            if (result) {
-              totalReservationsReleased += item.quantity;
+              if (result) {
+                totalReservationsReleased += item.quantity;
+              }
+            } catch (error: any) {
+              this.logger.warn(`Error liberando reserva: ${error}`);
             }
           }
         }
       }
 
       this.logger.log(
-        `✅ Limpieza completada. ${expiredCarts.length} carritos procesados. ${totalReservationsReleased} unidades liberadas.`,
+        `✅ Limpieza de reservas completada:` +
+          `\n   - ${expiredCarts.length} carritos procesados` +
+          `\n   - ${totalReservationsReleased} unidades liberadas`,
       );
     } catch (error) {
-      this.logger.error('Error al limpiar reservas expiradas:', error);
+      this.logger.error('❌ Error al limpiar reservas expiradas:', error);
     }
   }
 
@@ -64,7 +70,7 @@ export class CleanExpiredReservationsJob {
     timeZone: 'America/Argentina/Buenos_Aires',
   })
   async handlePartialCleanup() {
-    this.logger.log('Limpieza parcial de reservas...');
+    this.logger.log('🧹 Limpieza parcial de reservas...');
     await this.handleCleanExpiredReservations();
   }
 }

@@ -88,6 +88,9 @@ export class Order {
   @Prop({ min: 0, default: 0 })
   totalWeight?: number;
 
+  @Prop({ min: 0 })
+  bankTransferDiscount?: number;
+
   @Prop({ required: true, min: 0 })
   total!: number;
 

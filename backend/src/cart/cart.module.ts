@@ -6,11 +6,12 @@ import { CartController } from './cart.controller';
 import { Cart, CartSchema } from './schemas/cart.schema';
 import { ProductModule } from '../product/product.module';
 import { CleanExpiredReservationsJob } from './jobs/clean-expired-reservations.job';
+import { CleanAbandonedCartsJob } from './jobs/clean-abandoned-carts.job';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Cart.name, schema: CartSchema }]), ProductModule],
   controllers: [CartController],
-  providers: [CartService, StockService, CleanExpiredReservationsJob],
+  providers: [CartService, StockService, CleanExpiredReservationsJob, CleanAbandonedCartsJob],
   exports: [MongooseModule, CartService, StockService],
 })
 export class CartModule {}

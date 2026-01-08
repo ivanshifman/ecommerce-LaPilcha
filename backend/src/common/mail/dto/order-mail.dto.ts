@@ -22,6 +22,7 @@ export interface OrderMailDto {
     discountAmount: number;
     freeShipping: boolean;
   };
+  bankTransferDiscount?: number;
   total: number;
   paymentMethod?: string;
   shippingAddress: {

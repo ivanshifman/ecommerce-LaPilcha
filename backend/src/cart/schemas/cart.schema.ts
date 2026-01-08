@@ -46,6 +46,8 @@ export const CartSchema = SchemaFactory.createForClass(Cart);
 
 CartSchema.index({ user: 1 });
 CartSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+CartSchema.index({ anonymousId: 1, updatedAt: 1 });
+CartSchema.index({ anonymousId: 1, items: 1, updatedAt: 1 });
 
 CartSchema.pre('save', function (next) {
   if (this.anonymousId && !this.user) {

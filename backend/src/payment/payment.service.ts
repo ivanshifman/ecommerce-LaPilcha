@@ -14,6 +14,7 @@ import * as crypto from 'crypto';
 import { Payment, PaymentDocument } from './schemas/payment.schema';
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { ModoStrategy } from './strategies/modo.strategy';
+import { BankTransferStrategy } from './strategies/bank-transfer.strategy';
 import { PaymentStrategy } from './strategies/payment-strategy.interface';
 import { StockService } from '../cart/stock.service';
 import { ShippingService } from '../shipping/shipping.service';
@@ -38,6 +39,7 @@ export class PaymentService {
     private readonly configService: ConfigService,
     private readonly mercadoPagoStrategy: MercadoPagoStrategy,
     private readonly modoStrategy: ModoStrategy,
+    private readonly bankTransferStrategy: BankTransferStrategy,
     private readonly mailService: MailService,
     private readonly orderService: OrderService,
     private readonly shippingService: ShippingService,
@@ -47,6 +49,7 @@ export class PaymentService {
     this.strategies = new Map<PaymentMethod, PaymentStrategy>();
     this.strategies.set(PaymentMethod.MERCADO_PAGO, this.mercadoPagoStrategy);
     this.strategies.set(PaymentMethod.MODO, this.modoStrategy);
+    this.strategies.set(PaymentMethod.BANK_TRANSFER, this.bankTransferStrategy);
   }
 
   async createPayment(
@@ -141,6 +144,24 @@ export class PaymentService {
       await session.commitTransaction();
       await session.endSession();
 
+      if (dto.method === PaymentMethod.BANK_TRANSFER) {
+        try {
+          const originalAmount = order.bankTransferDiscount
+            ? order.total + order.bankTransferDiscount
+            : order.total;
+
+          await this.mailService.sendBankTransferInstructions(email, {
+            orderNumber: order.orderNumber,
+            amount: order.total,
+            paymentId: payment._id.toString(),
+            originalAmount: order.bankTransferDiscount ? originalAmount : undefined,
+            discount: order.bankTransferDiscount,
+          });
+        } catch (emailError) {
+          this.logger.error('Error enviando instrucciones de transferencia:', emailError);
+        }
+      }
+
       if (this.configService.get('NODE_ENV') !== 'production') {
         this.logger.log(`✅ Pago creado: ${payment._id.toString()}`);
       }
@@ -156,6 +177,63 @@ export class PaymentService {
         error instanceof Error ? error.message : 'No se pudo crear el pago. Intenta nuevamente.',
       );
     }
+  }
+
+  async confirmBankTransfer(
+    paymentId: string,
+    adminId: string,
+    transactionReference?: string,
+    note?: string,
+  ): Promise<PaymentResponseDto> {
+    const payment = await this.paymentModel.findById(paymentId).exec();
+
+    if (!payment) {
+      throw new NotFoundException('Pago no encontrado');
+    }
+
+    if (payment.method !== PaymentMethod.BANK_TRANSFER) {
+      throw new BadRequestException('Este método solo es válido para transferencias bancarias');
+    }
+
+    if (payment.status === PaymentStatus.APPROVED) {
+      throw new BadRequestException('Este pago ya fue confirmado');
+    }
+
+    payment.status = PaymentStatus.APPROVED;
+    payment.paidAt = new Date();
+    payment.metadata = {
+      ...payment.metadata,
+      transactionReference,
+      confirmedBy: adminId,
+      confirmationNote: note,
+      confirmedAt: new Date().toISOString(),
+    };
+
+    await payment.save();
+    await this.updateOrderByPaymentStatus(payment);
+
+    const order = await this.orderService.findById(payment.order.toString());
+    if (order) {
+      let email: string | null = null;
+      if (order.user) {
+        const user = await this.userService.findById(order.user.toString());
+        email = user?.email ?? null;
+      } else {
+        email = this.orderService.getOrderEmail(order);
+      }
+
+      if (email) {
+        try {
+          await this.mailService.sendBankTransferConfirmed(email, order.orderNumber);
+        } catch (emailError) {
+          this.logger.error('Error enviando confirmación de transferencia:', emailError);
+        }
+      }
+    }
+
+    this.logger.log(`✅ Transferencia confirmada por admin ${adminId}: ${payment._id.toString()}`);
+
+    return this.toPaymentResponseDto(payment);
   }
 
   async processWebhook(

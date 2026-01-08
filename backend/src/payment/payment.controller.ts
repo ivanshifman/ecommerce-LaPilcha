@@ -21,6 +21,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthenticatedUserDto } from '../auth/dto/authenticated-user.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { ConfirmBankTransferDto } from './dto/confirm-transfer.dto';
 import { MongoIdDto } from '../common/dto/mongo-id.dto';
 import { getCookie } from '../common/utils/request.util';
 import { CART_COOKIE } from '../common/utils/cookie.util';
@@ -142,5 +143,22 @@ export class PaymentController {
   async refundPayment(@Req() req: Request, @Param() params: MongoIdDto) {
     const admin = req.user as AuthenticatedUserDto;
     return await this.paymentService.refundPayment(params.id, admin.id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Post(':id/confirm-transfer')
+  async confirmBankTransfer(
+    @Req() req: Request,
+    @Param() params: MongoIdDto,
+    @Body() dto: ConfirmBankTransferDto,
+  ) {
+    const admin = req.user as AuthenticatedUserDto;
+    return await this.paymentService.confirmBankTransfer(
+      params.id,
+      admin.id,
+      dto.transactionReference,
+      dto.note,
+    );
   }
 }

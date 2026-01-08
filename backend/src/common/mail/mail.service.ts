@@ -51,6 +51,31 @@ export class MailService {
     return this.sendMail(to, 'Verificar correo', html);
   }
 
+  async sendBankTransferInstructions(
+    email: string,
+    data: {
+      orderNumber: string;
+      amount: number;
+      paymentId: string;
+      originalAmount?: number;
+      discount?: number;
+    },
+  ): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Instrucciones de pago - Orden ${data.orderNumber}`,
+      OrderMailTemplates.bankTransferInstructions(data),
+    );
+  }
+
+  async sendBankTransferConfirmed(email: string, orderNumber: string): Promise<SentMessageInfo> {
+    return this.sendMail(
+      email,
+      `Pago confirmado - Orden ${orderNumber}`,
+      OrderMailTemplates.bankTransferConfirmed(orderNumber),
+    );
+  }
+
   async sendOrderConfirmation(email: string, order: OrderMailDto): Promise<SentMessageInfo> {
     return this.sendMail(
       email,
