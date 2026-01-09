@@ -97,6 +97,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }),
     };
 
-    httpAdapter.reply(response, payload, status);
+    if (!response.headersSent) {
+      httpAdapter.reply(response, payload, status);
+    }
   }
 }

@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   login: async (data) => {
@@ -79,7 +79,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   getProfile: async () => {
-    set({ isLoading: true, error: null });
     try {
       const profile = await authService.getProfile();
       set({
@@ -89,8 +88,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      const apiError = handleApiError(error);
-      set({ error: apiError.message, isLoading: false });
       throw error;
     }
   },
@@ -108,10 +105,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkAuth: async () => {
+    set({ isLoading: true });
+
     try {
       await get().getProfile();
     } catch {
-      set({ user: null, profile: null, isAuthenticated: false });
+      set({
+        user: null,
+        profile: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
     }
   },
 

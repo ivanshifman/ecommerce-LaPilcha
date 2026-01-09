@@ -1,9 +1,19 @@
 'use client';
 
+import { ToastProvider } from '../components/providers/ToastProvider';
 import { useAuthInit } from '../hooks/useAuth';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+function AuthInitializer() {
     useAuthInit();
+    return null;
+}
 
-    return <>{children}</>;
+export function Providers({ children }: { children: React.ReactNode }) {
+    return (
+        <>
+            <AuthInitializer />
+            <ToastProvider />
+            {children}
+        </>
+    );
 }

@@ -71,9 +71,23 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user as AuthenticatedUserDto;
-    return this.authService.loginOAuth(user, res);
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+
+    try {
+      const anonymousCartId = getCookie(req, CART_COOKIE);
+      if (anonymousCartId) {
+        await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+      }
+
+      await this.authService.loginOAuth(user, res);
+
+      return res.redirect(`${frontendUrl}/?auth=success`);
+    } catch (error) {
+      console.error('Google OAuth error:', error);
+      return res.redirect(`${frontendUrl}/?auth=error`);
+    }
   }
 
   @Get('apple')
@@ -82,9 +96,23 @@ export class AuthController {
 
   @Get('apple/callback')
   @UseGuards(AuthGuard('apple'))
-  async appleCallback(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async appleCallback(@Req() req: Request, @Res() res: Response) {
     const user = req.user as AuthenticatedUserDto;
-    return this.authService.loginOAuth(user, res);
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+
+    try {
+      const anonymousCartId = getCookie(req, CART_COOKIE);
+      if (anonymousCartId) {
+        await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+      }
+
+      await this.authService.loginOAuth(user, res);
+
+      return res.redirect(`${frontendUrl}/?auth=success`);
+    } catch (error) {
+      console.error('Apple OAuth error:', error);
+      return res.redirect(`${frontendUrl}/login?error=oauth_failed`);
+    }
   }
 
   @Post('verify-email')

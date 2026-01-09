@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { getCurrentUser } from './lib/auth/auth-middleware';
 import { getRouteConfig } from './lib/auth/route-protection';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (

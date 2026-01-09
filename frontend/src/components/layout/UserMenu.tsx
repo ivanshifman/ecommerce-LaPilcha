@@ -6,8 +6,13 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, Package, Heart, Settings } from 'lucide-react';
 import { useAuth, useAuthActions } from '../../store/authStore';
+import { showError, showSuccess } from '../../lib/notifications';
 
-export function UserMenu() {
+interface UserMenuProps {
+    onOpen?: () => void;
+}
+
+export function UserMenu({ onOpen }: UserMenuProps) {
     const { isAuthenticated, user } = useAuth();
     const { logout } = useAuthActions();
     const router = useRouter();
@@ -25,13 +30,22 @@ export function UserMenu() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        if (isOpen && onOpen) {
+            onOpen();
+        }
+    }, [isOpen, onOpen]);
+
+
     const handleLogout = async () => {
         try {
             await logout();
             setIsOpen(false);
             router.push('/');
+            showSuccess('Se ha cerrado la sesión exitosamente.');
         } catch (error) {
             console.error('Logout failed:', error);
+            showError('Error al cerrar la sesión.');
         }
     };
 
@@ -50,7 +64,7 @@ export function UserMenu() {
     return (
         <div ref={menuRef} className="relative">
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => setIsOpen((prev) => !prev)}
                 className="p-2 hover:bg-accent rounded-full transition-colors"
                 aria-label="Menú de usuario"
             >
@@ -58,6 +72,8 @@ export function UserMenu() {
                     <Image
                         src={user.avatar}
                         alt={user.name}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full object-cover"
                     />
                 ) : (
