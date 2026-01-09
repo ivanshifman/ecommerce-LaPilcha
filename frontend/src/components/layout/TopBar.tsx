@@ -10,8 +10,6 @@ const MESSAGES = [
     <><Zap className="inline h-4 w-4 mr-2" /> Envíos a todo el país</>,
 ];
 
-
-
 export function TopBar() {
     const [index, setIndex] = useState(0);
     const [show, setShow] = useState(true);
@@ -42,7 +40,7 @@ export function TopBar() {
                     exit={{ opacity: 0, y: -16 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="hidden md:block bg-primary text-white text-sm text-center">
-                    <div className="py-2">
+                    <div className="py-1">
                         <AnimatePresence mode="wait" initial={false}>
                             <motion.p
                                 key={index}
