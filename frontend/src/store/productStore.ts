@@ -104,14 +104,10 @@ export const useProductStore = create<ProductState>((set) => ({
 
   fetchGenders: async () => {
     try {
-      console.log('Store - Fetching genders from API...');
       const genders = await productService.getGenders();
-      console.log('Store - Received genders:', genders);
       set({ genders });
-      console.log('Store - State updated, current genders:', genders);
     } catch (error) {
       const apiError = handleApiError(error);
-      console.error('Store - Error fetching genders:', apiError);
       set({ error: apiError.message });
       throw error;
     }

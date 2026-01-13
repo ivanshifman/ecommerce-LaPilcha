@@ -27,12 +27,25 @@ export const responseInterceptor = async (
 
   const { logout } = useAuthStore.getState();
 
+  const authEndpoints = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/get-user-id',
+    '/auth/verify-email',
+    '/auth/resend-code',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+  ];
+
+  if (authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))) {
+    return Promise.reject(error);
+  }
+
   if (
     error.response?.status === 401 &&
     originalRequest.method !== "get" &&
     !originalRequest._retry &&
-    !originalRequest.url?.includes("/auth/refresh") &&
-    !originalRequest.url?.includes("/auth/login")
+    !originalRequest.url?.includes("/auth/refresh")
   ) {
     if (isRefreshing) {
       return new Promise((resolve, reject) =>

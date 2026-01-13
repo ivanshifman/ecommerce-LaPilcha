@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Return, CreateReturnDto } from '../types/return.types';
 
@@ -9,7 +8,7 @@ export const returnService = {
       const response = await apiClient.post<ApiResponse<Return>>('/returns', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -18,7 +17,7 @@ export const returnService = {
       const response = await apiClient.get<ApiResponse<Return[]>>('/returns/my-returns');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -27,7 +26,7 @@ export const returnService = {
       const response = await apiClient.get<ApiResponse<Return>>(`/returns/${id}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -39,7 +38,7 @@ export const returnService = {
       });
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

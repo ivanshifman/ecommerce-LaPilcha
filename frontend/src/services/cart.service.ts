@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Cart, AddToCartDto, UpdateCartItemDto, RemoveCartItemDto } from '../types/cart.types';
 
@@ -9,7 +8,7 @@ export const cartService = {
       const response = await apiClient.get<ApiResponse<Cart>>('/cart');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -18,7 +17,7 @@ export const cartService = {
       const response = await apiClient.post<{ cart: Cart; anonymousId?: string }>('/cart/items', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -27,7 +26,7 @@ export const cartService = {
       const response = await apiClient.patch<ApiResponse<Cart>>('/cart/items', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -36,7 +35,7 @@ export const cartService = {
       const response = await apiClient.delete<ApiResponse<Cart>>('/cart/items', { data });
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -45,7 +44,7 @@ export const cartService = {
       const response = await apiClient.delete<ApiResponse<Cart>>('/cart');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -54,7 +53,7 @@ export const cartService = {
       const response = await apiClient.post<{ cart: Cart }>('/cart/merge');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

@@ -6,11 +6,13 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  ExecutionContext,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { HttpAdapterHost } from '@nestjs/core';
+import { HttpAdapterHost, Reflector } from '@nestjs/core';
 import { Response, Request } from 'express';
 import mongoose, { Error as MongooseError } from 'mongoose';
+import { SKIP_API_RESPONSE_KEY } from '../decorators/skip-api-response.decorator';
 
 interface HttpExceptionResponse {
   statusCode?: number;
@@ -31,13 +33,42 @@ export class AllExceptionsFilter implements ExceptionFilter {
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
     private readonly configService: ConfigService,
+    private readonly reflector: Reflector,
   ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
+
+    if (host.getType() !== 'http') {
+      throw exception;
+    }
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    const context = host as unknown as ExecutionContext;
+    const handler = context.getHandler?.();
+    const controller = context.getClass?.();
+
+    const skipApiResponse =
+      handler || controller
+        ? this.reflector.getAllAndOverride<boolean>(
+            SKIP_API_RESPONSE_KEY,
+            [handler, controller].filter(Boolean),
+          )
+        : false;
+
+    if (skipApiResponse) {
+      if (exception instanceof HttpException) {
+        const status = exception.getStatus();
+        const res = exception.getResponse();
+        httpAdapter.reply(response, res, status);
+        return;
+      }
+
+      throw exception;
+    }
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Se produjo un error inesperado. Inténtelo de nuevo más tarde.';

@@ -170,4 +170,15 @@ export class AuthService {
     if (!userDoc) throw new NotFoundException('Usuario no encontrado');
     return UserMapper.toProfileResponseDto(userDoc);
   }
+
+  async getUserIdByEmail(email: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      console.error('❌ User not found in database');
+      return null;
+    }
+
+    return user;
+  }
 }

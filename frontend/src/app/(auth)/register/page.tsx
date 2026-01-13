@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { AxiosError } from 'axios';
 import { registerSchema, type RegisterFormData } from '../../../schemas/auth.schema';
 import { FormInput } from '../../../components/forms/FormInput';
+import { PhoneInput } from '../../../components/forms/PhoneInput';
 import { OAuthButtons } from '../../../components/auth/OAuthButtons';
 import { useAuthActions } from '../../../store/authStore';
 import { showSuccess, showError } from '../../../lib/notifications';
-import type { ApiErrorResponse } from '../../../api/types/apiErrorResponse.interface';
+import { handleApiError } from '../../../api/error-handler';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -22,6 +22,7 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -32,23 +33,24 @@ export default function RegisterPage() {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { lastName, confirmPassword: _, ...registerData } = data;
-      
-      const response = await registerUser({
+      const { confirmPassword, ...registerData } = data;
+
+      const cleanedData = {
         ...registerData,
-        lastName: lastName || undefined,
-      });
+        lastName: registerData.lastName || undefined,
+        phone: registerData.phone || undefined,
+      };
+
+      const response = await registerUser(cleanedData);
 
       showSuccess('¡Cuenta creada! Revisa tu email para verificar.');
-      
+
       setTimeout(() => {
         router.push(`/verify-email?userId=${response.userId}`);
       }, 1500);
     } catch (err) {
-      const error = err as AxiosError<ApiErrorResponse>;
-      const errorMessage = error.response?.data?.message || 
-        'Error al crear la cuenta. Por favor, intenta nuevamente.';
-      showError(errorMessage);
+      const apiError = handleApiError(err);
+      showError(apiError.message || 'Error al crear la cuenta. Por favor, intenta nuevamente.');
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +59,6 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo y título */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-text-primary mb-2">
             Crear cuenta
@@ -67,13 +68,12 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Formulario */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-border">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <FormInput
               label="Nombre"
               type="text"
-              placeholder="Nombre"
+              placeholder="Juan"
               error={errors.name?.message}
               {...register('name')}
             />
@@ -81,7 +81,7 @@ export default function RegisterPage() {
             <FormInput
               label="Apellido (opcional)"
               type="text"
-              placeholder="Apellido"
+              placeholder="Pérez"
               error={errors.lastName?.message}
               {...register('lastName')}
             />
@@ -89,17 +89,22 @@ export default function RegisterPage() {
             <FormInput
               label="Email"
               type="email"
-              placeholder="nombre@gmail.com"
+              placeholder="juan@ejemplo.com"
               error={errors.email?.message}
               {...register('email')}
             />
 
-            <FormInput
-              label="Teléfono (opcional)"
-              type="tel"
-              placeholder="+54 9 11 1234-5678"
-              error={errors.phone?.message}
-              {...register('phone')}
+            <Controller
+              name="phone"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <PhoneInput
+                  label="Teléfono (opcional)"
+                  error={errors.phone?.message}
+                  {...field}
+                />
+              )}
             />
 
             <FormInput
@@ -119,6 +124,18 @@ export default function RegisterPage() {
               error={errors.confirmPassword?.message}
               {...register('confirmPassword')}
             />
+
+            <div className="p-4 bg-accent/30 rounded-lg">
+              <p className="text-xs text-text-muted">
+                <strong>Requisitos de contraseña:</strong>
+              </p>
+              <ul className="text-xs text-text-muted mt-1 space-y-1 list-disc list-inside">
+                <li>Mínimo 6 caracteres</li>
+                <li>Una letra mayúscula</li>
+                <li>Una letra minúscula</li>
+                <li>Un número</li>
+              </ul>
+            </div>
 
             <p className="text-xs text-text-muted">
               Al registrarte, aceptas nuestros{' '}
@@ -141,7 +158,6 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border" />
@@ -151,10 +167,8 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* OAuth Buttons */}
           <OAuthButtons />
 
-          {/* Link a login */}
           <p className="mt-6 text-center text-sm text-text-muted">
             ¿Ya tienes cuenta?{' '}
             <Link

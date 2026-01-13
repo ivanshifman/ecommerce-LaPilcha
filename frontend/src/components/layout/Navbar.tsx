@@ -59,6 +59,7 @@ export function Navbar() {
               alt="Logo"
               width={90}
               height={90}
+              loading='eager'
               className="md:w-[120px]"
             />
           </Link>

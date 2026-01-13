@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type {
   RegisterDto,
@@ -21,7 +20,7 @@ export const authService = {
       const response = await apiClient.post<ApiResponse<RegisterResponse>>('/auth/register', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -30,7 +29,7 @@ export const authService = {
       const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/login', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -39,7 +38,7 @@ export const authService = {
       const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/verify-email', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -48,7 +47,29 @@ export const authService = {
       const response = await apiClient.post<{ message: string }>('/auth/resend-code', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
+    }
+  },
+
+  getUserIdByEmail: async (email: string): Promise<{ userId: string }> => {
+    try {
+      console.log('🔍 Requesting userId for email:', email);
+
+      const response = await apiClient.post<ApiResponse<{ userId: string }>>(
+        '/auth/get-user-id',
+        { email }
+      );
+
+      const data = response.data.data || response.data;
+
+      if (!data || !data.userId) {
+        console.error('❌ Invalid response format:', response.data);
+        throw new Error('Respuesta inválida del servidor');
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -57,7 +78,7 @@ export const authService = {
       const response = await apiClient.post<{ message: string }>('/auth/forgot-password', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -66,7 +87,7 @@ export const authService = {
       const response = await apiClient.post<{ message: string }>('/auth/reset-password', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -75,7 +96,7 @@ export const authService = {
       const response = await apiClient.post<{ message: string }>('/auth/change-password', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -84,7 +105,7 @@ export const authService = {
       const response = await apiClient.post<{ message: string }>('/auth/logout');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -93,7 +114,7 @@ export const authService = {
       const response = await apiClient.post<ApiResponse<AuthResponse>>('/auth/refresh');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -102,7 +123,7 @@ export const authService = {
       const response = await apiClient.get<ApiResponse<ProfileResponse>>('/auth/profile');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -111,7 +132,7 @@ export const authService = {
       const response = await apiClient.patch<ApiResponse<ProfileResponse>>('/auth/profile', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 

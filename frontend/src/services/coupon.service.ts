@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Coupon, ValidateCouponDto, CouponValidationResponse } from '../types/coupon.types';
 
@@ -9,7 +8,7 @@ export const couponService = {
       const response = await apiClient.post<ApiResponse<CouponValidationResponse>>('/coupons/validate', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -18,7 +17,7 @@ export const couponService = {
       const response = await apiClient.get<{ valid: boolean; message?: string }>(`/coupons/quick-check/${code}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -27,7 +26,7 @@ export const couponService = {
       const response = await apiClient.get<ApiResponse<Partial<Coupon>[]>>('/coupons/public/active');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -39,7 +38,7 @@ export const couponService = {
       });
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -48,7 +47,7 @@ export const couponService = {
       const response = await apiClient.get<ApiResponse<Coupon>>(`/coupons/${id}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

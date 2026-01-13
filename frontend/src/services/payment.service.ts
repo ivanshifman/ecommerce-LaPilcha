@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Payment, CreatePaymentDto } from '../types/payment.types';
 
@@ -9,7 +8,7 @@ export const paymentService = {
       const response = await apiClient.post<ApiResponse<Payment>>('/payments', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -18,7 +17,7 @@ export const paymentService = {
       const response = await apiClient.get<ApiResponse<Payment>>(`/payments/order/${orderId}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -27,7 +26,7 @@ export const paymentService = {
       const response = await apiClient.get<ApiResponse<Payment[]>>('/payments/my-payments');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -37,7 +36,7 @@ export const paymentService = {
       const response = await apiClient.get<ApiResponse<Payment[]>>('/payments');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -46,7 +45,7 @@ export const paymentService = {
       const response = await apiClient.post<ApiResponse<Payment>>(`/payments/${paymentId}/refund`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

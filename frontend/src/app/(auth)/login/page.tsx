@@ -6,13 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
-import { AxiosError } from 'axios';
 import { loginSchema, type LoginFormData } from '../../../schemas/auth.schema';
 import { FormInput } from '../../../components/forms/FormInput';
 import { OAuthButtons } from '../../../components/auth/OAuthButtons';
 import { useAuthActions } from '../../../store/authStore';
 import { showSuccess, showError } from '../../../lib/notifications';
-import type { ApiErrorResponse } from '../../../api/types/apiErrorResponse.interface';
+import { handleApiError } from '../../../api/error-handler';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -23,6 +22,7 @@ export default function LoginPage() {
     const {
         register,
         handleSubmit,
+        getValues,
         formState: { errors },
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -38,15 +38,31 @@ export default function LoginPage() {
             const from = searchParams.get('from') || '/';
             router.push(from);
         } catch (err) {
-            const error = err as AxiosError<ApiErrorResponse>;
-            const errorData = error.response?.data;
-            const errorMessage = errorData?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+            const apiError = handleApiError(err);
 
-            if (errorData?.statusCode === 403 && errorMessage.toLowerCase().includes('verificado')) {
+            if (
+                apiError.statusCode === 401 &&
+                apiError.message.toLowerCase().includes('email no verificado')
+            ) {
                 showError('Debes verificar tu email antes de iniciar sesión');
-                router.push('/verify-email-notice');
+
+                const email = getValues('email');
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('pendingVerificationEmail', email);
+                }
+
+                setTimeout(() => {
+                    router.push('/verify-email-notice');
+                }, 1500);
+            } else if (
+                apiError.statusCode === 401 &&
+                (apiError.message.toLowerCase().includes('credenciales') ||
+                    apiError.message.toLowerCase().includes('contraseña') ||
+                    apiError.message.toLowerCase().includes('usuario'))
+            ) {
+                showError('Email o contraseña incorrectos');
             } else {
-                showError(errorMessage);
+                showError(apiError.message || 'Error al iniciar sesión. Intenta nuevamente.');
             }
         } finally {
             setIsLoading(false);
@@ -56,7 +72,6 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                {/* Logo y título */}
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-bold text-text-primary mb-2">
                         Bienvenido de vuelta
@@ -66,7 +81,6 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Formulario */}
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-border">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <FormInput
@@ -105,7 +119,6 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-border" />
@@ -115,10 +128,8 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {/* OAuth Buttons */}
                     <OAuthButtons />
 
-                    {/* Link a registro */}
                     <p className="mt-6 text-center text-sm text-text-muted">
                         ¿No tienes cuenta?{' '}
                         <Link

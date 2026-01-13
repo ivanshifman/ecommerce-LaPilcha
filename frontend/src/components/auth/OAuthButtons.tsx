@@ -13,7 +13,6 @@ export function OAuthButtons() {
 
     return (
         <div className="space-y-3">
-            {/* Google */}
             <button
                 type="button"
                 onClick={handleGoogleLogin}
@@ -42,7 +41,6 @@ export function OAuthButtons() {
                 </span>
             </button>
 
-            {/* Apple */}
             <button
                 type="button"
                 onClick={handleAppleLogin}

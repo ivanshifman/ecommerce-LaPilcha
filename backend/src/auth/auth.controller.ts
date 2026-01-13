@@ -8,12 +8,14 @@ import {
   BadRequestException,
   Patch,
   Get,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { SkipApiResponse } from '../common/decorators/skip-api-response.decorator';
 import { AuthService } from './auth.service';
 import { EmailVerificationService } from './emailVerification.service';
 import { PasswordService } from './password.service';
@@ -28,6 +30,7 @@ import { AuthResponseDto, ProfileResponseDto, UserResponseDto } from './dto/auth
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { GetUserIdDto } from './dto/get-user-id.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -170,5 +173,15 @@ export class AuthController {
   async profile(@Req() req: Request): Promise<ProfileResponseDto> {
     const user = req.user as AuthenticatedUserDto;
     return await this.authService.profile(user);
+  }
+
+  @Post('get-user-id')
+  @SkipApiResponse()
+  async getUserIdByEmail(@Body() dto: GetUserIdDto): Promise<{ userId: string }> {
+    const user = await this.authService.getUserIdByEmail(dto.email);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    return { userId: String(user._id) };
   }
 }

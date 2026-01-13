@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/shallow';
-import { userService } from '../services/user.service';
+import { wishlistService } from '../services/wishlist.service';
 import type { Product } from '../types/product.types';
 import { handleApiError } from '../api/error-handler';
 
@@ -24,7 +24,7 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
   fetchWishlist: async () => {
     set({ isLoading: true });
     try {
-      const items = await userService.getWishlist();
+      const items = await wishlistService.getWishlist();
       set({ items, isLoading: false });
     } catch (error) {
       const apiError = handleApiError(error);
@@ -34,17 +34,17 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
   },
 
   addToWishlist: async (productId) => {
-    await userService.addToWishlist(productId);
+    await wishlistService.addToWishlist(productId);
     await get().fetchWishlist();
   },
 
   removeFromWishlist: async (productId) => {
-    await userService.removeFromWishlist(productId);
+    await wishlistService.removeFromWishlist(productId);
     await get().fetchWishlist();
   },
 
   clearWishlist: async () => {
-    await userService.clearWishlist();
+    await wishlistService.clearWishlist();
     set({ items: [] });
   },
 

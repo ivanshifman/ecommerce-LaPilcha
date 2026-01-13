@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Product, ProductFilters, PaginatedProducts } from '../types/product.types';
 
@@ -11,7 +10,7 @@ export const productService = {
       });
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -20,7 +19,7 @@ export const productService = {
       const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -29,7 +28,7 @@ export const productService = {
       const response = await apiClient.get<ApiResponse<Product>>(`/products/slug/${slug}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -38,7 +37,7 @@ export const productService = {
       const response = await apiClient.get<ApiResponse<Product[]>>('/products/meta/featured');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -50,7 +49,7 @@ export const productService = {
       const paginatedData = unwrapResponse(response.data);
       return paginatedData.docs;
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -59,7 +58,7 @@ export const productService = {
       const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/genders');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -68,7 +67,7 @@ export const productService = {
       const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/categories');
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -79,7 +78,7 @@ export const productService = {
       );
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -90,7 +89,7 @@ export const productService = {
       );
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

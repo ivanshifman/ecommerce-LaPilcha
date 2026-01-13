@@ -1,5 +1,4 @@
 import { apiClient } from '../api/axios-client';
-import { handleApiError } from '../api/error-handler';
 import { ApiResponse, unwrapResponse } from '../api/helper';
 import type { Shipping, ShippingOption, CalculateShippingDto } from '../types/shipping.types';
 
@@ -9,7 +8,7 @@ export const shippingService = {
       const response = await apiClient.post<ApiResponse<ShippingOption[]>>('/shipping/calculate', data);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -18,7 +17,7 @@ export const shippingService = {
       const response = await apiClient.get<ApiResponse<Shipping>>(`/shipping/order/${orderId}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -30,7 +29,7 @@ export const shippingService = {
       });
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 
@@ -39,7 +38,7 @@ export const shippingService = {
       const response = await apiClient.get<ApiResponse<Shipping>>(`/shipping/${id}`);
       return unwrapResponse(response.data);
     } catch (error) {
-      throw handleApiError(error);
+      throw error;
     }
   },
 };

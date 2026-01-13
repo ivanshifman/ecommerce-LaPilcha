@@ -92,7 +92,6 @@ export function MobileMenu({ open, onClose }: Props) {
         <AnimatePresence>
             {open && (
                 <>
-                    {/* BLUR BACKDROP */}
                     <motion.div
                         className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
                         initial={{ opacity: 0 }}
@@ -101,7 +100,6 @@ export function MobileMenu({ open, onClose }: Props) {
                         onClick={onClose}
                     />
 
-                    {/* MENU */}
                     <motion.div
                         className="fixed inset-y-0 left-0 z-50 w-full bg-background flex flex-col"
                         initial={{ x: '-100%' }}
@@ -109,7 +107,6 @@ export function MobileMenu({ open, onClose }: Props) {
                         exit={{ x: '-100%' }}
                         transition={{ duration: 0.3, ease: 'easeOut' }}
                     >
-                        {/* HEADER */}
                         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
                             {level !== 'root' ? (
                                 <button
@@ -153,7 +150,6 @@ export function MobileMenu({ open, onClose }: Props) {
                             </button>
                         </div>
 
-                        {/* CONTENT */}
                         <div className="flex-1 overflow-y-auto px-4 py-6 relative">
                             <AnimatePresence mode="wait">
                                 <motion.div
@@ -163,10 +159,8 @@ export function MobileMenu({ open, onClose }: Props) {
                                     exit={{ opacity: 0, x: -20 }}
                                     transition={{ duration: 0.25, ease: 'easeOut' }}
                                 >
-                                    {/* ROOT */}
                                     {level === 'root' && (
                                         <ul className="space-y-5 text-lg">
-                                            {/* AUTH */}
                                             {!isAuthenticated ? (
                                                 <>
                                                     <li>
@@ -239,7 +233,6 @@ export function MobileMenu({ open, onClose }: Props) {
                                         </ul>
                                     )}
 
-                                    {/* PRODUCTS */}
                                     {level === 'products' && (
                                         <ul className="space-y-5 text-lg">
                                             <li>
@@ -268,8 +261,6 @@ export function MobileMenu({ open, onClose }: Props) {
                                             ))}
                                         </ul>
                                     )}
-
-                                    {/* GENDER */}
                                     {level === 'gender' && activeGender && (
                                         <ul className="space-y-5 text-lg">
                                             <li>
@@ -299,7 +290,6 @@ export function MobileMenu({ open, onClose }: Props) {
                                         </ul>
                                     )}
 
-                                    {/* CATEGORY */}
                                     {level === 'category' && activeCategory && (
                                         <ul className="space-y-5 text-lg">
                                             <li>
