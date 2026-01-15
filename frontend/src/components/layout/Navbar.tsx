@@ -42,7 +42,7 @@ export function Navbar() {
               <CategoryDropdown
                 key={gender}
                 gender={gender}
-                label={genderLabels[gender] || gender}
+                label={genderLabels[gender as keyof typeof genderLabels] || gender}
                 openGender={openGender}
                 setOpenGender={setOpenGender}
               />

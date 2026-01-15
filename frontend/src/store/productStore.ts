@@ -18,6 +18,7 @@ interface ProductState {
     hasNextPage: boolean;
     hasPrevPage: boolean;
   } | null;
+  sizes: string[];
   isLoading: boolean;
   error: string | null;
   fetchProducts: (filters?: ProductFilters) => Promise<void>;
@@ -28,6 +29,7 @@ interface ProductState {
   fetchCategoriesByGender: (gender: string) => Promise<string[]>;
   fetchCategories: () => Promise<void>;
   fetchSubcategories: (category: string) => Promise<string[]>;
+  fetchSizes: () => Promise<void>;
   searchProducts: (query: string) => Promise<Product[]>;
   clearCurrentProduct: () => void;
   clearError: () => void;
@@ -40,6 +42,7 @@ export const useProductStore = create<ProductState>((set) => ({
   genders: [],
   categories: [],
   pagination: null,
+  sizes: [],
   isLoading: false,
   error: null,
 
@@ -145,6 +148,17 @@ export const useProductStore = create<ProductState>((set) => ({
     }
   },
 
+  fetchSizes: async () => {
+    try {
+      const sizes = await productService.getSizes();
+      set({ sizes });
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
   searchProducts: async (query) => {
     try {
       return await productService.search(query);
@@ -167,6 +181,7 @@ export const useProducts = () => useProductStore(
     featuredProducts: state.featuredProducts,
     genders: state.genders,
     categories: state.categories,
+    sizes: state.sizes,
     pagination: state.pagination,
     isLoading: state.isLoading,
     error: state.error,
@@ -183,6 +198,7 @@ export const useProductActions = () => useProductStore(
     fetchCategoriesByGender: state.fetchCategoriesByGender,
     fetchCategories: state.fetchCategories,
     fetchSubcategories: state.fetchSubcategories,
+    fetchSizes: state.fetchSizes,
     searchProducts: state.searchProducts,
     clearCurrentProduct: state.clearCurrentProduct,
     clearError: state.clearError,

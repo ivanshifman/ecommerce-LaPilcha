@@ -1,6 +1,8 @@
-export const genderLabels: Record<string, string> = {
-  male: 'Hombre',
-  female: 'Mujer',
-  kid: 'Niño',
-  unisex: 'Unisex',
+import { GenderEnum } from '../types/product.types';
+
+export const genderLabels: Record<GenderEnum, string> = {
+  [GenderEnum.MALE]: 'Hombre',
+  [GenderEnum.FEMALE]: 'Mujer',
+  [GenderEnum.UNISEX]: 'Unisex',
+  [GenderEnum.KID]: 'Niños',
 };

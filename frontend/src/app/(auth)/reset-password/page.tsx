@@ -156,7 +156,6 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
             <Lock className="w-8 h-8 text-primary" />
@@ -169,10 +168,8 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-border">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Info Box */}
             <div className="p-4 bg-accent/30 rounded-lg">
               <p className="text-sm text-text-muted">
                 <strong>Tu contraseña debe tener:</strong>
@@ -185,7 +182,6 @@ export default function ResetPasswordPage() {
               </ul>
             </div>
 
-            {/* Password Input */}
             <FormInput
               label="Nueva contraseña"
               type="password"
@@ -195,7 +191,6 @@ export default function ResetPasswordPage() {
               {...register('password')}
             />
 
-            {/* Confirm Password Input */}
             <FormInput
               label="Confirmar contraseña"
               type="password"
@@ -205,7 +200,6 @@ export default function ResetPasswordPage() {
               {...register('confirmPassword')}
             />
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -216,7 +210,6 @@ export default function ResetPasswordPage() {
             </button>
           </form>
 
-          {/* Back to Login */}
           <div className="mt-6 text-center">
             <Link
               href="/login"

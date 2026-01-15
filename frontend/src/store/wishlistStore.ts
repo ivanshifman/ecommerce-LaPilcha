@@ -64,11 +64,14 @@ export const useWishlist = () => useWishlistStore(
   }))
 );
 
-export const useWishlistActions = () => useWishlistStore((state) => ({
-  fetchWishlist: state.fetchWishlist,
-  addToWishlist: state.addToWishlist,
-  removeFromWishlist: state.removeFromWishlist,
-  clearWishlist: state.clearWishlist,
-  isInWishlist: state.isInWishlist,
-  clearError: state.clearError,
-}));
+export const useWishlistActions = () =>
+  useWishlistStore(
+    useShallow((state) => ({
+      fetchWishlist: state.fetchWishlist,
+      addToWishlist: state.addToWishlist,
+      removeFromWishlist: state.removeFromWishlist,
+      clearWishlist: state.clearWishlist,
+      isInWishlist: state.isInWishlist,
+      clearError: state.clearError,
+    }))
+  );

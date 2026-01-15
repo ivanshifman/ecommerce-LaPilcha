@@ -92,4 +92,13 @@ export const productService = {
       throw error;
     }
   },
+
+  getSizes: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/sizes');
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
 };

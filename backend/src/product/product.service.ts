@@ -132,6 +132,41 @@ export class ProductService {
     return product;
   }
 
+  async getSizes(): Promise<string[]> {
+    const products = await this.productModel.find({ status: true }).select('sizes');
+
+    const allSizes = new Set<string>();
+
+    products.forEach((product) => {
+      product.sizes?.forEach((sizeObj) => {
+        if (sizeObj.size) {
+          allSizes.add(sizeObj.size.toUpperCase());
+        }
+      });
+    });
+
+    const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    const numericSizes: string[] = [];
+    const standardSizes: string[] = [];
+    const otherSizes: string[] = [];
+
+    Array.from(allSizes).forEach((size) => {
+      if (/^\d+$/.test(size)) {
+        numericSizes.push(size);
+      } else if (sizeOrder.includes(size)) {
+        standardSizes.push(size);
+      } else {
+        otherSizes.push(size);
+      }
+    });
+
+    numericSizes.sort((a, b) => Number(a) - Number(b));
+    standardSizes.sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
+    otherSizes.sort();
+
+    return [...standardSizes, ...numericSizes, ...otherSizes];
+  }
+
   async update(id: string, dto: UpdateProductDto) {
     const product = await this.productModel.findByIdAndUpdate(
       id,

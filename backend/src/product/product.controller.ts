@@ -69,6 +69,11 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
+  @Get('meta/sizes')
+  getSizes() {
+    return this.productService.getSizes();
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
