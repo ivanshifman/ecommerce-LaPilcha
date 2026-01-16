@@ -76,14 +76,47 @@ export default function ProductsPage() {
         fetchProducts(newFilters).catch(console.error);
     }, [searchParams, fetchProducts]);
 
-    const handleFilterChange = (key: keyof ProductFilters, value: ProductFilters[keyof ProductFilters]) => {
-        const newFilters = {
+    const handleFilterChange = (
+        key: keyof ProductFilters,
+        value: ProductFilters[keyof ProductFilters]
+    ) => {
+        setFilters(prev => {
+            const newFilters: ProductFilters = {
+                ...prev,
+                [key]: value,
+                page: 1,
+            };
+
+            if (value !== undefined) {
+                if (key === 'gender') {
+                    newFilters.category = undefined;
+                    newFilters.subcategory = undefined;
+                    newFilters.size = undefined;
+                    newFilters.brand = undefined;
+                    newFilters.color = undefined;
+                    newFilters.priceMin = undefined;
+                    newFilters.priceMax = undefined;
+                }
+
+                if (key === 'category') {
+                    newFilters.subcategory = undefined;
+                    newFilters.size = undefined;
+                    newFilters.brand = undefined;
+                }
+
+                if (key === 'subcategory') {
+                    newFilters.size = undefined;
+                }
+            }
+
+            return newFilters;
+        });
+
+        fetchProducts({
             ...filters,
             [key]: value,
             page: 1,
-        };
-        setFilters(newFilters);
-        fetchProducts(newFilters).catch(console.error);
+        }).catch(console.error);
     };
 
     const handleSortChange = (sortBy: string, order: 'asc' | 'desc') => {
@@ -114,6 +147,11 @@ export default function ProductsPage() {
         fetchProducts(cleanFilters).catch(console.error);
     };
 
+    const handleApplyFilters = (newFilters: ProductFilters) => {
+        setFilters(newFilters);
+        fetchProducts(newFilters).catch(console.error);
+    };
+
     const activeFiltersCount = [
         filters.category,
         filters.subcategory,
@@ -133,7 +171,7 @@ export default function ProductsPage() {
                     setFilterOpen(false);
                 }}
                 filters={filters}
-                onFilterChange={handleFilterChange}
+                onApplyFilters={handleApplyFilters}
                 onClearAll={handleClearAllFilters}
             />
 

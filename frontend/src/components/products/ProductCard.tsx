@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
-import { useWishlistActions } from '../../store/wishlistStore';
+import { useWishlist, useWishlistActions } from '../../store/wishlistStore';
 import { useCartActions } from '../../store/cartStore';
 import { showSuccess, showError } from '../../lib/notifications';
 import type { Product } from '../../types/product.types';
@@ -24,12 +24,13 @@ export function ProductCard({ product, user }: Props) {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
+    const { hydrated } = useWishlist();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistActions();
     const { addToCart } = useCartActions();
 
     const isAdmin = user?.role === UserRole.ADMIN;
-    const inWishlist = isInWishlist(product.id);
-    const hasDiscount = product.discount && product.discount > 0;
+    const inWishlist = hydrated && isInWishlist(product.id);
+    const hasDiscount = typeof product.discount === 'number' && product.discount > 0;
     const discountedPrice = hasDiscount
         ? product.price * (1 - product.discount! / 100)
         : product.price;

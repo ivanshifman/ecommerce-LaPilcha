@@ -10,18 +10,23 @@ import { SearchBar } from './SearchBar';
 import { UserMenu } from './UserMenu';
 import { CartIcon } from './CartIcon';
 import { MobileMenu } from './MobileMenu';
-import { useWishlist } from '../../store/wishlistStore';
+import { useWishlist, useWishlistActions } from '../../store/wishlistStore';
 import { useProductActions, useProducts } from '../../store/productStore';
 import { genderLabels } from '../../utils/genderLabels';
 
 export function Navbar() {
   const { count: wishlistCount } = useWishlist();
   const { genders } = useProducts();
+  const { fetchWishlist } = useWishlistActions();
   const { fetchGenders } = useProductActions();
 
   const headerRef = useRef<HTMLElement>(null);
   const [openGender, setOpenGender] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    fetchWishlist().catch(console.error);
+  }, [fetchWishlist]);
 
   useEffect(() => {
     fetchGenders().catch(console.error);

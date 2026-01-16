@@ -8,6 +8,7 @@ interface WishlistState {
   items: Product[];
   isLoading: boolean;
   error: string | null;
+  hydrated: boolean;
   fetchWishlist: () => Promise<void>;
   addToWishlist: (productId: string) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
@@ -20,12 +21,13 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
   items: [],
   isLoading: false,
   error: null,
+  hydrated: false,
 
   fetchWishlist: async () => {
     set({ isLoading: true });
     try {
       const items = await wishlistService.getWishlist();
-      set({ items, isLoading: false });
+      set({ items, isLoading: false, hydrated: true });
     } catch (error) {
       const apiError = handleApiError(error);
       set({ error: apiError.message, isLoading: false });
@@ -60,6 +62,7 @@ export const useWishlist = () => useWishlistStore(
     items: state.items,
     isLoading: state.isLoading,
     error: state.error,
+    hydrated: state.hydrated,
     count: state.items.length,
   }))
 );

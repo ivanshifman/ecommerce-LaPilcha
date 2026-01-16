@@ -12,20 +12,32 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     filters: ProductFilters;
-    onFilterChange: (key: keyof ProductFilters, value: string | number | undefined) => void;
+    onApplyFilters: (filters: ProductFilters) => void
     onClearAll: () => void;
 }
 
-export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClearAll }: Props) {
+const DEFAULT_FILTERS: ProductFilters = {
+    gender: GenderEnum.MALE,
+    page: 1,
+    limit: 12,
+    sortBy: 'createdAt',
+    order: 'desc',
+};
+
+export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClearAll }: Props) {
     const {
         fetchFilteredCategories,
         fetchFilteredSubcategories,
         fetchFilteredSizes,
-        fetchFilteredBrands
+        fetchFilteredBrands,
     } = useProductActions();
     const { sizes, categories, brands } = useProducts();
     const [subcategories, setSubcategories] = useState<string[]>([]);
-    const [tempFilters, setTempFilters] = useState<ProductFilters>(filters);
+    const [tempFilters, setTempFilters] = useState<ProductFilters>({
+        ...DEFAULT_FILTERS,
+        ...filters,
+        gender: filters.gender ?? GenderEnum.MALE,
+    });
 
     const [expandedSections, setExpandedSections] = useState({
         category: true,
@@ -38,11 +50,14 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
     });
 
     useEffect(() => {
-        if (isOpen) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setTempFilters(filters);
-        }
-    }, [isOpen, filters]);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTempFilters({
+            ...DEFAULT_FILTERS,
+            ...filters,
+            gender: filters.gender ?? GenderEnum.MALE,
+        });
+    }, [filters]);
+
 
     useEffect(() => {
         const updateFilters = async () => {
@@ -60,6 +75,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
 
                 await fetchFilteredSizes(baseFilters);
                 await fetchFilteredBrands(baseFilters);
+
             } catch (error) {
                 console.error('Error al actualizar filtros:', error);
             }
@@ -74,19 +90,45 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
         fetchFilteredCategories,
         fetchFilteredSubcategories,
         fetchFilteredSizes,
-        fetchFilteredBrands
+        fetchFilteredBrands,
     ]);
 
     const toggleSection = (section: keyof typeof expandedSections) => {
         setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
 
-    const handleTempFilterChange = (key: keyof ProductFilters, value: string | number | undefined) => {
-        setTempFilters((prev) => ({
-            ...prev,
-            [key]: value,
-            ...(key === 'category' && { subcategory: undefined }),
-        }));
+    const handleTempFilterChange = (
+        key: keyof ProductFilters,
+        value: string | number | undefined
+    ) => {
+        setTempFilters((prev) => {
+            const next = {
+                ...prev,
+                [key]: value,
+            };
+
+            if (key === 'gender') {
+                next.category = undefined;
+                next.subcategory = undefined;
+                next.size = undefined;
+                next.brand = undefined;
+                next.color = undefined;
+                next.priceMin = undefined;
+                next.priceMax = undefined;
+            }
+
+            if (key === 'category') {
+                next.subcategory = undefined;
+                next.size = undefined;
+                next.brand = undefined;
+            }
+
+            if (key === 'subcategory') {
+                next.size = undefined;
+            }
+
+            return next;
+        });
     };
 
     const handleRadioChange = (key: keyof ProductFilters, value: string) => {
@@ -98,38 +140,37 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
     };
 
     const handleApplyFilters = () => {
-        Object.entries(tempFilters).forEach(([key, value]) => {
-            if (filters[key as keyof ProductFilters] !== value) {
-                onFilterChange(key as keyof ProductFilters, value);
-            }
+        onApplyFilters({
+            ...tempFilters,
+            page: 1,
         });
+
         onClose();
     };
 
+
     const handleClearFilters = () => {
-        setTempFilters({
-            page: 1,
-            limit: 12,
-            sortBy: 'createdAt',
-            order: 'desc',
-        });
+        const resetFilters: ProductFilters = {
+            ...DEFAULT_FILTERS,
+        };
+
+        setTempFilters(resetFilters);
         onClearAll();
         onClose();
     };
 
+
     return (
         <>
             <div
-                className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
-                    isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                }`}
+                className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}
                 onClick={onClose}
             />
 
             <aside
-                className={`fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-400 overflow-y-auto ${
-                    isOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                className={`fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-400 overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
             >
                 <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between z-10">
                     <h2 className="text-lg font-bold text-text-primary">Filtros</h2>
@@ -143,6 +184,38 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                 </div>
 
                 <div className="p-6 space-y-6 pb-32">
+                    {/* Gender */}
+                    <div className="border-b border-border pb-4">
+                        <button
+                            onClick={() => toggleSection('gender')}
+                            className="w-full flex items-center justify-between mb-3"
+                        >
+                            <h3 className="font-semibold text-text-primary">Género</h3>
+                            <ChevronDown
+                                className={`w-4 h-4 transition-transform ${expandedSections.gender ? 'rotate-180' : ''
+                                    }`}
+                            />
+                        </button>
+                        {expandedSections.gender && (
+                            <div className="space-y-2">
+                                {Object.values(GenderEnum).map((gender) => (
+                                    <label key={gender} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            checked={tempFilters.gender === gender}
+                                            onChange={() => handleRadioChange('gender', gender)}
+                                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
+                                        />
+                                        <span className="text-sm text-text-secondary">
+                                            {genderLabels[gender]}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Category */}
                     <div className="border-b border-border pb-4">
                         <button
@@ -151,9 +224,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         >
                             <h3 className="font-semibold text-text-primary">Categoría</h3>
                             <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.category ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${expandedSections.category ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                         {expandedSections.category && (
@@ -189,9 +261,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                             >
                                 <h3 className="font-semibold text-text-primary">Subcategoría</h3>
                                 <ChevronDown
-                                    className={`w-4 h-4 transition-transform ${
-                                        expandedSections.subcategory ? 'rotate-180' : ''
-                                    }`}
+                                    className={`w-4 h-4 transition-transform ${expandedSections.subcategory ? 'rotate-180' : ''
+                                        }`}
                                 />
                             </button>
                             {expandedSections.subcategory && (
@@ -213,39 +284,6 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         </div>
                     )}
 
-                    {/* Gender */}
-                    <div className="border-b border-border pb-4">
-                        <button
-                            onClick={() => toggleSection('gender')}
-                            className="w-full flex items-center justify-between mb-3"
-                        >
-                            <h3 className="font-semibold text-text-primary">Género</h3>
-                            <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.gender ? 'rotate-180' : ''
-                                }`}
-                            />
-                        </button>
-                        {expandedSections.gender && (
-                            <div className="space-y-2">
-                                {Object.values(GenderEnum).map((gender) => (
-                                    <label key={gender} className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            checked={tempFilters.gender === gender}
-                                            onChange={() => handleRadioChange('gender', gender)}
-                                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 cursor-pointer"
-                                        />
-                                        <span className="text-sm text-text-secondary">
-                                            {genderLabels[gender]}
-                                        </span>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
                     {/* Color */}
                     <div className="border-b border-border pb-4">
                         <button
@@ -254,9 +292,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         >
                             <h3 className="font-semibold text-text-primary">Color</h3>
                             <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.color ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${expandedSections.color ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                         {expandedSections.color && (
@@ -267,11 +304,10 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                                         onClick={() =>
                                             handleTempFilterChange('color', tempFilters.color === color ? undefined : color)
                                         }
-                                        className={`relative w-10 h-10 rounded-full border-2 transition-all ${
-                                            tempFilters.color === color
-                                                ? 'border-primary scale-110'
-                                                : 'border-border hover:scale-105'
-                                        }`}
+                                        className={`relative w-10 h-10 rounded-full border-2 transition-all ${tempFilters.color === color
+                                            ? 'border-primary scale-110'
+                                            : 'border-border hover:scale-105'
+                                            }`}
                                         style={{ backgroundColor: colorMap[color] }}
                                         title={colorLabels[color]}
                                     >
@@ -294,9 +330,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         >
                             <h3 className="font-semibold text-text-primary">Talle</h3>
                             <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.size ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${expandedSections.size ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                         {expandedSections.size && (
@@ -308,11 +343,10 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                                             onClick={() =>
                                                 handleTempFilterChange('size', tempFilters.size === size ? undefined : size)
                                             }
-                                            className={`py-2 text-sm font-medium rounded-md transition-colors ${
-                                                tempFilters.size === size
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-accent text-text-primary hover:bg-accent-dark'
-                                            }`}
+                                            className={`py-2 text-sm font-medium rounded-md transition-colors ${tempFilters.size === size
+                                                ? 'bg-primary text-white'
+                                                : 'bg-accent text-text-primary hover:bg-accent-dark'
+                                                }`}
                                         >
                                             {size}
                                         </button>
@@ -334,9 +368,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         >
                             <h3 className="font-semibold text-text-primary">Marca</h3>
                             <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.brand ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${expandedSections.brand ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                         {expandedSections.brand && (
@@ -371,9 +404,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFilterChange, onClea
                         >
                             <h3 className="font-semibold text-text-primary">Precio</h3>
                             <ChevronDown
-                                className={`w-4 h-4 transition-transform ${
-                                    expandedSections.price ? 'rotate-180' : ''
-                                }`}
+                                className={`w-4 h-4 transition-transform ${expandedSections.price ? 'rotate-180' : ''
+                                    }`}
                             />
                         </button>
                         {expandedSections.price && (

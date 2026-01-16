@@ -232,6 +232,8 @@ export const useProductStore = create<ProductState>((set) => ({
 
   clearCurrentProduct: () => set({ currentProduct: null }),
 
+  clearSizes: () => set({ sizes: [] }),
+
   clearError: () => set({ error: null }),
 }));
 
