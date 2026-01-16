@@ -18,21 +18,9 @@ export class ProductService {
     return product.save();
   }
 
-  async findAll(query: QueryProductDto) {
-    const {
-      page = 1,
-      limit = 12,
-      search,
-      category,
-      subcategory,
-      color,
-      size,
-      brand,
-      priceMin,
-      priceMax,
-      sortBy = 'createdAt',
-      order = 'desc',
-    } = query;
+  // Método auxiliar para construir filtros
+  private buildFilters(query: QueryProductDto) {
+    const { search, category, subcategory, color, size, brand, gender, priceMin, priceMax } = query;
 
     const filter: Record<string, unknown> = { status: true };
 
@@ -45,6 +33,9 @@ export class ProductService {
       filter.subcategory = { $regex: new RegExp(`^${escapeRegex(subcategory)}$`, 'i') };
     if (color) filter.color = { $regex: new RegExp(`^${escapeRegex(color)}$`, 'i') };
     if (brand) filter.brand = { $regex: new RegExp(`^${escapeRegex(brand)}$`, 'i') };
+    if (gender) {
+      filter.gender = { $regex: new RegExp(`^${escapeRegex(gender)}$`, 'i') };
+    }
     if (size) {
       filter.sizes = {
         $elemMatch: {
@@ -67,6 +58,14 @@ export class ProductService {
         (filter.price as Record<string, number>).$lte = priceMax;
       }
     }
+
+    return filter;
+  }
+
+  async findAll(query: QueryProductDto) {
+    const { page = 1, limit = 12, sortBy = 'createdAt', order = 'desc' } = query;
+
+    const filter = this.buildFilters(query);
 
     const sort: Record<string, 1 | -1> = {};
     sort[sortBy] = order === 'asc' ? 1 : -1;
@@ -132,25 +131,65 @@ export class ProductService {
     return product;
   }
 
-  async getSizes(): Promise<string[]> {
-    const products = await this.productModel.find({ status: true }).select('sizes');
+  async getSizesFiltered(query: QueryProductDto): Promise<string[]> {
+    const filter = this.buildFilters({
+      ...query,
+      size: undefined,
+    });
+
+    const products = await this.productModel.find(filter).select('sizes');
 
     const allSizes = new Set<string>();
 
     products.forEach((product) => {
       product.sizes?.forEach((sizeObj) => {
-        if (sizeObj.size) {
+        if (sizeObj.size && sizeObj.stock > 0) {
           allSizes.add(sizeObj.size.toUpperCase());
         }
       });
     });
 
+    return this.sortSizes(Array.from(allSizes));
+  }
+
+  async getBrandsFiltered(query: QueryProductDto): Promise<string[]> {
+    const filter = this.buildFilters({
+      ...query,
+      brand: undefined,
+    });
+
+    const brands = await this.productModel.distinct('brand', filter);
+    return brands.filter(Boolean).sort();
+  }
+
+  async getCategoriesFiltered(query: QueryProductDto): Promise<string[]> {
+    const filter = this.buildFilters({
+      ...query,
+      category: undefined,
+      subcategory: undefined,
+    });
+
+    const categories = await this.productModel.distinct('category', filter);
+    return categories.filter(Boolean).sort();
+  }
+
+  async getSubcategoriesFiltered(query: QueryProductDto): Promise<string[]> {
+    const filter = this.buildFilters({
+      ...query,
+      subcategory: undefined,
+    });
+
+    const subcategories = await this.productModel.distinct('subcategory', filter);
+    return subcategories.filter(Boolean).sort();
+  }
+
+  private sortSizes(sizes: string[]): string[] {
     const sizeOrder = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
     const numericSizes: string[] = [];
     const standardSizes: string[] = [];
     const otherSizes: string[] = [];
 
-    Array.from(allSizes).forEach((size) => {
+    sizes.forEach((size) => {
       if (/^\d+$/.test(size)) {
         numericSizes.push(size);
       } else if (sizeOrder.includes(size)) {
@@ -165,6 +204,27 @@ export class ProductService {
     otherSizes.sort();
 
     return [...standardSizes, ...numericSizes, ...otherSizes];
+  }
+
+  async getSizes(): Promise<string[]> {
+    const products = await this.productModel.find({ status: true }).select('sizes');
+
+    const allSizes = new Set<string>();
+
+    products.forEach((product) => {
+      product.sizes?.forEach((sizeObj) => {
+        if (sizeObj.size) {
+          allSizes.add(sizeObj.size.toUpperCase());
+        }
+      });
+    });
+
+    return this.sortSizes(Array.from(allSizes));
+  }
+
+  async getBrands(): Promise<string[]> {
+    const brands = await this.productModel.distinct('brand', { status: true });
+    return brands.filter(Boolean).sort();
   }
 
   async update(id: string, dto: UpdateProductDto) {

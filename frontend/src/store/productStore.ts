@@ -10,6 +10,7 @@ interface ProductState {
   featuredProducts: Product[];
   categories: string[];
   genders: string[];
+  brands: string[];
   pagination: {
     totalDocs: number;
     limit: number;
@@ -30,6 +31,11 @@ interface ProductState {
   fetchCategories: () => Promise<void>;
   fetchSubcategories: (category: string) => Promise<string[]>;
   fetchSizes: () => Promise<void>;
+  fetchBrands: () => Promise<void>;
+  fetchFilteredSizes: (filters?: ProductFilters) => Promise<void>;
+  fetchFilteredBrands: (filters?: ProductFilters) => Promise<void>;
+  fetchFilteredCategories: (filters?: ProductFilters) => Promise<void>;
+  fetchFilteredSubcategories: (filters?: ProductFilters) => Promise<string[]>;
   searchProducts: (query: string) => Promise<Product[]>;
   clearCurrentProduct: () => void;
   clearError: () => void;
@@ -40,6 +46,7 @@ export const useProductStore = create<ProductState>((set) => ({
   currentProduct: null,
   featuredProducts: [],
   genders: [],
+  brands: [],
   categories: [],
   pagination: null,
   sizes: [],
@@ -159,6 +166,60 @@ export const useProductStore = create<ProductState>((set) => ({
     }
   },
 
+  fetchBrands: async () => {
+    try {
+      const brands = await productService.getBrands();
+      set({ brands });
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
+  fetchFilteredSizes: async (filters) => {
+    try {
+      const sizes = await productService.getSizesFiltered(filters);
+      set({ sizes });
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
+  fetchFilteredBrands: async (filters) => {
+    try {
+      const brands = await productService.getBrandsFiltered(filters);
+      set({ brands });
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
+  fetchFilteredCategories: async (filters) => {
+    try {
+      const categories = await productService.getCategoriesFiltered(filters);
+      set({ categories });
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
+  fetchFilteredSubcategories: async (filters) => {
+    try {
+      return await productService.getSubcategoriesFiltered(filters);
+    } catch (error) {
+      const apiError = handleApiError(error);
+      set({ error: apiError.message });
+      throw error;
+    }
+  },
+
   searchProducts: async (query) => {
     try {
       return await productService.search(query);
@@ -182,6 +243,7 @@ export const useProducts = () => useProductStore(
     genders: state.genders,
     categories: state.categories,
     sizes: state.sizes,
+    brands: state.brands,
     pagination: state.pagination,
     isLoading: state.isLoading,
     error: state.error,
@@ -199,6 +261,11 @@ export const useProductActions = () => useProductStore(
     fetchCategories: state.fetchCategories,
     fetchSubcategories: state.fetchSubcategories,
     fetchSizes: state.fetchSizes,
+    fetchBrands: state.fetchBrands,
+    fetchFilteredSizes: state.fetchFilteredSizes,
+    fetchFilteredBrands: state.fetchFilteredBrands,
+    fetchFilteredCategories: state.fetchFilteredCategories,
+    fetchFilteredSubcategories: state.fetchFilteredSubcategories,
     searchProducts: state.searchProducts,
     clearCurrentProduct: state.clearCurrentProduct,
     clearError: state.clearError,

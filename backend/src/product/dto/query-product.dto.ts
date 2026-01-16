@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsString, IsIn, IsNumber, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsNumber, Min, Max, IsEnum } from 'class-validator';
 import { GenderEnum } from '../common/enums/gender.enum';
 
 export class QueryProductDto {
@@ -45,12 +45,12 @@ export class QueryProductDto {
   size?: string;
 
   @IsOptional()
-  @IsIn(Object.values(GenderEnum), { message: 'gender inválido.' })
-  gender?: string;
-
-  @IsOptional()
   @IsString({ message: 'brand debe ser texto.' })
   brand?: string;
+
+  @IsOptional()
+  @IsEnum(GenderEnum)
+  gender?: GenderEnum;
 
   @IsOptional()
   @Type(() => Number)

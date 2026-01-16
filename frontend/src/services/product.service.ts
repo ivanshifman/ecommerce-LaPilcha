@@ -101,4 +101,70 @@ export const productService = {
       throw error;
     }
   },
+
+  getBrands: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/meta/brands');
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getSizesFiltered: async (filters?: ProductFilters): Promise<string[]> => {
+    try {
+      const filtersCopy = filters ? { ...filters } : {};
+      delete filtersCopy.size;
+
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/filters/sizes', {
+        params: filtersCopy,
+      });
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getBrandsFiltered: async (filters?: ProductFilters): Promise<string[]> => {
+    try {
+      const filtersCopy = filters ? { ...filters } : {};
+      delete filtersCopy.brand;
+
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/filters/brands', {
+        params: filtersCopy,
+      });
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getCategoriesFiltered: async (filters?: ProductFilters): Promise<string[]> => {
+    try {
+      const filtersCopy = filters ? { ...filters } : {};
+      delete filtersCopy.category;
+      delete filtersCopy.subcategory;
+
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/filters/categories', {
+        params: filtersCopy,
+      });
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getSubcategoriesFiltered: async (filters?: ProductFilters): Promise<string[]> => {
+    try {
+      const filtersCopy = filters ? { ...filters } : {};
+      delete filtersCopy.subcategory;
+
+      const response = await apiClient.get<ApiResponse<string[]>>('/products/filters/subcategories', {
+        params: filtersCopy,
+      });
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
 };

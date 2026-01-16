@@ -74,6 +74,31 @@ export class ProductController {
     return this.productService.getSizes();
   }
 
+  @Get('meta/brands')
+  getBrands() {
+    return this.productService.getBrands();
+  }
+
+  @Get('filters/sizes')
+  async getFilteredSizes(@Query() query: QueryProductDto) {
+    return this.productService.getSizesFiltered(query);
+  }
+
+  @Get('filters/brands')
+  async getFilteredBrands(@Query() query: QueryProductDto) {
+    return this.productService.getBrandsFiltered(query);
+  }
+
+  @Get('filters/categories')
+  async getFilteredCategories(@Query() query: QueryProductDto) {
+    return this.productService.getCategoriesFiltered(query);
+  }
+
+  @Get('filters/subcategories')
+  async getFilteredSubcategories(@Query() query: QueryProductDto) {
+    return this.productService.getSubcategoriesFiltered(query);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')

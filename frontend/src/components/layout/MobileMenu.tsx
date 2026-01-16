@@ -16,11 +16,10 @@ import {
     Truck,
     Handbag,
 } from 'lucide-react';
-
 import { useProductActions, useProducts } from '../../store/productStore';
 import { genderLabels } from '../../utils/genderLabels';
 import { useAuth, useAuthActions } from '../../store/authStore';
-import { showSuccess } from '@/src/lib/notifications';
+import { showSuccess } from '../../lib/notifications';
 
 interface Props {
     open: boolean;
@@ -45,10 +44,7 @@ export function MobileMenu({ open, onClose }: Props) {
     const [subcategories, setSubcategories] = useState<string[]>([]);
 
     useEffect(() => {
-        if (open) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
+        if (!open) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setLevel('root');
             setActiveGender(null);
@@ -56,10 +52,6 @@ export function MobileMenu({ open, onClose }: Props) {
             setCategories([]);
             setSubcategories([]);
         }
-
-        return () => {
-            document.body.style.overflow = '';
-        };
     }, [open]);
 
     useEffect(() => {
@@ -134,7 +126,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                         {level === 'root' &&
                                             (isAuthenticated ? 'Mi perfil' : 'Bienvenido')}
                                         {level === 'products' && 'Productos'}
-                                        {level === 'gender' && genderLabels[activeGender!]}
+                                        {level === 'gender' && genderLabels[activeGender! as keyof typeof genderLabels]}
                                         {level === 'category' && activeCategory}
                                     </motion.span>
                                 </AnimatePresence>
@@ -254,7 +246,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                                         }}
                                                         className="flex w-full justify-between capitalize"
                                                     >
-                                                        {genderLabels[gender] || gender}
+                                                        {genderLabels[gender as keyof typeof genderLabels] || gender}
                                                         <ChevronRight className="w-4 h-4" />
                                                     </button>
                                                 </li>
@@ -269,7 +261,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                                     onClick={onClose}
                                                     className="text-sm text-primary uppercase"
                                                 >
-                                                    Ver todo {genderLabels[activeGender]}
+                                                    Ver todo {genderLabels[activeGender as keyof typeof genderLabels]}
                                                 </Link>
                                             </li>
 

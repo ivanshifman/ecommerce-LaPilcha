@@ -36,6 +36,7 @@ export function ProductCard({ product, user }: Props) {
 
     const handleToggleWishlist = async (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         if (isAdmin) return;
 
         setIsTogglingWishlist(true);
@@ -86,12 +87,12 @@ export function ProductCard({ product, user }: Props) {
                     src={product.images?.[0] || '/imagen-no-disponible.webp'}
                     alt={product.name}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading='lazy'
                 />
 
                 {hasDiscount && (
-                    <div className="absolute top-2 left-2 bg-destructive text-white px-2 py-1 rounded-md text-xs font-medium">
+                    <div className="absolute top-2 left-2 bg-destructive text-white px-2 py-1 rounded-md text-xs font-medium z-10">
                         -{product.discount}%
                     </div>
                 )}
@@ -101,7 +102,7 @@ export function ProductCard({ product, user }: Props) {
                         title='Agregar a favoritos'
                         onClick={handleToggleWishlist}
                         disabled={isTogglingWishlist}
-                        className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all disabled:opacity-50"
+                        className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all disabled:opacity-50 z-10 cursor-pointer"
                     >
                         <Heart
                             className={`w-4 h-4 transition-colors ${inWishlist ? 'fill-primary text-primary' : 'text-text-muted'
@@ -161,7 +162,12 @@ export function ProductCard({ product, user }: Props) {
                                         key={sizeObj.size}
                                         onClick={() => setSelectedSize(sizeObj.size)}
                                         disabled={sizeObj.stock === 0}
-                                        className={`px-3 py-1 text-xs border rounded transition-colors ${selectedSize === sizeObj.size ? 'bg-primary text-white border-primary' : sizeObj.stock === 0 ? 'bg-muted text-text-muted border-border cursor-not-allowed' : 'bg-white text-text-primary border-border hover:border-primary'}`}
+                                        className={`px-3 py-1 text-xs border rounded transition-colors cursor-pointer ${selectedSize === sizeObj.size
+                                            ? 'bg-primary text-white border-primary'
+                                            : sizeObj.stock === 0
+                                                ? 'bg-muted text-text-muted border-border cursor-not-allowed'
+                                                : 'bg-white text-text-primary border-border hover:border-primary'
+                                            }`}
                                     >
                                         {sizeObj.size}
                                     </button>
@@ -171,7 +177,7 @@ export function ProductCard({ product, user }: Props) {
                         <button
                             onClick={handleAddToCart}
                             disabled={!selectedSize || isAddingToCart}
-                            className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                            className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
                         >
                             <ShoppingCart className="w-4 h-4" />
                             {isAddingToCart ? 'Agregando...' : 'Agregar al carrito'}
@@ -179,15 +185,14 @@ export function ProductCard({ product, user }: Props) {
                     </>
                 )}
 
-                
-                    <Link
-                        href={`/products/${product.slug}`}
-                        className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2 text-sm mt-4"
-                    >
-                        <Eye className="w-4 h-4" />
-                        Ver detalles
-                    </Link>
-              
+                <Link
+                    href={`/products/${product.slug}`}
+                    className="w-full bg-secondary text-white py-2 rounded-lg font-medium hover:bg-secondary-dark transition-colors flex items-center justify-center gap-2 text-sm mt-3"
+                >
+                    <Eye className="w-4 h-4" />
+                    Ver detalles
+                </Link>
             </div>
-        </div >);
+        </div>
+    );
 }
