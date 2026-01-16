@@ -18,13 +18,20 @@ export class ProductService {
     return product.save();
   }
 
-  // Método auxiliar para construir filtros
   private buildFilters(query: QueryProductDto) {
     const { search, category, subcategory, color, size, brand, gender, priceMin, priceMax } = query;
 
     const filter: Record<string, unknown> = { status: true };
 
-    if (search) filter.$text = { $search: search };
+    if (search) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { brand: searchRegex },
+        { category: searchRegex },
+      ];
+    }
 
     const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

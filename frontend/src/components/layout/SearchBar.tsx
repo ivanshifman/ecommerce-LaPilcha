@@ -1,49 +1,68 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useTransition } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, X } from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { useProductActions } from '../../store/productStore';
 import type { Product } from '../../types/product.types';
 
 interface Props {
-  onOpen?: () => void;
+    onOpen?: () => void;
 }
-
 
 export function SearchBar({ onOpen }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
     const { searchProducts } = useProductActions();
     const router = useRouter();
+    const pathname = usePathname();
     const searchRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
+        setIsOpen(false);
+        setQuery('');
+        setResults([]);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
         if (!query.trim()) {
             setResults([]);
             return;
         }
 
-        const timeoutId = setTimeout(async () => {
-            setIsLoading(true);
-            try {
-                const products = await searchProducts(query);
-                setResults(products);
-            } catch (error) {
-                console.error('Search failed:', error);
-                setResults([]);
-            } finally {
-                setIsLoading(false);
-            }
+        if (query.trim().length < 2) {
+            setResults([]);
+            return;
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            startTransition(async () => {
+                try {
+                    const products = await searchProducts(query);
+                    setResults(products);
+                } catch (error) {
+                    console.error('Error en búsqueda:', error);
+                    setResults([]);
+                }
+            });
         }, 300);
 
-        return () => clearTimeout(timeoutId);
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
     }, [query, searchProducts]);
 
     useEffect(() => {
@@ -53,9 +72,11 @@ export function SearchBar({ onOpen }: Props) {
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isOpen]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,6 +84,7 @@ export function SearchBar({ onOpen }: Props) {
             router.push(`/products?search=${encodeURIComponent(query)}`);
             setIsOpen(false);
             setQuery('');
+            setResults([]);
         }
     };
 
@@ -72,15 +94,29 @@ export function SearchBar({ onOpen }: Props) {
         inputRef.current?.focus();
     };
 
+    const handleOpen = () => {
+        onOpen?.();
+        setIsOpen(true);
+        window.dispatchEvent(new Event('navbar-menu-open'));
+        setTimeout(() => inputRef.current?.focus(), 100);
+    };
+
+    const handleProductClick = () => {
+        setIsOpen(false);
+        setQuery('');
+        setResults([]);
+    };
+
+    const showLoading = isPending && query.trim().length >= 2;
+    const showResults = !isPending && results.length > 0 && query.trim().length >= 2;
+    const showNoResults = !isPending && results.length === 0 && query.trim().length >= 2;
+    const showMinChars = query.trim().length > 0 && query.trim().length < 2;
+
     return (
         <div ref={searchRef} className="relative">
             {!isOpen && (
                 <button
-                    onClick={() => {
-                        onOpen?.();
-                        setIsOpen(true);
-                        setTimeout(() => inputRef.current?.focus(), 100);
-                    }}
+                    onClick={handleOpen}
                     className="p-2 hover:bg-accent rounded-full transition-colors"
                     aria-label="Buscar"
                 >
@@ -89,8 +125,7 @@ export function SearchBar({ onOpen }: Props) {
             )}
 
             {isOpen && (
-                <div className="absolute z-50 top-full mt-4 w-[85vw] max-w-[300px] left-1/2 -translate-x-[60%] sm:left-auto sm:right-0 sm:translate-x-0 bg-white shadow-lg rounded-lg border border-border overflow-hidden"
-                >
+                <div className="absolute z-50 top-full mt-4 w-[85vw] max-w-[300px] left-1/2 -translate-x-[60%] sm:left-auto sm:right-0 sm:translate-x-0 bg-white shadow-lg rounded-lg border border-border overflow-hidden">
                     <form onSubmit={handleSearch} className="p-3">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -100,9 +135,9 @@ export function SearchBar({ onOpen }: Props) {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Buscar productos..."
-                                className="w-full pl-9 pr-9 py-1.5 text-sm border border-border rounded-md  focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                className="w-full pl-9 pr-9 py-1.5 text-sm border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
                             />
-                            {query && (
+                            {query && !isPending && (
                                 <button
                                     type="button"
                                     onClick={handleClear}
@@ -112,27 +147,40 @@ export function SearchBar({ onOpen }: Props) {
                                     <X className="w-4 h-4 text-text-muted" />
                                 </button>
                             )}
+                            {isPending && (
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                                </div>
+                            )}
                         </div>
                     </form>
 
                     {query && (
                         <div className="max-h-56 overflow-y-auto border-t border-border">
-                            {isLoading ? (
-                                <div className="p-4 text-center text-text-muted">Buscando...</div>
-                            ) : results.length > 0 ? (
+                            {showMinChars && (
+                                <div className="p-4 text-center text-text-muted text-sm">
+                                    Escribe al menos 2 caracteres para buscar
+                                </div>
+                            )}
+
+                            {showLoading && (
+                                <div className="p-4 text-center text-text-muted flex items-center justify-center gap-2">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <span>Buscando...</span>
+                                </div>
+                            )}
+
+                            {showResults && (
                                 <div className="p-2">
                                     {results.map((product) => (
                                         <Link
                                             key={product.id}
                                             href={`/products/${product.slug}`}
-                                            onClick={() => {
-                                                setIsOpen(false);
-                                                setQuery('');
-                                            }}
+                                            onClick={handleProductClick}
                                             className="flex items-center gap-2 p-2 hover:bg-accent rounded-md transition-colors"
                                         >
                                             <Image
-                                                src={product.images?.[0] || '/placeholder.png'}
+                                                src={product.images?.[0] || '/imagen-no-disponible.webp'}
                                                 alt={product.name}
                                                 width={40}
                                                 height={40}
@@ -149,7 +197,9 @@ export function SearchBar({ onOpen }: Props) {
                                         </Link>
                                     ))}
                                 </div>
-                            ) : (
+                            )}
+
+                            {showNoResults && (
                                 <div className="p-4 text-center text-text-muted">
                                     No se encontraron productos
                                 </div>

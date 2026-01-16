@@ -23,6 +23,7 @@ export function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
   const [openGender, setOpenGender] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchWishlist().catch(console.error);
@@ -31,6 +32,33 @@ export function Navbar() {
   useEffect(() => {
     fetchGenders().catch(console.error);
   }, [fetchGenders]);
+
+  const handleSearchOpen = () => {
+    setUserMenuOpen(false);
+    setOpenGender(null);
+    window.dispatchEvent(new Event('navbar-menu-open'));
+  };
+
+  const handleUserMenuOpen = () => {
+    setUserMenuOpen(true);
+    setOpenGender(null);
+    window.dispatchEvent(new Event('navbar-menu-open'));
+  };
+
+  const handleMobileMenuOpen = () => {
+    setMobileOpen(true);
+    setUserMenuOpen(false);
+    setOpenGender(null);
+    window.dispatchEvent(new Event('navbar-menu-open'));
+  };
+
+  const handleCategoryOpen = (gender: string | null) => {
+    setOpenGender(gender);
+    setUserMenuOpen(false);
+    if (gender) {
+      window.dispatchEvent(new Event('navbar-menu-open'));
+    }
+  };
 
   return (
     <header
@@ -49,7 +77,7 @@ export function Navbar() {
                 gender={gender}
                 label={genderLabels[gender as keyof typeof genderLabels] || gender}
                 openGender={openGender}
-                setOpenGender={setOpenGender}
+                setOpenGender={handleCategoryOpen}
               />
             ))}
           </div>
@@ -72,11 +100,11 @@ export function Navbar() {
           {/* RIGHT */}
           <div className="flex items-center gap-1.5 md:gap-2">
             <div className="hidden md:block">
-              <SearchBar />
+              <SearchBar onOpen={handleSearchOpen} />
             </div>
 
             <div className="md:hidden">
-              <SearchBar onOpen={() => setMobileOpen(false)} />
+              <SearchBar onOpen={handleSearchOpen} />
             </div>
 
             <Link
@@ -91,12 +119,16 @@ export function Navbar() {
               )}
             </Link>
 
-            <UserMenu onOpen={() => setMobileOpen(false)} />
+            <UserMenu
+              onOpen={handleUserMenuOpen}
+              isOpen={userMenuOpen}
+              onClose={() => setUserMenuOpen(false)}
+            />
             <CartIcon />
 
             {/* HAMBURGER */}
             <button
-              onClick={() => setMobileOpen(true)}
+              onClick={handleMobileMenuOpen}
               className="md:hidden p-2 hover:bg-accent rounded-full"
               aria-label="Abrir menú"
             >

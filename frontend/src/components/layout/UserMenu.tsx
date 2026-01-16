@@ -10,42 +10,71 @@ import { showError, showSuccess } from '../../lib/notifications';
 
 interface UserMenuProps {
     onOpen?: () => void;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
-export function UserMenu({ onOpen }: UserMenuProps) {
+export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnClose }: UserMenuProps) {
     const { isAuthenticated, user } = useAuth();
     const { logout } = useAuthActions();
     const router = useRouter();
-    const [isOpen, setIsOpen] = useState(false);
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+    const setIsOpen = externalOnClose !== undefined 
+        ? (value: boolean) => value ? onOpen?.() : externalOnClose() 
+        : setInternalIsOpen;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
+                if (externalOnClose) {
+                    externalOnClose();
+                } else {
+                    setInternalIsOpen(false);
+                }
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        if (isOpen && onOpen) {
-            onOpen();
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
         }
-    }, [isOpen, onOpen]);
+    }, [isOpen, externalOnClose]);
 
+    const handleToggle = () => {
+        const newState = !isOpen;
+        
+        if (externalOnClose !== undefined) {
+            if (newState) {
+                onOpen?.();
+                window.dispatchEvent(new Event('navbar-menu-open'));
+            } else {
+                externalOnClose();
+            }
+        } else {
+            setInternalIsOpen(newState);
+            if (newState) {
+                onOpen?.();
+                window.dispatchEvent(new Event('navbar-menu-open'));
+            }
+        }
+    };
 
     const handleLogout = async () => {
         try {
             await logout();
-            setIsOpen(false);
+            if (externalOnClose) {
+                externalOnClose();
+            } else {
+                setInternalIsOpen(false);
+            }
             router.push('/');
-            showSuccess('Se ha cerrado la sesión exitosamente.');
+            showSuccess('Se ha cerrado la sesión exitosamente.');
         } catch (error) {
             console.error('Logout failed:', error);
-            showError('Error al cerrar la sesión.');
+            showError('Error al cerrar la sesión.');
         }
     };
 
@@ -64,7 +93,7 @@ export function UserMenu({ onOpen }: UserMenuProps) {
     return (
         <div ref={menuRef} className="relative">
             <button
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={handleToggle}
                 className="p-2 hover:bg-accent rounded-full transition-colors"
                 aria-label="Menú de usuario"
             >
@@ -95,7 +124,13 @@ export function UserMenu({ onOpen }: UserMenuProps) {
                     <div className="py-2">
                         <Link
                             href="/profile"
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => {
+                                if (externalOnClose) {
+                                    externalOnClose();
+                                } else {
+                                    setInternalIsOpen(false);
+                                }
+                            }}
                             className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
                         >
                             <Settings className="w-4 h-4" />
@@ -104,7 +139,13 @@ export function UserMenu({ onOpen }: UserMenuProps) {
 
                         <Link
                             href="/orders"
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => {
+                                if (externalOnClose) {
+                                    externalOnClose();
+                                } else {
+                                    setInternalIsOpen(false);
+                                }
+                            }}
                             className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
                         >
                             <Package className="w-4 h-4" />
@@ -113,7 +154,13 @@ export function UserMenu({ onOpen }: UserMenuProps) {
 
                         <Link
                             href="/wishlist"
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => {
+                                if (externalOnClose) {
+                                    externalOnClose();
+                                } else {
+                                    setInternalIsOpen(false);
+                                }
+                            }}
                             className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
                         >
                             <Heart className="w-4 h-4" />

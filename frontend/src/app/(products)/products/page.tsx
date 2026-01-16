@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Filter, SlidersHorizontal, X } from 'lucide-react';
 import { useProductActions, useProducts } from '../../../store/productStore';
@@ -42,6 +42,8 @@ function getPageTitle(filters: ProductFilters): string {
 
 export default function ProductsPage() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const { products, pagination, isLoading } = useProducts();
     const { fetchProducts } = useProductActions();
     const { user } = useAuth();
@@ -57,21 +59,65 @@ export default function ProductsPage() {
     });
 
     useEffect(() => {
-        const search = searchParams.get('search');
-        const category = searchParams.get('category');
-        const gender = searchParams.get('gender');
-
-        const newFilters: ProductFilters = {
-            page: 1,
-            limit: 12,
-            sortBy: 'createdAt',
-            order: 'desc',
-            search: search || undefined,
-            category: category || undefined,
-            gender: (gender as ProductFilters['gender']) || undefined,
+        const handleNavbarMenuOpen = () => {
+            setFilterOpen(false);
+            setSortOpen(false);
         };
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+        window.addEventListener('navbar-menu-open', handleNavbarMenuOpen);
+        return () => window.removeEventListener('navbar-menu-open', handleNavbarMenuOpen);
+    }, []);
+
+    const updateURL = useCallback((newFilters: ProductFilters) => {
+        const params = new URLSearchParams();
+
+        Object.entries(newFilters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                if (key === 'page' && value === 1) return;
+                if (key === 'limit' && value === 12) return;
+                if (key === 'sortBy' && value === 'createdAt') return;
+                if (key === 'order' && value === 'desc') return;
+
+                params.set(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const newURL = queryString ? `${pathname}?${queryString}` : pathname;
+
+        router.push(newURL, { scroll: false });
+    }, [pathname, router]);
+
+    useEffect(() => {
+        const search = searchParams.get('search');
+        const category = searchParams.get('category');
+        const subcategory = searchParams.get('subcategory');
+        const gender = searchParams.get('gender');
+        const color = searchParams.get('color');
+        const size = searchParams.get('size');
+        const brand = searchParams.get('brand');
+        const priceMin = searchParams.get('priceMin');
+        const priceMax = searchParams.get('priceMax');
+        const page = searchParams.get('page');
+        const sortBy = searchParams.get('sortBy');
+        const order = searchParams.get('order');
+
+        const newFilters: ProductFilters = {
+            page: page ? parseInt(page) : 1,
+            limit: 12,
+            sortBy: (sortBy as ProductFilters['sortBy']) || 'createdAt',
+            order: (order as 'asc' | 'desc') || 'desc',
+            search: search || undefined,
+            category: category || undefined,
+            subcategory: subcategory || undefined,
+            gender: (gender as ProductFilters['gender']) || undefined,
+            color: color as ProductFilters['color'] || undefined,
+            size: size || undefined,
+            brand: brand || undefined,
+            priceMin: priceMin ? parseFloat(priceMin) : undefined,
+            priceMax: priceMax ? parseFloat(priceMax) : undefined,
+        };
+
         setFilters(newFilters);
         fetchProducts(newFilters).catch(console.error);
     }, [searchParams, fetchProducts]);
@@ -80,43 +126,37 @@ export default function ProductsPage() {
         key: keyof ProductFilters,
         value: ProductFilters[keyof ProductFilters]
     ) => {
-        setFilters(prev => {
-            const newFilters: ProductFilters = {
-                ...prev,
-                [key]: value,
-                page: 1,
-            };
-
-            if (value !== undefined) {
-                if (key === 'gender') {
-                    newFilters.category = undefined;
-                    newFilters.subcategory = undefined;
-                    newFilters.size = undefined;
-                    newFilters.brand = undefined;
-                    newFilters.color = undefined;
-                    newFilters.priceMin = undefined;
-                    newFilters.priceMax = undefined;
-                }
-
-                if (key === 'category') {
-                    newFilters.subcategory = undefined;
-                    newFilters.size = undefined;
-                    newFilters.brand = undefined;
-                }
-
-                if (key === 'subcategory') {
-                    newFilters.size = undefined;
-                }
-            }
-
-            return newFilters;
-        });
-
-        fetchProducts({
+        const newFilters: ProductFilters = {
             ...filters,
             [key]: value,
             page: 1,
-        }).catch(console.error);
+        };
+
+        if (value !== undefined) {
+            if (key === 'gender') {
+                newFilters.category = undefined;
+                newFilters.subcategory = undefined;
+                newFilters.size = undefined;
+                newFilters.brand = undefined;
+                newFilters.color = undefined;
+                newFilters.priceMin = undefined;
+                newFilters.priceMax = undefined;
+            }
+
+            if (key === 'category') {
+                newFilters.subcategory = undefined;
+                newFilters.size = undefined;
+                newFilters.brand = undefined;
+            }
+
+            if (key === 'subcategory') {
+                newFilters.size = undefined;
+            }
+        }
+
+        setFilters(newFilters);
+        updateURL(newFilters);
+        fetchProducts(newFilters).catch(console.error);
     };
 
     const handleSortChange = (sortBy: string, order: 'asc' | 'desc') => {
@@ -126,12 +166,14 @@ export default function ProductsPage() {
             order,
         };
         setFilters(newFilters);
+        updateURL(newFilters);
         fetchProducts(newFilters).catch(console.error);
     };
 
     const handlePageChange = (page: number) => {
         const newFilters = { ...filters, page };
         setFilters(newFilters);
+        updateURL(newFilters);
         fetchProducts(newFilters).catch(console.error);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -144,11 +186,13 @@ export default function ProductsPage() {
             order: 'desc',
         };
         setFilters(cleanFilters);
+        updateURL(cleanFilters);
         fetchProducts(cleanFilters).catch(console.error);
     };
 
     const handleApplyFilters = (newFilters: ProductFilters) => {
         setFilters(newFilters);
+        updateURL(newFilters);
         fetchProducts(newFilters).catch(console.error);
     };
 
@@ -167,9 +211,7 @@ export default function ProductsPage() {
         <div className="min-h-screen bg-background">
             <FilterSidebar
                 isOpen={filterOpen}
-                onClose={() => {
-                    setFilterOpen(false);
-                }}
+                onClose={() => setFilterOpen(false)}
                 filters={filters}
                 onApplyFilters={handleApplyFilters}
                 onClearAll={handleClearAllFilters}
@@ -266,15 +308,28 @@ export default function ProductsPage() {
                                     </button>
                                 </span>
                             )}
+                            {(filters.priceMin || filters.priceMax) && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                                    Precio: ${filters.priceMin || 0} - ${filters.priceMax || '∞'}
+                                    <button
+                                        title='Eliminar filtro'
+                                        onClick={() => {
+                                            handleFilterChange('priceMin', undefined);
+                                            handleFilterChange('priceMax', undefined);
+                                        }}
+                                        className="hover:bg-primary/20 rounded-full p-0.5"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </span>
+                            )}
                         </div>
                     )}
                 </div>
 
                 <div className="flex items-center justify-between mb-6 gap-4">
                     <button
-                        onClick={() => {
-                            setFilterOpen(true);
-                        }}
+                        onClick={() => setFilterOpen(true)}
                         className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors"
                     >
                         <Filter className="w-5 h-5 text-text-primary" />
@@ -288,9 +343,7 @@ export default function ProductsPage() {
 
                     <div className="relative">
                         <button
-                            onClick={() => {
-                                setSortOpen(!sortOpen);
-                            }}
+                            onClick={() => setSortOpen(!sortOpen)}
                             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors"
                         >
                             <SlidersHorizontal className="w-5 h-5 text-text-primary" />

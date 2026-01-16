@@ -109,7 +109,7 @@ ProductSchema.plugin(mongoosePaginate);
 ProductSchema.index({ category: 1, subcategory: 1 });
 ProductSchema.index({ brand: 1, category: 1 });
 ProductSchema.index({ price: 1, status: 1 });
-ProductSchema.index({ name: 'text', description: 'text', tags: 'text' });
+ProductSchema.index({ name: 'text', description: 'text', tags: 'text', brands: 'text' });
 ProductSchema.index({ status: 1, featured: 1, salesCount: -1 });
 
 ProductSchema.pre('save', function (next) {
