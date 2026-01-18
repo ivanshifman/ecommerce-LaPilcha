@@ -330,7 +330,7 @@ export default function ProductsPage() {
                 <div className="flex items-center justify-between mb-6 gap-4">
                     <button
                         onClick={() => setFilterOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
                     >
                         <Filter className="w-5 h-5 text-text-primary" />
                         <span className="font-medium text-text-primary">Filtros</span>
@@ -344,7 +344,7 @@ export default function ProductsPage() {
                     <div className="relative">
                         <button
                             onClick={() => setSortOpen(!sortOpen)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
                         >
                             <SlidersHorizontal className="w-5 h-5 text-text-primary" />
                             <span className="font-medium text-text-primary">Ordenar</span>
