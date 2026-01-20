@@ -107,6 +107,14 @@ export class CreateProductDto {
   sizes?: CreateSizeDto[];
 
   @IsOptional()
+  @IsString({ message: 'slug debe ser texto.' })
+  slug?: string;
+
+  @IsOptional()
+  @IsString({ message: 'productGroup debe ser texto.' })
+  productGroup?: string;
+
+  @IsOptional()
   @IsNumber({}, { message: 'peso debe ser un número.' })
   @Min(0, { message: 'weight mínimo 0.' })
   weight?: number;

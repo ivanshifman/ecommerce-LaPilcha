@@ -23,6 +23,15 @@ export const productService = {
     }
   },
 
+  getColorVariants: async (productGroup: string): Promise<Product[]> => {
+    try {
+      const response = await apiClient.get<ApiResponse<Product[]>>(`/products/variants/${productGroup}`);
+      return unwrapResponse(response.data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getBySlug: async (slug: string): Promise<Product> => {
     try {
       const response = await apiClient.get<ApiResponse<Product>>(`/products/slug/${slug}`);

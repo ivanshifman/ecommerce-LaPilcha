@@ -13,6 +13,8 @@ import { SizeSelector } from '../../../../components/product/SizeSelector';
 import { QuantitySelector } from '../../../../components/product/QuantitySelector';
 import { ProductTabs } from '../../../../components/product/ProductTabs';
 import { RelatedProducts } from '../../../../components/product/RelatedProducts';
+import { SizeGuideModal } from '../../../../components/product/SizeGuideModal';
+import { ColorVariantSelector } from '../../../../components/product/ColorVariantSelector';
 import { showSuccess, showError } from '../../../../lib/notifications';
 import { colorLabels } from '../../../../utils/colorMap';
 import { genderLabels } from '../../../../utils/genderLabels';
@@ -36,9 +38,11 @@ export default function ProductDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+    const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
     const isAdmin = user?.role === UserRole.ADMIN;
     const inWishlist = hydrated && currentProduct ? isInWishlist(currentProduct.id) : false;
+    const hasSizes = currentProduct?.sizes && currentProduct.sizes.length > 0;
 
     useEffect(() => {
         if (user && !isAdmin) {
@@ -100,14 +104,19 @@ export default function ProductDetailPage() {
     const maxQuantity = maxQuantityToAdd;
 
     const handleAddToCart = async () => {
-        if (isAdmin || !selectedSize) return;
+        if (isAdmin) return;
 
-        if (maxQuantity === 0) {
+        if (hasSizes && !selectedSize) {
+            showError('Por favor, selecciona un talle');
+            return;
+        }
+
+        if (hasSizes && maxQuantity === 0) {
             showError('No hay stock disponible para agregar');
             return;
         }
 
-        if (quantity > maxQuantity) {
+        if (hasSizes && quantity > maxQuantity) {
             showError(`Solo puedes agregar ${maxQuantity} unidades más`);
             return;
         }
@@ -116,7 +125,7 @@ export default function ProductDetailPage() {
         try {
             await addToCart({
                 product: currentProduct.id,
-                variant: { size: selectedSize, color: currentProduct.color },
+                variant: hasSizes ? { size: selectedSize!, color: currentProduct.color } : { color: currentProduct.color },
                 quantity,
             });
             showSuccess(`${quantity} ${quantity === 1 ? 'producto agregado' : 'productos agregados'} al carrito`);
@@ -195,7 +204,6 @@ export default function ProductDetailPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-
                     <ProductImageGallery images={currentProduct.images || []} productName={currentProduct.name} />
 
                     <div className="flex flex-col">
@@ -260,17 +268,31 @@ export default function ProductDetailPage() {
                             />
                         </div>
 
-                        {!isAdmin && currentProduct.sizes && currentProduct.sizes.length > 0 && (
+                        {!isAdmin && (
                             <div className="mb-6">
-                                <SizeSelector
-                                    sizes={currentProduct.sizes}
-                                    selectedSize={selectedSize}
-                                    onSizeSelect={setSelectedSize}
+                                <ColorVariantSelector
+                                    currentProductId={currentProduct.id}
+                                    currentColor={currentProduct.color}
+                                    currentGender={currentProduct.gender}
+                                    productName={currentProduct.name}
                                 />
                             </div>
                         )}
 
-                        {!isAdmin && selectedSize && (
+                        {!isAdmin && hasSizes && (
+                            <div className="mb-6">
+                                <SizeSelector
+                                    sizes={currentProduct.sizes!}
+                                    selectedSize={selectedSize}
+                                    onSizeSelect={(size) => {
+                                        setSelectedSize(size);
+                                        setQuantity(1);
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {!isAdmin && hasSizes && selectedSize && (
                             <div className="mb-6">
                                 <QuantitySelector
                                     quantity={quantity}
@@ -283,8 +305,8 @@ export default function ProductDetailPage() {
                         {!isAdmin && (
                             <button
                                 onClick={handleAddToCart}
-                                disabled={!selectedSize || isAddingToCart || maxQuantity === 0}
-                                className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+                                disabled={isAddingToCart || (hasSizes && (!selectedSize || maxQuantity === 0))}
+                                className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 cursor-pointer"
                             >
                                 <ShoppingCart className="w-5 h-5" />
                                 {isAddingToCart ? 'Agregando...' : 'Agregar al carrito'}
@@ -313,13 +335,20 @@ export default function ProductDetailPage() {
                                     <p className="text-xs text-text-muted">12 meses</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <Ruler className="w-5 h-5 text-primary shrink-0" />
-                                <div>
-                                    <p className="text-sm font-medium text-text-primary">Guía de talles</p>
-                                    <p className="text-xs text-text-muted">Ver tabla</p>
+                            {hasSizes && (
+                                <div className="flex items-center gap-3">
+                                    <Ruler className="w-5 h-5 text-primary shrink-0" />
+                                    <div>
+                                        <button
+                                            onClick={() => setIsSizeGuideOpen(true)}
+                                            className="text-sm font-medium text-text-primary hover:text-primary transition-colors text-left cursor-pointer hover:underline"
+                                        >
+                                            Guía de talles
+                                        </button>
+                                        <p className="text-xs text-text-muted">Ver tabla</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -336,6 +365,15 @@ export default function ProductDetailPage() {
                     gender={currentProduct.gender}
                 />
             </div>
+
+            {hasSizes && (
+                <SizeGuideModal
+                    isOpen={isSizeGuideOpen}
+                    onClose={() => setIsSizeGuideOpen(false)}
+                    category={currentProduct.category}
+                    subcategory={currentProduct.subcategory}
+                />
+            )}
         </div>
     );
 }

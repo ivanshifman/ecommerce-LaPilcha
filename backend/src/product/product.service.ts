@@ -138,6 +138,19 @@ export class ProductService {
     return product;
   }
 
+  async getColorVariants(productGroup: string) {
+    const variants = await this.productModel
+      .find({
+        productGroup,
+        status: true,
+      })
+      .select('id name slug color images price discount')
+      .sort({ color: 1 })
+      .exec();
+
+    return variants;
+  }
+
   async getSizesFiltered(query: QueryProductDto): Promise<string[]> {
     const filter = this.buildFilters({
       ...query,

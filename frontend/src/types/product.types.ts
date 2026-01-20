@@ -46,6 +46,7 @@ export interface Product {
     rating?: number;
     reviewsCount?: number;
     sizes?: ProductSize[];
+    productGroup?: string;
     weight?: number;
     totalStock: number;
     availableSizes: string[];

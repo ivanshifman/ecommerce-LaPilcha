@@ -69,6 +69,11 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
+  @Get('variants/:productGroup')
+  async getColorVariants(@Param('productGroup') productGroup: string) {
+    return this.productService.getColorVariants(productGroup);
+  }
+
   @Get('meta/sizes')
   getSizes() {
     return this.productService.getSizes();

@@ -98,6 +98,9 @@ export class Product {
   @Prop({ min: 0, default: 0.3 })
   weight?: number;
 
+  @Prop({ index: true })
+  productGroup?: string;
+
   totalStock!: number;
   availableSizes!: string[];
 }
@@ -111,10 +114,11 @@ ProductSchema.index({ brand: 1, category: 1 });
 ProductSchema.index({ price: 1, status: 1 });
 ProductSchema.index({ name: 'text', description: 'text', tags: 'text', brands: 'text' });
 ProductSchema.index({ status: 1, featured: 1, salesCount: -1 });
+ProductSchema.index({ productGroup: 1, color: 1 });
 
 ProductSchema.pre('save', function (next) {
-  if (this.isModified('name')) {
-    this.slug = this.name
+  if (this.isModified('name') || this.isModified('color') || this.isModified('gender')) {
+    const baseName = this.name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -122,7 +126,51 @@ ProductSchema.pre('save', function (next) {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
+
+    const genderSlug = this.gender
+      ? this.gender
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .trim()
+      : 'unisex';
+
+    const colorSlug = this.color
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .trim();
+
+    this.slug = `${baseName}-${genderSlug}-${colorSlug}`;
   }
+
+  if (!this.productGroup && this.isNew) {
+    const baseName = this.name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+
+    const genderSlug = this.gender
+      ? this.gender
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .trim()
+      : 'unisex';
+
+    this.productGroup = `${baseName}-${genderSlug}`;
+  }
+
   next();
 });
 
