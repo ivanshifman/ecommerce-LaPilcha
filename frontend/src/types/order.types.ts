@@ -16,6 +16,7 @@ export enum OrderStatus {
 export enum PaymentMethod {
   MERCADO_PAGO = 'mercado_pago',
   MODO = 'modo',
+  BANK_TRANSFER = 'bank_transfer',
 }
 
 export enum ShippingMethod {

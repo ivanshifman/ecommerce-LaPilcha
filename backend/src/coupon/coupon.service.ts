@@ -109,54 +109,32 @@ export class CouponService {
       .exec();
 
     if (!coupon) {
-      return {
-        valid: false,
-        discountAmount: 0,
-        message: 'Cupón no válido o no existe',
-      };
+      throw new BadRequestException('Cupón no válido o no existe');
     }
 
     const now = new Date();
     if (now < coupon.startDate) {
-      return {
-        valid: false,
-        discountAmount: 0,
-        message: 'Este cupón aún no está disponible',
-      };
+      throw new BadRequestException('Este cupón aún no está disponible');
     }
 
     if (now > coupon.endDate) {
-      return {
-        valid: false,
-        discountAmount: 0,
-        message: 'Este cupón ha expirado',
-      };
+      throw new BadRequestException('Este cupón ha expirado');
     }
 
     if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return {
-        valid: false,
-        discountAmount: 0,
-        message: 'Este cupón ya alcanzó su límite de usos',
-      };
+      throw new BadRequestException('Este cupón ya alcanzó su límite de usos');
     }
 
     if (coupon.minPurchaseAmount && dto.orderTotal < coupon.minPurchaseAmount) {
-      return {
-        valid: false,
-        discountAmount: 0,
-        message: `Compra mínima de $${coupon.minPurchaseAmount} para usar este cupón`,
-      };
+      throw new BadRequestException(
+        `Compra mínima de $${coupon.minPurchaseAmount} para usar este cupón`,
+      );
     }
 
     if (coupon.firstPurchaseOnly && dto.userId) {
       const user = await this.userService.findById(dto.userId);
       if (user && user.totalOrders > 0) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón es solo para la primera compra',
-        };
+        throw new BadRequestException('Este cupón solo puede usarse en tu primera compra');
       }
     }
 
@@ -167,11 +145,7 @@ export class CouponService {
       });
 
       if (emailUsages >= coupon.usageLimitPerUser) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Ya alcanzaste el límite de usos para este cupón',
-        };
+        throw new BadRequestException('Ya alcanzaste el límite de usos para este cupón');
       }
     }
 
@@ -188,41 +162,25 @@ export class CouponService {
         coupon.usageLimitPerUser > 0 &&
         userUsages >= coupon.usageLimitPerUser
       ) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Ya alcanzaste el límite de usos para este cupón',
-        };
+        throw new BadRequestException('Ya alcanzaste el límite de usos para este cupón');
       }
     }
 
     if (coupon.restrictedToUsers && coupon.restrictedToUsers.length > 0) {
       if (!dto.userId) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Debes iniciar sesión para usar este cupón',
-        };
+        throw new BadRequestException('Debes iniciar sesión para usar este cupón');
       }
 
       const isAllowed = coupon.restrictedToUsers.some((uid) => uid.toString() === dto.userId);
 
       if (!isAllowed) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón no está disponible para tu cuenta',
-        };
+        throw new BadRequestException('No estás autorizado para usar este cupón');
       }
     }
 
     if (coupon.applicableCategories && coupon.applicableCategories.length > 0) {
       if (!dto.cartCategories || dto.cartCategories.length === 0) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón no aplica a los productos en tu carrito',
-        };
+        throw new BadRequestException('Este cupón no aplica a las categorías en tu carrito');
       }
 
       const hasApplicableCategory = dto.cartCategories.some((cat) =>
@@ -230,21 +188,13 @@ export class CouponService {
       );
 
       if (!hasApplicableCategory) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón no aplica a las categorías en tu carrito',
-        };
+        throw new BadRequestException('Este cupón no aplica a las categorías en tu carrito');
       }
     }
 
     if (coupon.applicableProducts && coupon.applicableProducts.length > 0) {
       if (!dto.cartProducts || dto.cartProducts.length === 0) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón no aplica a los productos en tu carrito',
-        };
+        throw new BadRequestException('Este cupón no aplica a los productos en tu carrito');
       }
 
       const hasApplicableProduct = dto.cartProducts.some((prodId) =>
@@ -252,11 +202,7 @@ export class CouponService {
       );
 
       if (!hasApplicableProduct) {
-        return {
-          valid: false,
-          discountAmount: 0,
-          message: 'Este cupón no aplica a los productos en tu carrito',
-        };
+        throw new BadRequestException('Este cupón no aplica a los productos en tu carrito');
       }
     }
 

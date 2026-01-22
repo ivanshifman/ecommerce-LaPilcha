@@ -141,9 +141,7 @@ export class StockService {
       const availableStock = size.stock - (size.reserved ?? 0);
 
       if (availableStock < quantity) {
-        throw new ConflictException(
-          `Stock insuficiente. Disponible: ${availableStock}, solicitado: ${quantity}`,
-        );
+        throw new ConflictException('No hay stock suficiente para la cantidad seleccionada');
       }
     }
 

@@ -2,8 +2,6 @@
 
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 
-
-
 interface ProtectedLayoutProps {
     children: React.ReactNode;
 }

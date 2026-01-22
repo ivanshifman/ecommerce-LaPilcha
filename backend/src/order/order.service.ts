@@ -93,10 +93,7 @@ export class OrderService {
           const availableStock = size ? size.stock - (size.reserved ?? 0) : 0;
 
           if (availableStock < cartItem.quantity) {
-            throw new ConflictException(
-              `Stock insuficiente para "${product.name}" talle ${cartItem.variant.size}. ` +
-                `Disponible: ${availableStock}, solicitado: ${cartItem.quantity}`,
-            );
+            throw new ConflictException('No hay stock suficiente para la cantidad seleccionada');
           }
         }
 

@@ -22,9 +22,6 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
     const menuRef = useRef<HTMLDivElement>(null);
 
     const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
-    const setIsOpen = externalOnClose !== undefined 
-        ? (value: boolean) => value ? onOpen?.() : externalOnClose() 
-        : setInternalIsOpen;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -94,7 +91,7 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
         <div ref={menuRef} className="relative">
             <button
                 onClick={handleToggle}
-                className="p-2 hover:bg-accent rounded-full transition-colors"
+                className="p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Menú de usuario"
             >
                 {user?.avatar ? (

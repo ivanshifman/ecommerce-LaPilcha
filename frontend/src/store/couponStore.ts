@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/shallow';
 import { couponService } from '../services/coupon.service';
 import type { ValidateCouponDto, CouponValidationResponse } from '../types/coupon.types';
 import { handleApiError } from '../api/error-handler';
@@ -52,16 +53,20 @@ export const useCouponStore = create<CouponState>((set) => ({
     clearError: () => set({ error: null }),
 }));
 
-export const useCoupon = () => useCouponStore((state) => ({
-    appliedCoupon: state.appliedCoupon,
-    isValidating: state.isValidating,
-    error: state.error,
-    discountAmount: state.appliedCoupon?.discountAmount || 0,
-    freeShipping: state.appliedCoupon?.freeShipping || false,
-}));
+export const useCoupon = () => useCouponStore(
+    useShallow((state) => ({
+        appliedCoupon: state.appliedCoupon,
+        isValidating: state.isValidating,
+        error: state.error,
+        discountAmount: state.appliedCoupon?.discountAmount || 0,
+        freeShipping: state.appliedCoupon?.freeShipping || false,
+    }))
+);
 
-export const useCouponActions = () => useCouponStore((state) => ({
-    validateCoupon: state.validateCoupon,
-    removeCoupon: state.removeCoupon,
-    clearError: state.clearError,
-}));
+export const useCouponActions = () => useCouponStore(
+    useShallow((state) => ({
+        validateCoupon: state.validateCoupon,
+        removeCoupon: state.removeCoupon,
+        clearError: state.clearError,
+    }))
+);

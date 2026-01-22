@@ -51,6 +51,10 @@ export const ROUTE_PROTECTION: RouteConfig[] = [
     allowedRoles: [UserRole.CUSTOMER, UserRole.ADMIN],
   },
   {
+    path: '/cart',
+    requiresAuth: false,
+  },
+  {
     path: '/orders',
     requiresAuth: true,
     allowedRoles: [UserRole.CUSTOMER, UserRole.ADMIN],

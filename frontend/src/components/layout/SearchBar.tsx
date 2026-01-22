@@ -117,7 +117,7 @@ export function SearchBar({ onOpen }: Props) {
             {!isOpen && (
                 <button
                     onClick={handleOpen}
-                    className="p-2 hover:bg-accent rounded-full transition-colors"
+                    className="p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                     aria-label="Buscar"
                 >
                     <Search className="w-5 h-5 text-text-muted" />
@@ -172,30 +172,51 @@ export function SearchBar({ onOpen }: Props) {
 
                             {showResults && (
                                 <div className="p-2">
-                                    {results.map((product) => (
-                                        <Link
-                                            key={product.id}
-                                            href={`/products/${product.slug}`}
-                                            onClick={handleProductClick}
-                                            className="flex items-center gap-2 p-2 hover:bg-accent rounded-md transition-colors"
-                                        >
-                                            <Image
-                                                src={product.images?.[0] || '/imagen-no-disponible.webp'}
-                                                alt={product.name}
-                                                width={40}
-                                                height={40}
-                                                className="w-10 h-10 rounded object-cover"
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-sm text-text-primary truncate">
-                                                    {product.name}
-                                                </p>
-                                                <p className="text-xs text-text-muted">
-                                                    ${product.price.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    ))}
+                                    {results.map((product) => {
+                                        const hasDiscount = typeof product.discount === 'number' && product.discount > 0;
+                                        const finalPrice = hasDiscount
+                                            ? product.price * (1 - product.discount! / 100)
+                                            : product.price;
+
+                                        return (
+                                            <Link
+                                                key={product.id}
+                                                href={`/products/${product.slug}`}
+                                                onClick={handleProductClick}
+                                                className="flex items-center gap-2 p-2 hover:bg-accent rounded-md transition-colors"
+                                            >
+                                                <div className="relative">
+                                                    <Image
+                                                        src={product.images?.[0] || '/imagen-no-disponible.webp'}
+                                                        alt={product.name}
+                                                        width={40}
+                                                        height={40}
+                                                        className="w-10 h-10 rounded object-cover"
+                                                    />
+                                                    {hasDiscount && (
+                                                        <div className="absolute -top-1 -right-1 bg-destructive text-white text-[8px] font-bold px-1 py-0.5 rounded-full">
+                                                            -{product.discount}%
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-sm text-text-primary truncate">
+                                                        {product.name}
+                                                    </p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <p className="text-sm font-semibold text-primary">
+                                                            ${finalPrice.toFixed(2)}
+                                                        </p>
+                                                        {hasDiscount && (
+                                                            <p className="text-xs text-text-muted line-through">
+                                                                ${product.price.toFixed(2)}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             )}
 

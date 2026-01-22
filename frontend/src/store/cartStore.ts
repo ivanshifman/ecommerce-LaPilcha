@@ -11,7 +11,8 @@ import { handleApiError } from '../api/error-handler';
 
 interface CartState {
     cart: Cart | null;
-    isLoading: boolean;
+    isFetching: boolean;
+    isMutating: boolean;
     error: string | null;
     fetchCart: () => Promise<void>;
     addToCart: (data: AddToCartDto) => Promise<void>;
@@ -23,65 +24,66 @@ interface CartState {
 
 export const useCartStore = create<CartState>((set) => ({
     cart: null,
-    isLoading: false,
+    isFetching: false,
+    isMutating: false,
     error: null,
 
     fetchCart: async () => {
-        set({ isLoading: true });
+        set({ isFetching: true });
         try {
             const cart = await cartService.getCart();
-            set({ cart, isLoading: false });
+            set({ cart, isFetching: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isLoading: false });
+            set({ error: apiError.message, isFetching: false });
             throw error;
         }
     },
 
     addToCart: async (data) => {
-        set({ isLoading: true });
+        set({ isMutating: true });
         try {
             const { cart } = await cartService.addToCart(data);
-            set({ cart, isLoading: false });
+            set({ cart, isMutating: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isLoading: false });
+            set({ error: apiError.message, isMutating: false });
             throw error;
         }
     },
 
     updateCartItem: async (data) => {
-        set({ isLoading: true });
+        set({ isMutating: true });
         try {
             const cart = await cartService.updateCartItem(data);
-            set({ cart, isLoading: false });
+            set({ cart, isMutating: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isLoading: false });
+            set({ error: apiError.message, isMutating: false });
             throw error;
         }
     },
 
     removeFromCart: async (data) => {
-        set({ isLoading: true });
+        set({ isMutating: true });
         try {
             const cart = await cartService.removeFromCart(data);
-            set({ cart, isLoading: false });
+            set({ cart, isMutating: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isLoading: false });
+            set({ error: apiError.message, isMutating: false });
             throw error;
         }
     },
 
     clearCart: async () => {
-        set({ isLoading: true });
+        set({ isMutating: true });
         try {
             const cart = await cartService.clearCart();
-            set({ cart, isLoading: false });
+            set({ cart, isMutating: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isLoading: false });
+            set({ error: apiError.message, isMutating: false });
             throw error;
         }
     },
@@ -93,7 +95,8 @@ export const useCartStore = create<CartState>((set) => ({
 export const useCart = () => useCartStore(
     useShallow((state) => ({
         cart: state.cart,
-        isLoading: state.isLoading,
+        isFetching: state.isFetching,
+        isMutating: state.isMutating,
         error: state.error,
     }))
 );
