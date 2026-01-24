@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { orderService } from '../services/order.service';
 import type { Order, CreateOrderDto, CancelOrderDto, OrderQueryDto } from '../types/order.types';
 import { handleApiError } from '../api/error-handler';
+import { useShallow } from 'zustand/shallow';
 
 interface OrderState {
     orders: Order[];
@@ -90,19 +91,21 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     clearError: () => set({ error: null }),
 }));
 
-export const useOrders = () => useOrderStore((state) => ({
-    orders: state.orders,
-    currentOrder: state.currentOrder,
-    pagination: state.pagination,
-    isLoading: state.isLoading,
-    error: state.error,
-}));
+export const useOrders = () => useOrderStore(
+    useShallow((state) => ({
+        orders: state.orders,
+        currentOrder: state.currentOrder,
+        pagination: state.pagination,
+        isLoading: state.isLoading,
+        error: state.error,
+    })));
 
-export const useOrderActions = () => useOrderStore((state) => ({
-    createOrder: state.createOrder,
-    fetchMyOrders: state.fetchMyOrders,
-    fetchOrderById: state.fetchOrderById,
-    cancelOrder: state.cancelOrder,
-    clearCurrentOrder: state.clearCurrentOrder,
-    clearError: state.clearError,
-}));
+export const useOrderActions = () => useOrderStore(
+    useShallow((state) => ({
+        createOrder: state.createOrder,
+        fetchMyOrders: state.fetchMyOrders,
+        fetchOrderById: state.fetchOrderById,
+        cancelOrder: state.cancelOrder,
+        clearCurrentOrder: state.clearCurrentOrder,
+        clearError: state.clearError,
+    })));

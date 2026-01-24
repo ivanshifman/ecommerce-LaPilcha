@@ -28,14 +28,13 @@ export enum ShippingMethod {
 export interface OrderItem {
   product: Product | string;
   name: string;
-  image?: string;
-  variant?: {
-    size?: string;
-    color?: string;
-  };
+  code: string;
+  variant?: { size?: string; color?: string };
   quantity: number;
   unitPrice: number;
+  discount: number;
   subtotal: number;
+  image?: string;
 }
 
 export interface ShippingAddress {
@@ -63,21 +62,22 @@ export interface Order {
   isGuest: boolean;
   guestInfo?: {
     email: string;
-    name: string;
+    fullName: string;
+    phone: string;
   };
   items: OrderItem[];
   subtotal: number;
   discount: number;
   shippingCost: number;
   total: number;
-  totalWeight: number;
+  totalWeight?: number;
   status: OrderStatus;
   paymentMethod?: PaymentMethod;
   paymentDetails?: {
     transactionId?: string;
     status?: string;
     paidAt?: string;
-    metadata?: Record<string, unknown>;
+    metadata?: Record<string, any>;
   };
   shippingMethod?: ShippingMethod;
   shippingAddress: ShippingAddress;
@@ -90,25 +90,21 @@ export interface Order {
   };
   emailSent: boolean;
   deliveredAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  bankTransferDiscount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateOrderDto {
-  items: {
-    product: string;
-    variant?: {
-      size?: string;
-      color?: string;
-    };
-    quantity: number;
-  }[];
   shippingAddress: ShippingAddress;
-  shippingMethod: ShippingMethod;
+  paymentMethod?: PaymentMethod;
+  shippingMethod?: ShippingMethod;
   couponCode?: string;
+  notes?: string;
   guestInfo?: {
     email: string;
-    name: string;
+    fullName: string;
+    phone: string;
   };
 }
 
