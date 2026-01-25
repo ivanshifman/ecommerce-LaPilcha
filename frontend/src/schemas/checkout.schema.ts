@@ -25,9 +25,18 @@ export const checkoutSchema = z.object({
     zipCode: z.string().min(4, 'Código postal requerido'),
     additionalInfo: z.string().optional(),
 }).refine((data) => {
+    if (data.guestEmail || data.guestFullname || data.guestPhone) {
+        return !!(
+            data.guestEmail &&
+            data.guestFullname &&
+            data.guestPhone
+        );
+    }
     return true;
 }, {
     message: 'Datos de contacto requeridos para invitados',
+    path: ['guestEmail'],
 });
+
 
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;

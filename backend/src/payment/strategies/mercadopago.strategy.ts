@@ -54,9 +54,9 @@ export class MercadoPagoStrategy implements PaymentStrategy {
       ],
       payer: { email: userEmail },
       back_urls: {
-        success: `${backUrl}/payment/success`,
-        failure: `${backUrl}/payment/failure`,
-        pending: `${backUrl}/payment/pending`,
+        success: `${backUrl}/payments/payment/success`,
+        failure: `${backUrl}/payments/payment/failure`,
+        pending: `${backUrl}/payments/payment/pending`,
       },
       notification_url: notificationUrl,
       external_reference: payment._id.toString(),

@@ -12,8 +12,9 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  Res,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../cart/guards/optional-jwt-auth.guard';
@@ -160,5 +161,10 @@ export class PaymentController {
       dto.transactionReference,
       dto.note,
     );
+  }
+
+  @Get('payment/success')
+  redirectSuccess(@Res() res: Response) {
+    return res.redirect(`${process.env.FRONTEND_URL}/checkout/success`);
   }
 }

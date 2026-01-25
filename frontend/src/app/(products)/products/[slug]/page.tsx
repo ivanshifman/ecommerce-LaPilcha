@@ -43,6 +43,28 @@ export default function ProductDetailPage() {
     const isAdmin = user?.role === UserRole.ADMIN;
     const inWishlist = hydrated && currentProduct ? isInWishlist(currentProduct.id) : false;
     const hasSizes = currentProduct?.sizes && currentProduct.sizes.length > 0;
+    const hasDiscount = typeof currentProduct?.discount === 'number' && currentProduct.discount > 0;
+    const finalPrice = hasDiscount
+        ? currentProduct.price * (1 - currentProduct.discount! / 100)
+        : currentProduct?.price;
+
+    const selectedSizeData = currentProduct?.sizes?.find(s => s.size === selectedSize);
+
+
+    const cartItem = cart?.items?.find(
+        item =>
+            item.product.id === currentProduct?.id &&
+            item.variant?.size === selectedSize
+    );
+
+    const quantityInCart = cartItem?.quantity || 0;
+
+    const maxQuantity = selectedSizeData
+        ? Math.max(0, selectedSizeData.stock - quantityInCart)
+        : 0;
+
+    const hasSelectedSize = !!selectedSize;
+    const isOutOfStockForSelectedSize = hasSelectedSize && maxQuantity === 0;
 
     useEffect(() => {
         if (user && !isAdmin) {
@@ -62,6 +84,20 @@ export default function ProductDetailPage() {
             clearCurrentProduct();
         };
     }, [slug, fetchProductBySlug, clearCurrentProduct, router]);
+
+    useEffect(() => {
+        if (!selectedSize) return;
+
+        if (maxQuantity === 0) {
+            setQuantity(1);
+            return;
+        }
+
+        if (quantity > maxQuantity) {
+            setQuantity(maxQuantity);
+        }
+    }, [maxQuantity, selectedSize]);
+
 
     if (isLoading) {
         return (
@@ -84,24 +120,6 @@ export default function ProductDetailPage() {
             </div>
         );
     }
-
-    const hasDiscount = typeof currentProduct.discount === 'number' && currentProduct.discount > 0;
-    const finalPrice = hasDiscount
-        ? currentProduct.price * (1 - currentProduct.discount! / 100)
-        : currentProduct.price;
-
-    const selectedSizeData = currentProduct.sizes?.find(s => s.size === selectedSize);
-
-    const availableStock = selectedSizeData
-        ? Math.max(0, selectedSizeData.stock - selectedSizeData.reserved)
-        : 0;
-
-    const cartItem = cart?.items?.find(
-        item => item.product.id === currentProduct.id && item.variant?.size === selectedSize
-    );
-    const quantityInCart = cartItem?.quantity || 0;
-    const maxQuantityToAdd = Math.max(0, availableStock - quantityInCart);
-    const maxQuantity = maxQuantityToAdd;
 
     const handleAddToCart = async () => {
         if (isAdmin) return;
@@ -128,6 +146,7 @@ export default function ProductDetailPage() {
                 variant: hasSizes ? { size: selectedSize!, color: currentProduct.color } : { color: currentProduct.color },
                 quantity,
             });
+            await fetchCart();
             showSuccess(`${quantity} ${quantity === 1 ? 'producto agregado' : 'productos agregados'} al carrito`);
             setSelectedSize(null);
             setQuantity(1);
@@ -245,7 +264,7 @@ export default function ProductDetailPage() {
 
                             <div className="flex items-baseline gap-3 mb-4">
                                 <span className="text-3xl font-bold text-primary">
-                                    ${finalPrice.toFixed(2)}
+                                    ${finalPrice?.toFixed(2)}
                                 </span>
                                 {hasDiscount && (
                                     <>
@@ -292,7 +311,13 @@ export default function ProductDetailPage() {
                             </div>
                         )}
 
-                        {!isAdmin && hasSizes && selectedSize && (
+                        {!isAdmin && hasSizes && selectedSize && maxQuantity === 0 && (
+                            <p className="text-sm text-destructive font-medium mt-2">
+                                No hay stock disponible para este talle
+                            </p>
+                        )}
+
+                        {!isAdmin && hasSizes && selectedSize && maxQuantity > 0 && (
                             <div className="mb-6">
                                 <QuantitySelector
                                     quantity={quantity}
@@ -305,11 +330,19 @@ export default function ProductDetailPage() {
                         {!isAdmin && (
                             <button
                                 onClick={handleAddToCart}
-                                disabled={isAddingToCart || (hasSizes && (!selectedSize || maxQuantity === 0))}
+                                disabled={
+                                    isAddingToCart ||
+                                    (hasSizes && !selectedSize) ||
+                                    isOutOfStockForSelectedSize
+                                }
                                 className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 cursor-pointer"
                             >
                                 <ShoppingCart className="w-5 h-5" />
-                                {isAddingToCart ? 'Agregando...' : 'Agregar al carrito'}
+                                {isAddingToCart
+                                    ? 'Agregando...'
+                                    : isOutOfStockForSelectedSize
+                                        ? 'Sin stock'
+                                        : 'Agregar al carrito'}
                             </button>
                         )}
 

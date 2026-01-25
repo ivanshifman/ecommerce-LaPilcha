@@ -86,6 +86,14 @@ export default function CheckoutPage() {
     }, [fetchCart, setValue]);
 
     useEffect(() => {
+        if (isAuthenticated) {
+            setValue('guestEmail', undefined);
+            setValue('guestFullname', undefined);
+            setValue('guestPhone', undefined);
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => {
         if (!cart || cart.items.length === 0) {
             router.push('/cart');
         }

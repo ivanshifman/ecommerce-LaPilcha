@@ -10,8 +10,19 @@ interface Props {
 }
 
 export function SizeSelector({ sizes, selectedSize, onSizeSelect }: Props) {
-    const availableSizes = sizes.filter(s => s.stock > 0);
-    const outOfStockSizes = sizes.filter(s => s.stock === 0);
+    const availableSizes = sizes.filter(
+        s => s.stock - s.reserved > 0
+    );
+
+    const outOfStockSizes = sizes.filter(
+        s => s.stock - s.reserved <= 0
+    );
+
+    const selectedSizeData = sizes.find(s => s.size === selectedSize);
+    const isSelectedOutOfStock =
+    selectedSizeData
+        ? selectedSizeData.stock - selectedSizeData.reserved <= 0
+        : false;
 
     return (
         <div>
@@ -20,8 +31,11 @@ export function SizeSelector({ sizes, selectedSize, onSizeSelect }: Props) {
                     Seleccionar talle
                 </label>
                 {selectedSize && (
-                    <span className="text-sm text-success font-medium">
-                        ✓ Disponible
+                    <span
+                        className={`text-sm font-medium ${isSelectedOutOfStock ? 'text-error' : 'text-success'
+                            }`}
+                    >
+                        {isSelectedOutOfStock ? 'Sin stock' : 'Disponible'}
                     </span>
                 )}
             </div>
@@ -32,8 +46,8 @@ export function SizeSelector({ sizes, selectedSize, onSizeSelect }: Props) {
                         key={sizeObj.size}
                         onClick={() => onSizeSelect(sizeObj.size)}
                         className={`relative py-3 px-2 text-sm font-medium rounded-lg border-2 transition-all cursor-pointer ${selectedSize === sizeObj.size
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-border hover:border-primary bg-white text-text-primary'
+                            ? 'border-primary bg-primary text-white'
+                            : 'border-border hover:border-primary bg-white text-text-primary'
                             }`}
                     >
                         {sizeObj.size}

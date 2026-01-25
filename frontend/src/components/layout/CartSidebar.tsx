@@ -126,6 +126,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                         ) : (
                             <div className="space-y-4">
                                 {cart.items.map((item, index) => {
+   
                                     const hasDiscount = typeof item.product.discount === 'number' && item.product.discount > 0;
                                     const finalPrice = hasDiscount
                                         ? item.product.price * (1 - item.product.discount! / 100)

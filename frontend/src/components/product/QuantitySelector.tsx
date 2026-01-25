@@ -23,11 +23,23 @@ export function QuantitySelector({ quantity, maxQuantity, quantityInCart = 0, on
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseInt(e.target.value);
-        if (!isNaN(value) && value >= 1 && value <= maxQuantity) {
-            onQuantityChange(value);
+        const value = Number(e.target.value);
+
+        if (Number.isNaN(value)) return;
+
+        if (value < 1) {
+            onQuantityChange(1);
+            return;
         }
+
+        if (value > maxQuantity) {
+            onQuantityChange(maxQuantity);
+            return;
+        }
+
+        onQuantityChange(value);
     };
+
 
     return (
         <div>

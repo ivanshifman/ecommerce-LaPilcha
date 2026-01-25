@@ -96,14 +96,16 @@ export class CartService {
     }
 
     const product = await this.stockService.validateProduct(dto.product);
-    await this.stockService.validateStock(product, dto.variant, dto.quantity);
 
     const oldQuantity = cart.items[index].quantity;
     const quantityDiff = dto.quantity - oldQuantity;
 
     if (quantityDiff > 0) {
+      await this.stockService.validateStock(product, dto.variant, quantityDiff);
       await this.stockService.reserveStock(dto.product, dto.variant?.size, quantityDiff);
-    } else if (quantityDiff < 0) {
+    }
+
+    if (quantityDiff < 0) {
       await this.stockService.releaseStock(dto.product, dto.variant?.size, Math.abs(quantityDiff));
     }
 
