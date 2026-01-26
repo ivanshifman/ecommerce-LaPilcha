@@ -94,10 +94,10 @@ export default function CheckoutPage() {
     }, [isAuthenticated]);
 
     useEffect(() => {
-        if (!cart || cart.items.length === 0) {
+        if (!isFetching && cart && cart.items.length === 0) {
             router.push('/cart');
         }
-    }, [cart, router]);
+    }, [cart, isFetching, router]);
 
     const onSubmit = async (data: CheckoutFormData) => {
         if (!cart || cart.items.length === 0) {

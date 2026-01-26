@@ -358,6 +358,14 @@ export class PaymentService {
         };
         await order.save();
 
+        if (order.user) {
+          try {
+            await this.userService.incrementTotalSpent(order.user.toString(), order.total);
+          } catch (error) {
+            this.logger.error('Error incrementando totalSpent:', error);
+          }
+        }
+
         try {
           const existingShipping = await this.shippingService.findShippingByOrderId(
             order._id.toString(),

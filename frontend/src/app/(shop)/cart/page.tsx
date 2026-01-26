@@ -27,7 +27,6 @@ import { showSuccess, showError } from '../../../lib/notifications';
 import { handleApiError } from '../../../api/error-handler';
 import type { ShippingOption } from '../../../types/shipping.types';
 
-// Provincias argentinas (sin hardcodear zonas, el backend las maneja)
 const PROVINCES = [
     'Buenos Aires',
     'Capital Federal',
@@ -297,7 +296,7 @@ export default function CartPage() {
                             <button
                                 onClick={handleClearCart}
                                 disabled={isClearingCart}
-                                className="px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
+                                className="px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                             >
                                 {isClearingCart ? 'Vaciando...' : 'Vaciar carrito'}
                             </button>
@@ -386,7 +385,7 @@ export default function CartPage() {
                                                             )
                                                         }
                                                         disabled={item.quantity <= 1 || isMutating}
-                                                        className="p-2 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="p-2 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         title="Disminuir cantidad"
                                                     >
                                                         <Minus className="w-4 h-4" />
@@ -404,7 +403,7 @@ export default function CartPage() {
                                                             )
                                                         }
                                                         disabled={isMutating}
-                                                        className="p-2 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="p-2 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         title="Aumentar cantidad"
                                                     >
                                                         <Plus className="w-4 h-4" />
@@ -446,7 +445,7 @@ export default function CartPage() {
                                         </div>
                                         <button
                                             onClick={handleRemoveCoupon}
-                                            className="p-1 hover:bg-success/20 rounded transition-colors"
+                                            className="p-1 hover:bg-success/20 rounded transition-colors cursor-pointer"
                                             title="Eliminar cupón"
                                         >
                                             <X className="w-4 h-4 text-success" />
@@ -465,7 +464,7 @@ export default function CartPage() {
                                         <button
                                             onClick={handleApplyCoupon}
                                             disabled={isValidating || !couponCode.trim()}
-                                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
                                         >
                                             {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Aplicar'}
                                         </button>
@@ -591,7 +590,7 @@ export default function CartPage() {
                             <button
                                 onClick={handleCheckout}
                                 disabled={!selectedProvince || !selectedShippingMethod}
-                                className="w-full py-4 bg-primary text-white rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full py-4 bg-primary text-white rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 Finalizar compra
                             </button>

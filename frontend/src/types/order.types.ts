@@ -93,6 +93,7 @@ export interface Order {
   bankTransferDiscount?: number;
   createdAt?: string;
   updatedAt?: string;
+  trackingNumber?: string;
 }
 
 export interface CreateOrderDto {

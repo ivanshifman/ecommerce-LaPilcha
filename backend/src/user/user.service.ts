@@ -84,6 +84,14 @@ export class UserService {
     );
   }
 
+  async incrementTotalSpent(userId: string, amount: number) {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { $inc: { totalSpent: amount } },
+      { new: true },
+    );
+  }
+
   async clearVerification(userId: string) {
     return this.userModel.findByIdAndUpdate(
       userId,

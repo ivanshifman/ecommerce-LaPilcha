@@ -124,12 +124,18 @@ export default function ProfilePage() {
                 phone: data.phone || undefined,
                 avatar: data.avatar || undefined,
                 preferences: {
-                    defaultSize: data.preferences?.defaultSize,
-                    favoriteColors: data.preferences?.favoriteColors?.length
-                        ? data.preferences.favoriteColors
-                        : undefined,
+                    ...(data.preferences?.defaultSize && {
+                        defaultSize: data.preferences.defaultSize
+                    }),
+                    ...(data.preferences?.favoriteColors && data.preferences.favoriteColors.length > 0 && {
+                        favoriteColors: data.preferences.favoriteColors
+                    }),
                 },
             };
+
+            if (Object.keys(cleanData.preferences).length === 0) {
+                delete (cleanData as any).preferences;
+            }
 
             await updateProfile(cleanData);
             showSuccess('Perfil actualizado exitosamente');
