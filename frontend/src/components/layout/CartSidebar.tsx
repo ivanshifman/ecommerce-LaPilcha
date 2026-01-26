@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,7 +18,15 @@ interface Props {
 export function CartSidebar({ isOpen, onClose }: Props) {
     const router = useRouter();
     const { cart, isFetching } = useCart();
-    const { updateCartItem, removeFromCart } = useCartActions();
+    const { updateCartItem, removeFromCart, fetchCart } = useCartActions();
+    const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        fetchCart().catch(console.error);
+    }, [isOpen, fetchCart]);
+
 
     useEffect(() => {
         if (isOpen) {
@@ -32,8 +40,19 @@ export function CartSidebar({ isOpen, onClose }: Props) {
         };
     }, [isOpen]);
 
-    const handleUpdateQuantity = async (productId: string, newQuantity: number, size?: string, color?: string) => {
+    const handleUpdateQuantity = async (
+        productId: string,
+        newQuantity: number,
+        size?: string,
+        color?: string
+    ) => {
         if (newQuantity < 1) return;
+
+        const itemKey = `${productId}-${size || ''}-${color || ''}`;
+
+        if (updatingItemId === itemKey) return;
+
+        setUpdatingItemId(itemKey);
 
         try {
             await updateCartItem({
@@ -44,6 +63,8 @@ export function CartSidebar({ isOpen, onClose }: Props) {
         } catch (err) {
             const apiError = handleApiError(err);
             showError(apiError.message || 'Error al actualizar cantidad');
+        } finally {
+            setUpdatingItemId(null);
         }
     };
 
@@ -126,7 +147,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                         ) : (
                             <div className="space-y-4">
                                 {cart.items.map((item, index) => {
-   
+
                                     const hasDiscount = typeof item.product.discount === 'number' && item.product.discount > 0;
                                     const finalPrice = hasDiscount
                                         ? item.product.price * (1 - item.product.discount! / 100)
@@ -198,7 +219,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                                                 item.variant?.size,
                                                                 item.variant?.color
                                                             )}
-                                                            disabled={item.quantity <= 1}
+                                                            disabled={item.quantity <= 1 || updatingItemId === `${item.product.id}-${item.variant?.size || ''}-${item.variant?.color || ''}`}
                                                             className="p-1 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                             title="Disminuir cantidad"
                                                         >
@@ -214,6 +235,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                                                 item.variant?.size,
                                                                 item.variant?.color
                                                             )}
+                                                            disabled={updatingItemId === `${item.product.id}-${item.variant?.size || ''}-${item.variant?.color || ''}`}
                                                             className="p-1 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                             title='Aumentar cantidad'
                                                         >

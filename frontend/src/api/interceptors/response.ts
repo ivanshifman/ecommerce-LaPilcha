@@ -4,6 +4,7 @@ import type { AxiosRequestConfigWithMeta } from "../types/axiosRequestConfigWith
 import type { ApiErrorResponse } from "../types/apiErrorResponse.interface";
 import { apiClient } from "../axios-client";
 import { useAuthStore } from "../../store/authStore";
+import { useCartStore } from "../../store/cartStore";
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -65,6 +66,7 @@ export const responseInterceptor = async (
     } catch (refreshError) {
       processQueue(refreshError as AxiosError);
       await logout();
+      useCartStore.setState({ cart: null });
       window.location.href = "/login";
       return Promise.reject(refreshError);
     } finally {

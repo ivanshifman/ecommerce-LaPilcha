@@ -3,15 +3,20 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
+import { useAuth } from '../../store/authStore';
 import { useCart, useCartActions } from '../../store/cartStore';
 
 export function CartIcon() {
+    const { isAuthenticated } = useAuth();
     const { cart } = useCart();
     const { fetchCart } = useCartActions();
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            return;
+        }
         fetchCart();
-    }, [fetchCart]);
+    }, [fetchCart, isAuthenticated]);
 
     const itemCount = cart?.itemCount || 0;
 

@@ -9,6 +9,8 @@ import type {
   ProfileResponse,
 } from '../types/auth.types';
 import { handleApiError } from '../api/error-handler';
+import { cartService } from '../services/cart.service';
+import { useCartStore } from './cartStore';
 
 interface AuthState {
   user: User | null;
@@ -65,6 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await authService.logout();
+      useCartStore.setState({ cart: null });
       set({
         user: null,
         profile: null,
@@ -126,6 +129,7 @@ export const useAuth = () =>
   useAuthStore(
     useShallow((state) => ({
       user: state.user,
+      profile: state.profile,
       isAuthenticated: state.isAuthenticated,
       isLoading: state.isLoading,
       error: state.error,

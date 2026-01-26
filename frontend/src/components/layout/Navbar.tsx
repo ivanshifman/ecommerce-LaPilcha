@@ -11,6 +11,7 @@ import { UserMenu } from './UserMenu';
 import { MobileMenu } from './MobileMenu';
 import { WishlistSidebar } from './WishlistSidebar';
 import { CartSidebar } from './CartSidebar';
+import { useAuth } from '../../store/authStore';
 import { useWishlist, useWishlistActions } from '../../store/wishlistStore';
 import { useCart, useCartActions } from '../../store/cartStore';
 import { useProductActions, useProducts } from '../../store/productStore';
@@ -20,6 +21,7 @@ export function Navbar() {
   const { count: wishlistCount } = useWishlist();
   const { cart } = useCart();
   const { genders } = useProducts();
+  const { isAuthenticated } = useAuth();
   const { fetchWishlist } = useWishlistActions();
   const { fetchCart } = useCartActions();
   const { fetchGenders } = useProductActions();
@@ -36,7 +38,7 @@ export function Navbar() {
   useEffect(() => {
     fetchWishlist().catch(console.error);
     fetchCart().catch(console.error);
-  }, [fetchWishlist, fetchCart]);
+  }, [fetchWishlist, fetchCart, isAuthenticated]);
 
   useEffect(() => {
     fetchGenders().catch(console.error);

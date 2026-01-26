@@ -24,6 +24,7 @@ import { AuthTokens } from './types/auth-tokens.type';
 import { AuthenticatedUserDto } from './dto/authenticated-user.dto';
 import {
   ACCESS_COOKIE,
+  CART_COOKIE,
   cookieOptions,
   REFRESH_COOKIE,
   WISHLIST_COOKIE,
@@ -140,6 +141,8 @@ export class AuthService {
     await this.userService.setRefreshTokenHash(userId, null);
     res.clearCookie(ACCESS_COOKIE, { path: '/' });
     res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    res.clearCookie(CART_COOKIE, { path: '/' });
+    res.clearCookie(WISHLIST_COOKIE, { path: '/' });
     return { message: 'Sesión cerrada' };
   }
 

@@ -29,17 +29,17 @@ export const useCartStore = create<CartState>((set) => ({
     error: null,
 
     fetchCart: async () => {
-        set({ isFetching: true });
+        set({ isFetching: true, cart: null });
         try {
             const cart = await cartService.getCart();
             set({ cart, isFetching: false });
         } catch (error) {
             const apiError = handleApiError(error);
-            set({ error: apiError.message, isFetching: false });
+            set({ error: apiError.message, isFetching: false, cart: null });
             throw error;
         }
     },
-
+    
     addToCart: async (data) => {
         set({ isMutating: true });
         try {

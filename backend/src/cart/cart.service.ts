@@ -88,7 +88,7 @@ export class CartService {
     anonymousId?: string,
     res?: Response,
   ): Promise<CartResponseDto> {
-    const cart = await this.getCartDocument(userId, anonymousId);
+    const { cart, anonymousId: finalAnonymousId } = await this.getCartDocument(userId, anonymousId);
 
     const index = this.findItemIndex(cart, dto.product, dto.variant);
     if (index < 0) {
@@ -112,10 +112,10 @@ export class CartService {
     cart.items[index].quantity = dto.quantity;
     await cart.save();
 
-    const populatedCart = await this.getPopulatedCart(userId, anonymousId);
+    const populatedCart = await this.getPopulatedCart(userId, finalAnonymousId);
 
-    if (!userId && anonymousId && res) {
-      this.updateAnonymousCookie(anonymousId, res);
+    if (!userId && finalAnonymousId && res) {
+      this.updateAnonymousCookie(finalAnonymousId, res);
     }
 
     return CartMapper.toCartResponseDto(populatedCart, !userId);
@@ -127,7 +127,7 @@ export class CartService {
     anonymousId?: string,
     res?: Response,
   ): Promise<CartResponseDto> {
-    const cart = await this.getCartDocument(userId, anonymousId);
+    const { cart, anonymousId: finalAnonymousId } = await this.getCartDocument(userId, anonymousId);
 
     const index = this.findItemIndex(cart, dto.product, dto.variant);
     if (index < 0) {
@@ -144,18 +144,21 @@ export class CartService {
     cart.items.splice(index, 1);
     await cart.save();
 
-    const populatedCart = await this.getPopulatedCart(userId, anonymousId);
+    const populatedCart = await this.getPopulatedCart(userId, finalAnonymousId);
 
-    if (!userId && anonymousId && res) {
-      this.updateAnonymousCookie(anonymousId, res);
+    if (!userId && finalAnonymousId && res) {
+      this.updateAnonymousCookie(finalAnonymousId, res);
     }
 
     return CartMapper.toCartResponseDto(populatedCart, !userId);
   }
 
   async getCart(userId?: string, anonymousId?: string, res?: Response): Promise<CartResponseDto> {
-    const cartDoc = await this.getCartDocument(userId, anonymousId);
-    const cart = await this.getPopulatedCart(userId, anonymousId);
+    const { cart: cartDoc, anonymousId: finalAnonymousId } = await this.getCartDocument(
+      userId,
+      anonymousId,
+    );
+    const cart = await this.getPopulatedCart(userId, finalAnonymousId);
 
     const invalidItemsIndices: number[] = [];
 
@@ -174,19 +177,19 @@ export class CartService {
       cartDoc.items = cartDoc.items.filter((_, index) => !invalidItemsIndices.includes(index));
       await cartDoc.save();
 
-      const updatedCart = await this.getPopulatedCart(userId, anonymousId);
+      const updatedCart = await this.getPopulatedCart(userId, finalAnonymousId);
       return CartMapper.toCartResponseDto(updatedCart, !userId);
     }
 
-    if (!userId && anonymousId && res) {
-      this.updateAnonymousCookie(anonymousId, res);
+    if (!userId && finalAnonymousId && res) {
+      this.updateAnonymousCookie(finalAnonymousId, res);
     }
 
     return CartMapper.toCartResponseDto(cart, !userId);
   }
 
   async clearCart(userId?: string, anonymousId?: string, res?: Response): Promise<CartResponseDto> {
-    const cart = await this.getCartDocument(userId, anonymousId);
+    const { cart, anonymousId: finalAnonymousId } = await this.getCartDocument(userId, anonymousId);
 
     for (const item of cart.items) {
       await this.stockService.releaseStock(
@@ -196,7 +199,7 @@ export class CartService {
       );
     }
 
-    if (!userId && anonymousId) {
+    if (!userId && finalAnonymousId) {
       await this.cartModel.findByIdAndDelete(cart._id);
 
       if (res) {
@@ -324,31 +327,34 @@ export class CartService {
     return { cart, anonymousId: id };
   }
 
-  private async getCartDocument(userId?: string, anonymousId?: string): Promise<CartDocument> {
+  private async getCartDocument(
+    userId?: string,
+    anonymousId?: string,
+  ): Promise<{ cart: CartDocument; anonymousId?: string }> {
     if (userId) {
-      return this.getOrCreateUserCart(userId);
+      const cart = await this.getOrCreateUserCart(userId);
+      return { cart };
     }
 
-    const { cart } = await this.getOrCreateAnonymousCart(anonymousId);
-    return cart;
+    const result = await this.getOrCreateAnonymousCart(anonymousId);
+    return { cart: result.cart, anonymousId: result.anonymousId };
   }
 
   private async getPopulatedCart(userId?: string, anonymousId?: string): Promise<CartPopulated> {
-    const cart = userId
-      ? await this.cartModel.findOne({ user: userId }).populate('items.product').exec()
-      : await this.cartModel.findOne({ anonymousId }).populate('items.product').exec();
+    if (userId) {
+      const cart = await this.cartModel.findOne({ user: userId }).populate('items.product').exec();
+      if (!cart) throw new NotFoundException('Carrito no encontrado');
+      return cart.toObject() as unknown as CartPopulated;
+    }
+
+    if (!anonymousId) {
+      throw new NotFoundException('AnonymousId no provisto');
+    }
+
+    const cart = await this.cartModel.findOne({ anonymousId }).populate('items.product').exec();
 
     if (!cart) {
       throw new NotFoundException('Carrito no encontrado');
-    }
-
-    const validItems = cart.items.filter((item) => {
-      return item.product !== null && item.product !== undefined;
-    });
-
-    if (validItems.length !== cart.items.length) {
-      cart.items = validItems;
-      await cart.save();
     }
 
     return cart.toObject() as unknown as CartPopulated;
