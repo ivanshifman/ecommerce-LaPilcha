@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { UserService } from './user.service';
-import { UserController } from './user.controller';
 import { WishlistService } from './wishList.service';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
+import { UserController } from './user.controller';
 import { CartModule } from '../cart/cart.module';
 import { ProductModule } from '../product/product.module';
 
@@ -14,7 +15,7 @@ import { ProductModule } from '../product/product.module';
     ProductModule,
   ],
   controllers: [UserController],
-  providers: [UserService, WishlistService],
+  providers: [UserService, WishlistService, CloudinaryService],
   exports: [UserService, WishlistService],
 })
 export class UserModule {}

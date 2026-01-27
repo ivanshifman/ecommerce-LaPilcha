@@ -7,6 +7,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MongooseService } from './database/mongoose.service';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 import { ProductModule } from './product/product.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
@@ -45,6 +46,7 @@ import { CouponModule } from './coupon/coupon.module';
       ],
     }),
     ScheduleModule.forRoot(),
+    CloudinaryModule,
     ProductModule,
     UserModule,
     AuthModule,

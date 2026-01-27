@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 import {
     User,
     Mail,
@@ -18,12 +19,14 @@ import {
     Loader2,
     Heart,
     Ruler,
+    Camera,
 } from 'lucide-react';
 import { useAuth, useAuthActions } from '../../../store/authStore';
 import { handleApiError } from '../../../api/error-handler';
 import { showSuccess, showError } from '../../../lib/notifications';
 import { profileSchema, UserSizePreference, UserColorPreference } from '../../../schemas/profile.schema';
 import type { ProfileFormData } from '../../../schemas/profile.schema';
+import { uploadService } from '../../../services/upload.service';
 
 type SizeValue = (typeof UserSizePreference)[keyof typeof UserSizePreference];
 type ColorValue = UserColorPreference;
@@ -34,7 +37,6 @@ const isSizeValue = (value: any): value is SizeValue => {
 const isColorValue = (value: any): value is ColorValue => {
     return Object.values(UserColorPreference).includes(value);
 };
-
 
 const allSizes = Object.values(UserSizePreference) as SizeValue[];
 const LETTER_SIZES = allSizes.filter((s) => isNaN(Number(s))) as SizeValue[];
@@ -60,6 +62,8 @@ export default function ProfilePage() {
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
 
     const {
         register,
@@ -112,6 +116,7 @@ export default function ProfilePage() {
                     ),
                 },
             });
+            setAvatarPreview(profile.avatar || null);
         }
     }, [profile, reset]);
 
@@ -138,6 +143,7 @@ export default function ProfilePage() {
             }
 
             await updateProfile(cleanData);
+            await getProfile();
             showSuccess('Perfil actualizado exitosamente');
             setIsEditing(false);
         } catch (err) {
@@ -164,8 +170,79 @@ export default function ProfilePage() {
                     ),
                 },
             });
+            setAvatarPreview(profile.avatar || null);
         }
         setIsEditing(false);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validar archivo
+        const validation = uploadService.validateImageFile(file, 5);
+        if (!validation.valid) {
+            showError(validation.error || 'Archivo inválido');
+            return;
+        }
+
+        setIsUploadingImage(true);
+
+        try {
+            const preview = await uploadService.createPreview(file);
+            setAvatarPreview(preview);
+
+            const imageUrl = await uploadService.uploadAvatar(file);
+
+            setAvatarPreview(imageUrl);
+
+            const currentValues = watch();
+            reset({
+                ...currentValues,
+                avatar: imageUrl,
+            });
+
+            showSuccess('Imagen subida exitosamente');
+        } catch (err) {
+            const apiError = handleApiError(err);
+            showError(apiError.message || 'Error al cargar la imagen');
+            console.error('Error uploading image:', err);
+
+            if (profile?.avatar) {
+                setAvatarPreview(profile.avatar);
+            } else {
+                setAvatarPreview(null);
+            }
+        } finally {
+            setIsUploadingImage(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        if (!window.confirm('¿Estás seguro de que deseas eliminar tu foto de perfil?')) {
+            return;
+        }
+
+        try {
+            setIsUploadingImage(true);
+
+            await uploadService.deleteAvatar();
+
+            setAvatarPreview(null);
+            const currentValues = watch();
+            reset({
+                ...currentValues,
+                avatar: '',
+            });
+
+            showSuccess('Avatar eliminado exitosamente');
+        } catch (err) {
+            const apiError = handleApiError(err);
+            showError(apiError.message || 'Error al eliminar avatar');
+        } finally {
+            setIsUploadingImage(false);
+        }
     };
 
     if (authLoading || !profile) {
@@ -205,6 +282,63 @@ export default function ProfilePage() {
                             </div>
 
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                <div className="flex flex-col items-center mb-6 pb-6 border-b border-border">
+                                    <div className="relative">
+                                        <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
+                                            {avatarPreview ? (
+                                                <Image
+                                                    src={avatarPreview}
+                                                    alt="Avatar"
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="128px"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                                                    <User className="w-16 h-16 text-primary/40" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        {isEditing && (
+                                            <div className="absolute bottom-0 right-0">
+                                                <label
+                                                    htmlFor="avatar-upload"
+                                                    className="flex items-center justify-center w-10 h-10 bg-primary text-white rounded-full cursor-pointer hover:bg-primary-dark transition-colors shadow-lg"
+                                                >
+                                                    {isUploadingImage ? (
+                                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                                    ) : (
+                                                        <Camera className="w-5 h-5" />
+                                                    )}
+                                                </label>
+                                                <input
+                                                    id="avatar-upload"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    disabled={isUploadingImage}
+                                                    className="hidden"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {isEditing && avatarPreview && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveAvatar}
+                                            disabled={isUploadingImage}
+                                            className="mt-3 text-sm text-destructive hover:text-destructive/80 transition-colors disabled:opacity-50"
+                                        >
+                                            Eliminar foto
+                                        </button>
+                                    )}
+                                    {isEditing && (
+                                        <p className="text-xs text-text-muted mt-2 text-center">
+                                            Tamaño máximo: 5MB • JPG, PNG, GIF, WebP
+                                        </p>
+                                    )}
+                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-text-primary mb-2">
                                         Nombre *
@@ -217,7 +351,7 @@ export default function ProfilePage() {
                                             disabled={!isEditing}
                                             className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.name ? 'border-destructive' : 'border-border'
                                                 } ${!isEditing ? 'bg-muted cursor-not-allowed' : ''}`}
-                                            placeholder="Juan"
+                                            placeholder="Nombre"
                                         />
                                     </div>
                                     {errors.name && (
@@ -237,7 +371,7 @@ export default function ProfilePage() {
                                             disabled={!isEditing}
                                             className={`w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${!isEditing ? 'bg-muted cursor-not-allowed' : ''
                                                 }`}
-                                            placeholder="Pérez"
+                                            placeholder="Apellido"
                                         />
                                     </div>
                                 </div>

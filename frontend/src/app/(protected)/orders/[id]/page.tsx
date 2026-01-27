@@ -117,9 +117,8 @@ export default function OrderDetailPage() {
 
     useEffect(() => {
         if (isAuthenticated && orderId) {
-            fetchOrderById(orderId).catch((err) => {
-                const apiError = handleApiError(err);
-                showError(apiError.message || 'Error al cargar orden');
+            fetchOrderById(orderId).catch(() => {
+                showError('Error al cargar orden');
                 router.push('/orders');
             });
         }
@@ -310,7 +309,7 @@ export default function OrderDetailPage() {
                                 <h2 className="text-xl font-bold text-text-primary mb-4">
                                     Notas del Pedido
                                 </h2>
-                                <p className="text-text-secondary">{order?.statusHistory[0].note}</p>
+                                <p className="text-text-secondary">{order.statusHistory[0].note}</p>
                             </div>
                         )}
                     </div>

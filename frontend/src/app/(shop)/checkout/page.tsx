@@ -231,7 +231,7 @@ export default function CheckoutPage() {
                                                     type="text"
                                                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.guestFullname ? 'border-destructive' : 'border-border'
                                                         }`}
-                                                    placeholder="Juan Pérez"
+                                                    placeholder="Nombre Completo"
                                                 />
                                             </div>
                                             {errors.guestFullname && (
@@ -250,7 +250,7 @@ export default function CheckoutPage() {
                                                     type="email"
                                                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.guestEmail ? 'border-destructive' : 'border-border'
                                                         }`}
-                                                    placeholder="tu@email.com"
+                                                    placeholder="Email"
                                                 />
                                             </div>
                                             {errors.guestEmail && (
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                                                 type="text"
                                                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.fullName ? 'border-destructive' : 'border-border'
                                                     }`}
-                                                placeholder="Juan Pérez"
+                                                placeholder="Nombre Completo"
                                             />
                                         </div>
                                         {errors.fullName && (
@@ -351,7 +351,7 @@ export default function CheckoutPage() {
                                                 type="text"
                                                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.address ? 'border-destructive' : 'border-border'
                                                     }`}
-                                                placeholder="Av. Corrientes 1234"
+                                                placeholder="Dirección"
                                             />
                                         </div>
                                         {errors.address && (
@@ -368,7 +368,7 @@ export default function CheckoutPage() {
                                             type="text"
                                             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.city ? 'border-destructive' : 'border-border'
                                                 }`}
-                                            placeholder="Buenos Aires"
+                                            placeholder="Ciudad"
                                         />
                                         {errors.city && (
                                             <p className="text-sm text-destructive mt-1">{errors.city.message}</p>
