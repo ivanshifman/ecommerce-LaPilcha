@@ -139,21 +139,21 @@ export default function CheckoutPage() {
             const order = await createOrder(orderData);
             showSuccess('¡Orden creada exitosamente!');
 
-            if (selectedPaymentMethod === PaymentMethod.BANK_TRANSFER) {
-                removeCoupon();
-                sessionStorage.removeItem('checkoutShipping');
-                router.push(`/orders/${order.id}?payment=bank_transfer`);
-                return;
-            }
-
             const payment = await paymentService.createPayment({
                 orderId: order.id,
                 method: selectedPaymentMethod,
             });
 
+            removeCoupon();
+            sessionStorage.removeItem('checkoutShipping');
+
+            if (selectedPaymentMethod === PaymentMethod.BANK_TRANSFER) {
+                showSuccess('Revisa tu email para completar la transferencia');
+                router.push(`/orders/${order.id}`);
+                return;
+            }
+
             if (payment.checkoutUrl) {
-                removeCoupon();
-                sessionStorage.removeItem('checkoutShipping');
                 window.location.href = payment.checkoutUrl;
             } else {
                 showError('No se pudo generar el link de pago');

@@ -683,6 +683,79 @@ export class PaymentService {
     this.logger.log('✅ Firma verificada correctamente');
   }
 
+  async cancelExpiredPayments(params: { status: PaymentStatus; minutes: number }): Promise<number> {
+    const expirationDate = new Date(Date.now() - params.minutes * 60 * 1000);
+
+    const expiredPayments = await this.paymentModel
+      .find({
+        status: params.status,
+        createdAt: { $lte: expirationDate },
+      })
+      .exec();
+
+    const session = await this.paymentModel.db.startSession();
+    session.startTransaction();
+
+    try {
+      let cancelledCount = 0;
+
+      for (const payment of expiredPayments) {
+        const currentPayment = await this.paymentModel
+          .findOne({ _id: payment._id, status: params.status })
+          .session(session);
+
+        if (!currentPayment) continue;
+
+        currentPayment.status = PaymentStatus.CANCELLED;
+        currentPayment.statusHistory.push({
+          status: PaymentStatus.CANCELLED,
+          timestamp: new Date(),
+        });
+        await currentPayment.save({ session });
+
+        const order = await this.orderService.findByIdWithSession(
+          currentPayment.order.toString(),
+          session,
+        );
+
+        if (!order) continue;
+
+        if (order.status === OrderStatus.PAYMENT_PENDING) {
+          order.status = OrderStatus.CANCELLED;
+          order.cancelledAt = new Date();
+          order.cancellationReason = 'Tiempo de pago expirado';
+          order.statusHistory.push({
+            status: OrderStatus.CANCELLED,
+            timestamp: new Date(),
+            note: 'Cancelado automáticamente por timeout de pago',
+          });
+
+          for (const item of order.items) {
+            if (item.variant?.size) {
+              await this.stockService.restockProduct(
+                item.product._id.toString(),
+                item.variant.size,
+                item.quantity,
+              );
+            }
+          }
+
+          await order.save({ session });
+        }
+
+        cancelledCount++;
+      }
+
+      await session.commitTransaction();
+      return cancelledCount;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+  }
+
   private toPaymentResponseDto(payment: PaymentDocument): PaymentResponseDto {
     return {
       id: payment._id.toString(),

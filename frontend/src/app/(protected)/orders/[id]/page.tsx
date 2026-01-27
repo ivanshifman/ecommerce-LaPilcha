@@ -163,6 +163,7 @@ export default function OrderDetailPage() {
     const statusConfig = STATUS_CONFIG[order.status];
     const StatusIcon = statusConfig.icon;
     const canCancel = CANCELLABLE_STATUSES.includes(order.status);
+    const showPaymentButton = order.status === OrderStatus.PAYMENT_PENDING && order.paymentMethod !== PaymentMethod.BANK_TRANSFER
 
     return (
         <div className="min-h-screen bg-background">
@@ -395,6 +396,15 @@ export default function OrderDetailPage() {
                                 )}
                             </div>
                         </div>
+
+                        {showPaymentButton && (
+                            <button
+                                onClick={() => router.push(`/checkout/payment/${orderId}`)}
+                                className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold cursor-pointer mb-3"
+                            >
+                                Realizar Pago
+                            </button>
+                        )}
 
                         {canCancel && (
                             <button

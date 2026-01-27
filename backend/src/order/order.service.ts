@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { Cart, CartDocument } from '../cart/schemas/cart.schema';
 import { Product, ProductDocument } from '../product/schemas/product.schema';
@@ -631,6 +631,13 @@ export class OrderService {
 
   async findById(orderId: string): Promise<OrderDocument | null> {
     return this.orderModel.findById(orderId).exec();
+  }
+
+  async findByIdWithSession(
+    orderId: string,
+    session: ClientSession,
+  ): Promise<OrderDocument | null> {
+    return this.orderModel.findById(orderId).session(session).exec();
   }
 
   getOrderEmail(order: OrderDocument): string | null {

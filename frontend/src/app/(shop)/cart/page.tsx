@@ -366,7 +366,7 @@ export default function CartPage() {
                                                     onClick={() =>
                                                         handleRemove(item.product.id, item.variant?.size, item.variant?.color)
                                                     }
-                                                    className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                                    className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
                                                     title="Eliminar"
                                                 >
                                                     <Trash2 className="w-5 h-5" />

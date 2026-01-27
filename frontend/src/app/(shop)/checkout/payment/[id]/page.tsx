@@ -75,6 +75,12 @@ export default function OrderPaymentPage() {
         };
     }, [isAuthenticated, orderId, fetchOrderById, clearCurrentOrder, router]);
 
+    useEffect(() => {
+        if (currentOrder?.paymentMethod) {
+            setSelectedMethod(currentOrder.paymentMethod);
+        }
+    }, [currentOrder]);
+
     const handlePayment = async () => {
         if (!selectedMethod || !currentOrder) return;
 
@@ -172,7 +178,7 @@ export default function OrderPaymentPage() {
                     <div className="lg:col-span-2">
                         <div className="bg-white border border-border rounded-lg p-6 mb-6">
                             <h2 className="text-xl font-bold text-text-primary mb-4">
-                                Selecciona tu método de pago
+                                Método de pago seleccionado
                             </h2>
 
                             <div className="space-y-3">
@@ -180,24 +186,27 @@ export default function OrderPaymentPage() {
                                     const Icon = method.icon;
                                     const isSelected = selectedMethod === method.id;
                                     const discount = calculateDiscount(method.id);
+                                    const isOriginalMethod = currentOrder?.paymentMethod === method.id;
 
                                     return (
                                         <button
                                             key={method.id}
                                             onClick={() => setSelectedMethod(method.id)}
-                                            className={`w-full p-4 border-2 rounded-lg text-left transition-all cursor-pointer ${
-                                                isSelected
+                                            disabled={!isOriginalMethod}
+                                            className={`w-full p-4 border-2 rounded-lg text-left transition-all ${!isOriginalMethod
+                                                    ? 'opacity-40 cursor-not-allowed'
+                                                    : 'cursor-pointer'
+                                                } ${isSelected
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:border-primary/50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div
-                                                    className={`p-3 rounded-lg ${
-                                                        isSelected
+                                                    className={`p-3 rounded-lg ${isSelected
                                                             ? 'bg-primary text-white'
                                                             : 'bg-accent'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <Icon className="w-6 h-6" />
                                                 </div>
@@ -206,7 +215,7 @@ export default function OrderPaymentPage() {
                                                         <h3 className="font-bold text-text-primary">
                                                             {method.name}
                                                         </h3>
-                                                        {method.discount > 0 && (
+                                                        {method.discount > 0 && isOriginalMethod && (
                                                             <span className="px-2 py-0.5 bg-success text-white text-xs font-bold rounded-full">
                                                                 -{method.discount}%
                                                             </span>
@@ -215,7 +224,7 @@ export default function OrderPaymentPage() {
                                                     <p className="text-sm text-text-muted">
                                                         {method.description}
                                                     </p>
-                                                    {discount > 0 && (
+                                                    {discount > 0 && isOriginalMethod && (
                                                         <p className="text-sm text-success font-semibold mt-1">
                                                             Ahorras ${discount.toFixed(2)}
                                                         </p>
@@ -347,5 +356,5 @@ export default function OrderPaymentPage() {
                 </div>
             </div>
         </div>
-    );
-}
+    )
+};

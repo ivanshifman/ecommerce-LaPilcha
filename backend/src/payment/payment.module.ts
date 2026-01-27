@@ -11,6 +11,7 @@ import { UserModule } from '../user/user.module';
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { ModoStrategy } from './strategies/modo.strategy';
 import { BankTransferStrategy } from './strategies/bank-transfer.strategy';
+import { PaymentJob } from './jobs/payment.job';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { BankTransferStrategy } from './strategies/bank-transfer.strategy';
     UserModule,
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, MercadoPagoStrategy, ModoStrategy, BankTransferStrategy],
+  providers: [PaymentService, MercadoPagoStrategy, ModoStrategy, BankTransferStrategy, PaymentJob],
   exports: [PaymentService],
 })
 export class PaymentModule {}
