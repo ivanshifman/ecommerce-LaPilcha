@@ -90,10 +90,9 @@ export class OrderService {
 
         if (cartItem.variant?.size) {
           const size = product.sizes.find((s) => s.size === cartItem.variant?.size?.toUpperCase());
-          const availableStock = size ? size.stock - (size.reserved ?? 0) : 0;
 
-          if (availableStock < cartItem.quantity) {
-            throw new ConflictException('No hay stock suficiente para la cantidad seleccionada');
+          if (!size || size.stock < cartItem.quantity) {
+            throw new ConflictException('No hay stock suficiente para completar la orden');
           }
         }
 

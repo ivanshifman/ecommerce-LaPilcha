@@ -44,6 +44,7 @@ export default function CheckoutPage() {
     const { createOrder } = useOrderActions();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>(PaymentMethod.MERCADO_PAGO);
 
     const [shippingInfo, setShippingInfo] = useState<{
@@ -83,6 +84,7 @@ export default function CheckoutPage() {
             setShippingInfo(parsed);
             setValue('state', parsed.province);
         }
+        setIsInitialized(true);
     }, [fetchCart, setValue]);
 
     useEffect(() => {
@@ -95,9 +97,25 @@ export default function CheckoutPage() {
 
     useEffect(() => {
         if (!isFetching && cart && cart.items.length === 0) {
-            router.push('/cart');
+            const hasOrder = sessionStorage.getItem('checkoutShipping');
+
+            if (hasOrder) {
+                showSuccess('Tu orden fue procesada. Revisa el estado en tus órdenes.');
+                sessionStorage.removeItem('checkoutShipping');
+                router.push('/orders');
+            } else {
+                showError('Tu carrito está vacío');
+                router.push('/cart');
+            }
         }
     }, [cart, isFetching, router]);
+
+    useEffect(() => {
+        if (isInitialized && !isFetching && cart && cart.items.length > 0 && !shippingInfo) {
+            showError('Debes seleccionar un método de envío primero');
+            router.push('/cart');
+        }
+    }, [cart, isFetching, shippingInfo, isInitialized, router]);
 
     const onSubmit = async (data: CheckoutFormData) => {
         if (!cart || cart.items.length === 0) {

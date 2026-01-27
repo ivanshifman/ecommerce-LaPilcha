@@ -95,7 +95,7 @@ const PAYMENT_METHOD_LABELS = {
 
 export default function MyOrdersPage() {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useAuth();
     const { orders, pagination, isLoading } = useOrders();
     const { fetchMyOrders } = useOrderActions();
 

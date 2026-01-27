@@ -81,6 +81,13 @@ export default function OrderPaymentPage() {
         }
     }, [currentOrder]);
 
+    useEffect(() => {
+        if (currentOrder && currentOrder.paymentMethod === PaymentMethod.BANK_TRANSFER) {
+            showError('Esta orden fue configurada para pago por transferencia bancaria');
+            router.push(`/orders/${orderId}`);
+        }
+    }, [currentOrder, orderId, router]);
+
     const handlePayment = async () => {
         if (!selectedMethod || !currentOrder) return;
 
@@ -194,8 +201,8 @@ export default function OrderPaymentPage() {
                                             onClick={() => setSelectedMethod(method.id)}
                                             disabled={!isOriginalMethod}
                                             className={`w-full p-4 border-2 rounded-lg text-left transition-all ${!isOriginalMethod
-                                                    ? 'opacity-40 cursor-not-allowed'
-                                                    : 'cursor-pointer'
+                                                ? 'opacity-40 cursor-not-allowed'
+                                                : 'cursor-pointer'
                                                 } ${isSelected
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:border-primary/50'
@@ -204,8 +211,8 @@ export default function OrderPaymentPage() {
                                             <div className="flex items-center gap-4">
                                                 <div
                                                     className={`p-3 rounded-lg ${isSelected
-                                                            ? 'bg-primary text-white'
-                                                            : 'bg-accent'
+                                                        ? 'bg-primary text-white'
+                                                        : 'bg-accent'
                                                         }`}
                                                 >
                                                     <Icon className="w-6 h-6" />
