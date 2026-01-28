@@ -216,6 +216,13 @@ ${
   </p>
 </div>
 
+<div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:16px;margin:24px 0;border-radius:6px;">
+  <p style="margin:0;">
+    ⏳ <strong>Tenés hasta 48 horas para realizar la transferencia.</strong><br/>
+    Pasado ese plazo, la orden se cancelará automáticamente.
+  </p>
+</div>
+
 <p style="text-align:center;margin-top:32px;">
   <strong>¿Tenés dudas?</strong><br>
   Respondé este email o contactanos por WhatsApp

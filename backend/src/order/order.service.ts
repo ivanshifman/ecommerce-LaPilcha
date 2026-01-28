@@ -365,99 +365,40 @@ export class OrderService {
 
     for (const item of order.items) {
       if (item.variant?.size) {
-        await this.productModel.findOneAndUpdate(
-          {
-            _id: item.product,
-            'sizes.size': item.variant.size.toUpperCase(),
-          },
-          {
-            $inc: {
-              'sizes.$.stock': item.quantity,
-              salesCount: -item.quantity,
-            },
-          },
-        );
+        try {
+          await this.stockService.restockProduct(
+            item.product.toString(),
+            item.variant.size,
+            item.quantity,
+          );
+        } catch (error) {
+          console.error('Error restaurando stock:', error);
+        }
       }
     }
 
     order.status = OrderStatus.CANCELLED;
     order.cancelledAt = new Date();
     order.cancellationReason = dto.reason;
+    order.statusHistory.push({
+      status: OrderStatus.CANCELLED,
+      timestamp: new Date(),
+      note: dto.reason,
+    });
     await order.save();
 
     const user = await this.userService.findById(userId);
     const email = order.user ? (user?.email ?? null) : this.getOrderEmail(order);
 
     if (email) {
-      await this.mailService.sendOrderCancellation(email, order.orderNumber);
+      try {
+        await this.mailService.sendOrderCancellation(email, order.orderNumber);
+      } catch (emailError) {
+        console.error('Error enviando email de cancelación:', emailError);
+      }
     }
 
     return OrderMapper.toOrderResponseDto(order);
-  }
-
-  async cancelExpiredOrders(params: { status: OrderStatus; minutes: number }): Promise<number> {
-    const expirationDate = new Date(Date.now() - params.minutes * 60 * 1000);
-
-    const expiredOrders = await this.orderModel
-      .find({
-        status: params.status,
-        createdAt: { $lte: expirationDate },
-      })
-      .session(await this.orderModel.startSession());
-
-    const session = await this.orderModel.db.startSession();
-    session.startTransaction();
-
-    try {
-      let cancelledCount = 0;
-
-      for (const order of expiredOrders) {
-        const currentOrder = await this.orderModel
-          .findOne({ _id: order._id, status: params.status })
-          .session(session);
-
-        if (!currentOrder) continue;
-
-        for (const item of currentOrder.items) {
-          if (item.variant?.size) {
-            await this.productModel.findOneAndUpdate(
-              {
-                _id: item.product,
-                'sizes.size': item.variant.size.toUpperCase(),
-              },
-              {
-                $inc: {
-                  'sizes.$.stock': item.quantity,
-                  'sizes.$.reserved': -item.quantity,
-                  salesCount: -item.quantity,
-                },
-              },
-              { session },
-            );
-          }
-        }
-
-        currentOrder.status = OrderStatus.CANCELLED;
-        currentOrder.cancelledAt = new Date();
-        currentOrder.cancellationReason = 'Tiempo de pago expirado';
-        currentOrder.statusHistory.push({
-          status: OrderStatus.CANCELLED,
-          timestamp: new Date(),
-          note: 'Cancelado automáticamente por timeout',
-        });
-
-        await currentOrder.save({ session });
-        cancelledCount++;
-      }
-
-      await session.commitTransaction();
-      return cancelledCount;
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      await session.endSession();
-    }
   }
 
   async getAllOrders(query: OrderQueryDto): Promise<PaginatedOrderResponseDto> {

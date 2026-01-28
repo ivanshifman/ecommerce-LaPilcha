@@ -90,7 +90,7 @@ export class StockService {
       {
         $inc: {
           'sizes.$.stock': quantity,
-          'sizes.$.reserved': -quantity,
+          salesCount: -quantity,
         },
       },
       { new: true },

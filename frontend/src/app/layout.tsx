@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "../components/layout/Navbar";
 import { ScrollToTop } from "../components/layout/ScrollToTop";
+import { Footer } from "../components/layout/Footer";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ScrollToTop />
           <Navbar />
           <main className="min-h-screen">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

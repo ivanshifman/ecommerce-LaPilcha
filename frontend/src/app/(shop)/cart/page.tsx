@@ -26,33 +26,7 @@ import { colorLabels } from '../../../utils/colorMap';
 import { showSuccess, showError } from '../../../lib/notifications';
 import { handleApiError } from '../../../api/error-handler';
 import type { ShippingOption } from '../../../types/shipping.types';
-
-const PROVINCES = [
-    'Buenos Aires',
-    'Capital Federal',
-    'Catamarca',
-    'Chaco',
-    'Chubut',
-    'Córdoba',
-    'Corrientes',
-    'Entre Ríos',
-    'Formosa',
-    'Jujuy',
-    'La Pampa',
-    'La Rioja',
-    'Mendoza',
-    'Misiones',
-    'Neuquén',
-    'Río Negro',
-    'Salta',
-    'San Juan',
-    'San Luis',
-    'Santa Cruz',
-    'Santa Fe',
-    'Santiago del Estero',
-    'Tierra del Fuego',
-    'Tucumán',
-];
+import { PROVINCES } from '../../../lib/constants/geography';
 
 export default function CartPage() {
     const router = useRouter();

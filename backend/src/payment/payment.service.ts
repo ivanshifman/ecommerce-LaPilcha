@@ -115,6 +115,10 @@ export class PaymentService {
         anonymousCartId && Types.ObjectId.isValid(anonymousCartId)
           ? new Types.ObjectId(anonymousCartId)
           : undefined;
+      const expiresAt =
+        dto.method === PaymentMethod.BANK_TRANSFER
+          ? new Date(Date.now() + 48 * 60 * 60 * 1000)
+          : new Date(Date.now() + 60 * 60 * 1000);
 
       const payment = new this.paymentModel({
         order: orderObjectId,
@@ -123,6 +127,7 @@ export class PaymentService {
         amount: order.total,
         method: dto.method,
         status: PaymentStatus.PENDING,
+        expiresAt,
       });
 
       await payment.save({ session });
@@ -348,7 +353,8 @@ export class PaymentService {
         if (order.status === OrderStatus.PAID) {
           return;
         }
-
+        payment.expiresAt = undefined;
+        await payment.save();
         order.status = OrderStatus.PAID;
         order.paymentDetails = {
           transactionId: payment.externalId,
@@ -683,15 +689,17 @@ export class PaymentService {
     this.logger.log('✅ Firma verificada correctamente');
   }
 
-  async cancelExpiredPayments(params: { status: PaymentStatus; minutes: number }): Promise<number> {
-    const expirationDate = new Date(Date.now() - params.minutes * 60 * 1000);
-
+  async cancelExpiredPayments(params: { status: PaymentStatus }): Promise<number> {
     const expiredPayments = await this.paymentModel
       .find({
         status: params.status,
-        createdAt: { $lte: expirationDate },
+        expiresAt: { $lte: new Date() },
       })
       .exec();
+
+    if (expiredPayments.length === 0) {
+      return 0;
+    }
 
     const session = await this.paymentModel.db.startSession();
     session.startTransaction();
@@ -701,10 +709,15 @@ export class PaymentService {
 
       for (const payment of expiredPayments) {
         const currentPayment = await this.paymentModel
-          .findOne({ _id: payment._id, status: params.status })
+          .findOne({
+            _id: payment._id,
+            status: PaymentStatus.PENDING,
+          })
           .session(session);
 
-        if (!currentPayment) continue;
+        if (!currentPayment) {
+          continue;
+        }
 
         currentPayment.status = PaymentStatus.CANCELLED;
         currentPayment.statusHistory.push({
@@ -718,38 +731,57 @@ export class PaymentService {
           session,
         );
 
-        if (!order) continue;
+        if (!order) {
+          this.logger.warn(`⚠️ Orden no encontrada para pago ${currentPayment._id.toString()}`);
+          continue;
+        }
 
-        if (order.status === OrderStatus.PAYMENT_PENDING) {
-          order.status = OrderStatus.CANCELLED;
-          order.cancelledAt = new Date();
-          order.cancellationReason = 'Tiempo de pago expirado';
-          order.statusHistory.push({
-            status: OrderStatus.CANCELLED,
-            timestamp: new Date(),
-            note: 'Cancelado automáticamente por timeout de pago',
-          });
+        if (order.status !== OrderStatus.PAYMENT_PENDING) {
+          this.logger.warn(
+            `⚠️ Orden ${order.orderNumber} no está en PAYMENT_PENDING (estado: ${order.status})`,
+          );
+          continue;
+        }
 
-          for (const item of order.items) {
-            if (item.variant?.size) {
+        order.status = OrderStatus.CANCELLED;
+        order.cancelledAt = new Date();
+        order.cancellationReason = 'Tiempo de pago expirado';
+        order.statusHistory.push({
+          status: OrderStatus.CANCELLED,
+          timestamp: new Date(),
+          note: 'Cancelado automáticamente por timeout de pago',
+        });
+
+        for (const item of order.items) {
+          if (item.variant?.size) {
+            try {
               await this.stockService.restockProduct(
                 item.product._id.toString(),
                 item.variant.size,
                 item.quantity,
               );
+            } catch (error) {
+              this.logger.error(
+                `❌ Error restaurando stock para producto ${item.product._id.toString()}:`,
+                error,
+              );
             }
           }
-
-          await order.save({ session });
         }
 
+        await order.save({ session });
         cancelledCount++;
+
+        this.logger.log(
+          `✅ Pago ${currentPayment._id.toString()} y orden ${order.orderNumber} cancelados por expiración`,
+        );
       }
 
       await session.commitTransaction();
       return cancelledCount;
     } catch (error) {
       await session.abortTransaction();
+      this.logger.error('❌ Error en cancelExpiredPayments:', error);
       throw error;
     } finally {
       await session.endSession();

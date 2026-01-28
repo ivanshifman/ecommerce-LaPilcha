@@ -62,6 +62,7 @@ export class Payment {
 
   createdAt?: Date;
   updatedAt?: Date;
+  expiresAt?: Date;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

@@ -9,7 +9,6 @@ import { ProductModule } from '../product/product.module';
 import { ShippingModule } from '../shipping/shipping.module';
 import { UserModule } from '../user/user.module';
 import { MailModule } from '../common/mail/mail.module';
-import { OrderJob } from './jobs/order.job';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import { OrderJob } from './jobs/order.job';
     MailModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService, OrderJob],
+  providers: [OrderService],
   exports: [OrderService],
 })
 export class OrderModule {}

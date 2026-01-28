@@ -13,7 +13,6 @@ export class PaymentJob {
   async cancelExpiredPendingPayments() {
     const cancelledPayments = await this.paymentService.cancelExpiredPayments({
       status: PaymentStatus.PENDING,
-      minutes: 60,
     });
 
     if (cancelledPayments > 0) {

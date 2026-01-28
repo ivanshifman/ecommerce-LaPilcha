@@ -21,77 +21,22 @@ import { useAuth } from '../../../store/authStore';
 import { useOrders, useOrderActions } from '../../../store/orderStore';
 import { handleApiError } from '../../../api/error-handler';
 import { showError } from '../../../lib/notifications';
-import { OrderStatus, PaymentMethod } from '../../../types/order.types';
+import { OrderStatus } from '../../../types/order.types';
 import type { OrderQueryDto } from '../../../types/order.types';
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_CONFIG } from '../../../lib/constants/business';
 
-const STATUS_CONFIG = {
-    [OrderStatus.PENDING]: {
-        label: 'Pendiente',
-        color: 'text-warning',
-        bg: 'bg-warning/10',
-        icon: Clock,
-    },
-    [OrderStatus.PAYMENT_PENDING]: {
-        label: 'Pago Pendiente',
-        color: 'text-warning',
-        bg: 'bg-warning/10',
-        icon: Clock,
-    },
-    [OrderStatus.PAID]: {
-        label: 'Pagado',
-        color: 'text-info',
-        bg: 'bg-info/10',
-        icon: CheckCircle2,
-    },
-    [OrderStatus.PROCESSING]: {
-        label: 'Procesando',
-        color: 'text-info',
-        bg: 'bg-info/10',
-        icon: Package,
-    },
-    [OrderStatus.SHIPPED]: {
-        label: 'Enviado',
-        color: 'text-primary',
-        bg: 'bg-primary/10',
-        icon: Truck,
-    },
-    [OrderStatus.DELIVERED]: {
-        label: 'Entregado',
-        color: 'text-success',
-        bg: 'bg-success/10',
-        icon: CheckCircle2,
-    },
-    [OrderStatus.CANCELLED]: {
-        label: 'Cancelado',
-        color: 'text-destructive',
-        bg: 'bg-destructive/10',
-        icon: XCircle,
-    },
-    [OrderStatus.REFUND_PENDING]: {
-        label: 'Devolución Pendiente',
-        color: 'text-warning',
-        bg: 'bg-warning/10',
-        icon: AlertCircle,
-    },
-    [OrderStatus.REFUNDED]: {
-        label: 'Reembolsado',
-        color: 'text-text-muted',
-        bg: 'bg-muted',
-        icon: CheckCircle2,
-    },
-    [OrderStatus.FAILED]: {
-        label: 'Fallido',
-        color: 'text-destructive',
-        bg: 'bg-destructive/10',
-        icon: XCircle,
-    },
-};
-
-const PAYMENT_METHOD_LABELS = {
-    [PaymentMethod.MERCADO_PAGO]: 'Mercado Pago',
-    [PaymentMethod.MODO]: 'Modo',
-    [PaymentMethod.BANK_TRANSFER]: 'Transferencia',
-};
+const STATUS_ICONS = {
+    [OrderStatus.PENDING]: Clock,
+    [OrderStatus.PAYMENT_PENDING]: Clock,
+    [OrderStatus.PAID]: CheckCircle2,
+    [OrderStatus.PROCESSING]: Package,
+    [OrderStatus.SHIPPED]: Truck,
+    [OrderStatus.DELIVERED]: CheckCircle2,
+    [OrderStatus.CANCELLED]: XCircle,
+    [OrderStatus.REFUND_PENDING]: AlertCircle,
+    [OrderStatus.REFUNDED]: CheckCircle2,
+    [OrderStatus.FAILED]: XCircle,
+} as const;
 
 export default function MyOrdersPage() {
     const router = useRouter();
@@ -178,7 +123,7 @@ export default function MyOrdersPage() {
                                     className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                                 >
                                     <option value="">Todos</option>
-                                    {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                                    {Object.entries(ORDER_STATUS_CONFIG).map(([key, config]) => (
                                         <option key={key} value={key}>
                                             {config.label}
                                         </option>
@@ -234,10 +179,10 @@ export default function MyOrdersPage() {
                 ) : (
                     <div className="space-y-4">
                         {orders.map((order) => {
-                            const statusConfig = STATUS_CONFIG[order.status];
-                            const StatusIcon = statusConfig.icon;
+                            const statusConfig = ORDER_STATUS_CONFIG[order.status];
+                            const StatusIcon = STATUS_ICONS[order.status];
                             const firstItem = order.items[0];
-
+                            
                             return (
                                 <Link
                                     key={order.id}
@@ -280,7 +225,7 @@ export default function MyOrdersPage() {
                                                         {order.paymentMethod && (
                                                             <span className="flex items-center gap-1">
                                                                 <CreditCard className="w-4 h-4" />
-                                                                {PAYMENT_METHOD_LABELS[order.paymentMethod]}
+                                                                {PAYMENT_METHOD_CONFIG[order.paymentMethod].shortLabel}
                                                             </span>
                                                         )}
                                                         <span className="flex items-center gap-1">

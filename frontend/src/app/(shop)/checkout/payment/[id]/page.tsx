@@ -18,30 +18,15 @@ import { handleApiError } from '../../../../../api/error-handler';
 import { showSuccess, showError } from '../../../../../lib/notifications';
 import { OrderStatus, PaymentMethod } from '../../../../../types/order.types';
 import { paymentService } from '../../../../../services/payment.service';
+import { PAYMENT_METHOD_CONFIG } from '../../../../../lib/constants/business';
 
-const PAYMENT_METHODS = [
-    {
-        id: PaymentMethod.MERCADO_PAGO,
-        name: 'Mercado Pago',
-        icon: CreditCard,
-        description: 'Paga con tarjeta de crédito, débito o efectivo',
-        discount: 0,
-    },
-    {
-        id: PaymentMethod.MODO,
-        name: 'Modo',
-        icon: Smartphone,
-        description: 'Transferencia inmediata con tu cuenta de Modo',
-        discount: 0,
-    },
-    {
-        id: PaymentMethod.BANK_TRANSFER,
-        name: 'Transferencia Bancaria',
-        icon: Building2,
-        description: '10% de descuento adicional',
-        discount: 10,
-    },
-];
+const PAYMENT_ICONS = {
+    [PaymentMethod.MERCADO_PAGO]: CreditCard,
+    [PaymentMethod.MODO]: Smartphone,
+    [PaymentMethod.BANK_TRANSFER]: Building2,
+} as const;
+
+const paymentMethods = Object.values(PAYMENT_METHOD_CONFIG);
 
 export default function OrderPaymentPage() {
     const router = useRouter();
@@ -189,8 +174,8 @@ export default function OrderPaymentPage() {
                             </h2>
 
                             <div className="space-y-3">
-                                {PAYMENT_METHODS.map((method) => {
-                                    const Icon = method.icon;
+                                {paymentMethods.map((method) => {
+                                    const Icon = PAYMENT_ICONS[method.id];
                                     const isSelected = selectedMethod === method.id;
                                     const discount = calculateDiscount(method.id);
                                     const isOriginalMethod = currentOrder?.paymentMethod === method.id;
@@ -220,7 +205,7 @@ export default function OrderPaymentPage() {
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <h3 className="font-bold text-text-primary">
-                                                            {method.name}
+                                                            {method.label}
                                                         </h3>
                                                         {method.discount > 0 && isOriginalMethod && (
                                                             <span className="px-2 py-0.5 bg-success text-white text-xs font-bold rounded-full">
