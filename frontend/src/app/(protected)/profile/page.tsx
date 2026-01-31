@@ -27,6 +27,7 @@ import { showSuccess, showError } from '../../../lib/notifications';
 import { profileSchema, UserSizePreference, UserColorPreference } from '../../../schemas/profile.schema';
 import type { ProfileFormData } from '../../../schemas/profile.schema';
 import { uploadService } from '../../../services/upload.service';
+import { ProfilePhoneInput } from '../../../components/forms/ProfilePhoneInput';
 
 type SizeValue = (typeof UserSizePreference)[keyof typeof UserSizePreference];
 type ColorValue = UserColorPreference;
@@ -236,7 +237,7 @@ export default function ProfilePage() {
                 avatar: '',
             });
 
-            showSuccess('Avatar eliminado exitosamente');
+            showSuccess('Imagen eliminada exitosamente');
         } catch (err) {
             const apiError = handleApiError(err);
             showError(apiError.message || 'Error al eliminar avatar');
@@ -395,20 +396,18 @@ export default function ProfilePage() {
                                     <label className="block text-sm font-medium text-text-primary mb-2">
                                         Teléfono
                                     </label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                                        <input
-                                            {...register('phone')}
-                                            type="tel"
-                                            disabled={!isEditing}
-                                            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.phone ? 'border-destructive' : 'border-border'
-                                                } ${!isEditing ? 'bg-muted cursor-not-allowed' : ''}`}
-                                            placeholder="+54 9 11 1234-5678"
-                                        />
-                                    </div>
-                                    {errors.phone && (
-                                        <p className="text-sm text-destructive mt-1">{errors.phone.message}</p>
-                                    )}
+                                    <Controller
+                                        name="phone"
+                                        control={control}
+                                        defaultValue=""
+                                        render={({ field }) => (
+                                            <ProfilePhoneInput
+                                                error={errors.phone?.message}
+                                                disabled={!isEditing}
+                                                {...field}
+                                            />
+                                        )}
+                                    />
                                 </div>
 
                                 <div className="pt-4 border-t border-border">

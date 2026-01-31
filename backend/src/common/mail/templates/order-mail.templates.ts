@@ -517,4 +517,95 @@ El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
 </p>
 `);
   }
+
+  static sendContactForm(data: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+    isAuthenticated?: boolean;
+    userId?: string;
+  }) {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #d4a574; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none; }
+        .field { margin-bottom: 15px; }
+        .label { font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+        .value { padding: 10px; background: white; border-left: 3px solid #d4a574; border-radius: 4px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .badge-user { background: #4caf50; color: white; }
+        .badge-guest { background: #ff9800; color: white; }
+        .footer { margin-top: 20px; padding: 15px; text-align: center; font-size: 12px; color: #666; background: #f0f0f0; border-radius: 0 0 8px 8px; }
+        .user-info { background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>📧 Nuevo Mensaje de Contacto</h2>
+        </div>
+        <div class="content">
+          ${
+            data.isAuthenticated
+              ? `
+            <div class="user-info">
+              <span class="badge badge-user">✓ Usuario Registrado</span>
+              <p style="margin: 5px 0 0 0; font-size: 13px;">ID: ${data.userId}</p>
+            </div>
+          `
+              : `
+            <span class="badge badge-guest">👤 Usuario Invitado</span>
+          `
+          }
+          
+          <div class="field">
+            <span class="label">Nombre:</span>
+            <div class="value">${data.name}</div>
+          </div>
+          
+          <div class="field">
+            <span class="label">Email:</span>
+            <div class="value"><a href="mailto:${data.email}">${data.email}</a></div>
+          </div>
+          
+          ${
+            data.phone
+              ? `
+          <div class="field">
+            <span class="label">Teléfono:</span>
+            <div class="value"><a href="tel:${data.phone}">${data.phone}</a></div>
+          </div>
+          `
+              : ''
+          }
+          
+          <div class="field">
+            <span class="label">Asunto:</span>
+            <div class="value"><strong>${data.subject}</strong></div>
+          </div>
+          
+          <div class="field">
+            <span class="label">Mensaje:</span>
+            <div class="value">${data.message.replace(/\n/g, '<br>')}</div>
+          </div>
+        </div>
+        <div class="footer">
+          <p>📅 Enviado el ${new Date().toLocaleString('es-AR', {
+            dateStyle: 'full',
+            timeStyle: 'short',
+          })}</p>
+          <p>Enviado desde el formulario de contacto de La Pilcha</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  }
 }

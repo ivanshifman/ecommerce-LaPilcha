@@ -14,5 +14,7 @@ export const SOCIAL_LINKS = {
 export const COMPANY_INFO = {
   name: 'La Pilcha',
   slogan: 'Moda argentina con estilo auténtico. Calidad y tradición en cada prenda.',
+  legalName: 'La Pilcha S.A.',
+  taxId: process.env.NEXT_PUBLIC_TAX_ID || 'CUIT 30-12345678-9',
   foundedYear: 2026,
 } as const;

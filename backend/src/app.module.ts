@@ -17,6 +17,7 @@ import { PaymentModule } from './payment/payment.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { ReturnModule } from './return/return.module';
 import { CouponModule } from './coupon/coupon.module';
+import { ContactModule } from './common/contact/contact.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CouponModule } from './coupon/coupon.module';
     UserModule,
     AuthModule,
     CartModule,
+    ContactModule,
     OrderModule,
     PaymentModule,
     ShippingModule,

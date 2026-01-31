@@ -191,4 +191,22 @@ export class MailService {
       OrderMailTemplates.refundProcessed(returnNumber, refundedAmount, paymentMethod),
     );
   }
+
+  async sendContactForm(data: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+    isAuthenticated?: boolean;
+    userId?: string;
+  }): Promise<SentMessageInfo> {
+    const adminEmail = this.configService.get<string>('ADMIN_EMAIL') || 'info@lapilcha.com';
+
+    return this.sendMail(
+      adminEmail,
+      `[Contacto] ${data.subject} - ${data.name}`,
+      OrderMailTemplates.sendContactForm(data),
+    );
+  }
 }
