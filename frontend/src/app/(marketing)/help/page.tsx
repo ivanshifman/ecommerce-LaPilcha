@@ -16,7 +16,7 @@ const HELP_SECTIONS = [
             },
             {
                 question: '¿Cuál es el costo de envío?',
-                answer: 'El costo de envío varía según la provincia y el método seleccionado. Los envíos son GRATIS en compras superiores a $50.000.',
+                answer: 'El costo de envío varía según la provincia y el método seleccionado. Los envíos son GRATIS en compras superiores a $100.000.',
             },
             {
                 question: '¿Realizan envíos a todo el país?',

@@ -15,6 +15,7 @@ export interface ShippingOption {
   cost: number;
   estimatedDays: string;
   isFree: boolean;
+  freeShippingThreshold?: number;
   description?: string;
 }
 

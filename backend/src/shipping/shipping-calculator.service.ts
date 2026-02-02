@@ -15,6 +15,7 @@ export interface ShippingOption {
   cost: number;
   estimatedDays: string;
   isFree: boolean;
+  freeShippingThreshold?: number;
   description?: string;
 }
 
@@ -76,6 +77,7 @@ export class ShippingCalculatorService {
         cost,
         estimatedDays,
         isFree,
+        freeShippingThreshold: rate.freeShippingThreshold,
         description: rate.description,
       });
     }

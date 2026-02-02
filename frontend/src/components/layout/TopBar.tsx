@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CreditCard, Truck, Zap } from 'lucide-react';
 
 const MESSAGES = [
-    <><Truck className="inline h-4 w-4 mr-2" /> Envío gratis superando los <strong>$150.000</strong></>,
+    <><Truck className="inline h-4 w-4 mr-2" /> Envío gratis superando los <strong>$100.000</strong></>,
     <><CreditCard className="inline h-4 w-4 mr-2" /> 3 y 6 cuotas sin interés</>,
     <><Zap className="inline h-4 w-4 mr-2" /> Envíos a todo el país</>,
 ];
