@@ -64,6 +64,7 @@ export interface ProductFilters {
     brand?: string;
     size?: string;
     featured?: boolean;
+    onDiscount?: boolean;
     search?: string;
     sortBy?: 'price' | 'salesCount' | 'rating' | 'createdAt';
     order?: 'asc' | 'desc';

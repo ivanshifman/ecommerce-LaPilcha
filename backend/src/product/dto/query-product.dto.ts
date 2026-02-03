@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsString, IsIn, IsNumber, Min, Max, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsNumber, Min, Max, IsEnum, IsBoolean } from 'class-validator';
 import { GenderEnum } from '../common/enums/gender.enum';
 
 export class QueryProductDto {
@@ -67,6 +67,11 @@ export class QueryProductDto {
   @IsOptional()
   @IsIn(['price', 'salesCount', 'rating', 'createdAt'], { message: 'sortBy inválido.' })
   sortBy?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  onDiscount?: boolean;
 
   @IsOptional()
   @IsIn(['asc', 'desc'], { message: 'order debe ser asc o desc.' })

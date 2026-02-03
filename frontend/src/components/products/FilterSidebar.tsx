@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, Percent } from 'lucide-react';
 import { useProductActions, useProducts } from '../../store/productStore';
 import type { ProductFilters } from '../../types/product.types';
 import { ColorEnum, GenderEnum } from '../../types/product.types';
@@ -47,6 +47,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
         price: true,
         size: true,
         brand: true,
+        discount: true,
     });
 
     useEffect(() => {
@@ -99,7 +100,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
 
     const handleTempFilterChange = (
         key: keyof ProductFilters,
-        value: string | number | undefined
+        value: string | number | undefined | boolean
     ) => {
         setTempFilters((prev) => {
             const next = {
@@ -115,12 +116,14 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                 next.color = undefined;
                 next.priceMin = undefined;
                 next.priceMax = undefined;
+                next.onDiscount = undefined;
             }
 
             if (key === 'category') {
                 next.subcategory = undefined;
                 next.size = undefined;
                 next.brand = undefined;
+                next.onDiscount = undefined;
             }
 
             if (key === 'subcategory') {
@@ -284,6 +287,40 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         </div>
                     )}
 
+                    <div className="border-b border-border pb-4">
+                        <button
+                            onClick={() => toggleSection('discount')}
+                            className="w-full flex items-center justify-between mb-3"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Percent className="w-4 h-4 text-primary" />
+                                <h3 className="font-semibold text-text-primary">Ofertas</h3>
+                            </div>
+                            <ChevronDown
+                                className={`w-4 h-4 transition-transform ${expandedSections.discount ? 'rotate-180' : ''
+                                    }`}
+                            />
+                        </button>
+                        {expandedSections.discount && (
+                            <label className="flex items-center gap-3 cursor-pointer p-3 bg-destructive/5 rounded-lg border border-destructive/20 hover:bg-destructive/10 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={tempFilters.onDiscount || false}
+                                    onChange={(e) => handleTempFilterChange('onDiscount', e.target.checked || undefined)}
+                                    className="w-4 h-4 rounded border-border text-destructive focus:ring-destructive/20 cursor-pointer"
+                                />
+                                <div className="flex-1">
+                                    <span className="text-sm font-semibold text-text-primary block">
+                                        Solo productos en oferta
+                                    </span>
+                                    <span className="text-xs text-text-muted">
+                                        Ver productos con descuento
+                                    </span>
+                                </div>
+                            </label>
+                        )}
+                    </div>
+
                     {/* Color */}
                     <div className="border-b border-border pb-4">
                         <button
@@ -304,7 +341,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                                         onClick={() =>
                                             handleTempFilterChange('color', tempFilters.color === color ? undefined : color)
                                         }
-                                        className={`relative w-10 h-10 rounded-full border-2 transition-all ${tempFilters.color === color
+                                        className={`relative w-10 h-10 rounded-full border-2 transition-all cursor-pointer ${tempFilters.color === color
                                             ? 'border-primary scale-110'
                                             : 'border-border hover:scale-105'
                                             }`}
@@ -343,7 +380,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                                             onClick={() =>
                                                 handleTempFilterChange('size', tempFilters.size === size ? undefined : size)
                                             }
-                                            className={`py-2 text-sm font-medium rounded-md transition-colors ${tempFilters.size === size
+                                            className={`py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${tempFilters.size === size
                                                 ? 'bg-primary text-white'
                                                 : 'bg-accent text-text-primary hover:bg-accent-dark'
                                                 }`}

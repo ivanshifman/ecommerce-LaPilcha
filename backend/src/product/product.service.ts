@@ -19,7 +19,18 @@ export class ProductService {
   }
 
   private buildFilters(query: QueryProductDto) {
-    const { search, category, subcategory, color, size, brand, gender, priceMin, priceMax } = query;
+    const {
+      search,
+      category,
+      subcategory,
+      color,
+      size,
+      brand,
+      gender,
+      priceMin,
+      priceMax,
+      onDiscount,
+    } = query;
 
     const filter: Record<string, unknown> = { status: true };
 
@@ -50,6 +61,10 @@ export class ProductService {
           stock: { $gt: 0 },
         },
       };
+    }
+
+    if (onDiscount === true) {
+      filter.discount = { $gt: 0 };
     }
 
     if (priceMin !== undefined && priceMax !== undefined && priceMin > priceMax) {

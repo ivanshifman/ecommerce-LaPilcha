@@ -3,15 +3,15 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Filter, SlidersHorizontal, X } from 'lucide-react';
+import { Filter, SlidersHorizontal } from 'lucide-react';
 import { useProductActions, useProducts } from '../../../store/productStore';
 import { useAuth } from '../../../store/authStore';
 import { ProductGrid } from '../../../components/products/ProductGrid';
 import { FilterSidebar } from '../../../components/products/FilterSidebar';
 import { SortMenu } from '../../../components/products/SortMenu';
 import { Pagination } from '../../../components/products/Pagination';
+import { ActiveFiltersChips } from '../../../components/products/ActiveFiltersChips';
 import { genderLabels } from '../../../utils/genderLabels';
-import { colorLabels } from '../../../utils/colorMap';
 import type { ProductFilters } from '../../../types/product.types';
 
 function getPageTitle(filters: ProductFilters): string {
@@ -31,6 +31,10 @@ function getPageTitle(filters: ProductFilters): string {
 
     if (filters.subcategory) {
         parts.push(filters.subcategory);
+    }
+
+    if (filters.onDiscount) {
+        parts.push('Descuentos');
     }
 
     if (parts.length > 0) {
@@ -101,6 +105,7 @@ export default function ProductsPage() {
         const page = searchParams.get('page');
         const sortBy = searchParams.get('sortBy');
         const order = searchParams.get('order');
+        const onDiscount = searchParams.get('onDiscount');
 
         const newFilters: ProductFilters = {
             page: page ? parseInt(page) : 1,
@@ -116,6 +121,7 @@ export default function ProductsPage() {
             brand: brand || undefined,
             priceMin: priceMin ? parseFloat(priceMin) : undefined,
             priceMax: priceMax ? parseFloat(priceMax) : undefined,
+            onDiscount: onDiscount === 'true' ? true : undefined,
         };
 
         setFilters(newFilters);
@@ -124,7 +130,7 @@ export default function ProductsPage() {
 
     const handleFilterChange = (
         key: keyof ProductFilters,
-        value: ProductFilters[keyof ProductFilters]
+        value?: ProductFilters[keyof ProductFilters]
     ) => {
         const newFilters: ProductFilters = {
             ...filters,
@@ -141,12 +147,14 @@ export default function ProductsPage() {
                 newFilters.color = undefined;
                 newFilters.priceMin = undefined;
                 newFilters.priceMax = undefined;
+                newFilters.onDiscount = undefined;
             }
 
             if (key === 'category') {
                 newFilters.subcategory = undefined;
                 newFilters.size = undefined;
                 newFilters.brand = undefined;
+                newFilters.onDiscount = undefined;
             }
 
             if (key === 'subcategory') {
@@ -205,6 +213,7 @@ export default function ProductsPage() {
         filters.brand,
         filters.priceMin,
         filters.priceMax,
+        filters.onDiscount,
     ].filter(Boolean).length;
 
     return (
@@ -235,94 +244,11 @@ export default function ProductsPage() {
                     </p>
 
                     {activeFiltersCount > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-4">
-                            {filters.category && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Categoría: {filters.category}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('category', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {filters.subcategory && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Subcategoría: {filters.subcategory}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('subcategory', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {filters.gender && filters.gender in genderLabels && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    {genderLabels[filters.gender as keyof typeof genderLabels]}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('gender', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {filters.color && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Color: {colorLabels[filters.color as keyof typeof colorLabels]}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('color', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {filters.size && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Talle: {filters.size}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('size', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {filters.brand && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Marca: {filters.brand}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => handleFilterChange('brand', undefined)}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
-                            {(filters.priceMin || filters.priceMax) && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                                    Precio: ${filters.priceMin || 0} - ${filters.priceMax || '∞'}
-                                    <button
-                                        title='Eliminar filtro'
-                                        onClick={() => {
-                                            handleFilterChange('priceMin', undefined);
-                                            handleFilterChange('priceMax', undefined);
-                                        }}
-                                        className="hover:bg-primary/20 rounded-full p-0.5"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
-                            )}
+                        <div className="mt-4">
+                            <ActiveFiltersChips
+                                filters={filters}
+                                onRemoveFilter={handleFilterChange}
+                            />
                         </div>
                     )}
                 </div>
