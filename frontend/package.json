@@ -23,6 +23,7 @@
     "react-hook-form": "7.67.0",
     "react-hot-toast": "2.6.0",
     "react-icons": "5.5.0",
+    "swiper": "^12.1.0",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "1.0.7",
     "zod": "4.1.13",

@@ -105,7 +105,7 @@ export function Navbar() {
 
         <nav className="max-w-7xl mx-auto px-3 py-1.5 md:px-4 md:py-2">
           <div className="flex items-center justify-between">
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               {genders.map((gender) => (
                 <CategoryDropdown
                   key={gender}
@@ -119,7 +119,7 @@ export function Navbar() {
 
             <Link
               href="/"
-              className="md:absolute md:left-1/2 md:-translate-x-1/2"
+              className="lg:absolute lg:left-1/2 lg:-translate-x-1/2"
             >
               <Image
                 src="/LOGO_LA_PILCHA.png"
@@ -131,18 +131,18 @@ export function Navbar() {
               />
             </Link>
 
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <div className="hidden md:block">
+            <div className="flex items-center gap-1.5 lg:gap-2">
+              <div className="hidden lg:block">
                 <SearchBar onOpen={handleSearchOpen} />
               </div>
 
-              <div className="md:hidden">
+              <div className="lg:hidden">
                 <SearchBar onOpen={handleSearchOpen} />
               </div>
 
               <button
                 onClick={handleWishlistOpen}
-                className="relative p-1.5 md:p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
+                className="relative p-1.5 lg:p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Favoritos"
               >
                 <Heart className="w-5 h-5 text-text-primary" />
@@ -174,7 +174,7 @@ export function Navbar() {
 
               <button
                 onClick={handleMobileMenuOpen}
-                className="md:hidden p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
+                className="lg:hidden p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Abrir menú"
               >
                 <Menu className="w-6 h-6 text-text-primary" />

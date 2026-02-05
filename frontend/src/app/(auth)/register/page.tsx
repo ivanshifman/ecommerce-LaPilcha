@@ -64,7 +64,7 @@ export default function RegisterPage() {
             Crear cuenta
           </h1>
           <p className="text-text-muted">
-            Únete a La Pilcha
+            Únete a El Paisano
           </p>
         </div>
 

@@ -60,7 +60,7 @@ export class MercadoPagoStrategy implements PaymentStrategy {
       },
       notification_url: notificationUrl,
       external_reference: payment._id.toString(),
-      statement_descriptor: 'LA PILCHA',
+      statement_descriptor: 'EL PAISANO',
     };
 
     if (isProd) {

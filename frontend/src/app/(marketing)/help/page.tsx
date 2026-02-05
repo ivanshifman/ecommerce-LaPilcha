@@ -54,7 +54,7 @@ const HELP_SECTIONS = [
             },
             {
                 question: '¿Cómo solicito un cambio?',
-                answer: 'Contacta a nuestro equipo a través del email info@lapilcha.com indicando tu número de orden y el motivo del cambio.',
+                answer: 'Contacta a nuestro equipo a través del email info@elpaisano.com indicando tu número de orden y el motivo del cambio.',
             },
             {
                 question: '¿Quién paga el envío de la devolución?',

@@ -39,7 +39,7 @@ export function TopBar() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, y: -16 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="hidden md:block bg-primary text-white text-sm text-center">
+                    className="hidden lg:block bg-primary text-white text-sm text-center">
                     <div className="py-1">
                         <AnimatePresence mode="wait" initial={false}>
                             <motion.p

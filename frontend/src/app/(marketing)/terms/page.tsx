@@ -1,11 +1,10 @@
-// app/terms/page.tsx
 import Link from 'next/link';
 import { FileText, AlertCircle, Package, CreditCard, Truck, RefreshCw } from 'lucide-react';
 import { COMPANY_INFO, CONTACT_INFO } from '../../../lib/constants/contact';
 
 export const metadata = {
-    title: 'Términos y Condiciones | La Pilcha',
-    description: 'Términos y condiciones de uso del sitio web y servicio de La Pilcha',
+    title: 'Términos y Condiciones | El Paisano',
+    description: 'Términos y condiciones de uso del sitio web y servicio de entrega de El Paisano',
 };
 
 export default function TermsPage() {
@@ -53,9 +52,9 @@ export default function TermsPage() {
                         <div className="text-text-secondary space-y-4">
                             <p>
                                 El presente documento establece los Términos y Condiciones (en adelante, "T&C") que regulan
-                                el uso del sitio web <strong>lapilcha.com.ar</strong> (en adelante, el "Sitio") y la compra
+                                el uso del sitio web <strong>elpaisano.com.ar</strong> (en adelante, el "Sitio") y la compra
                                 de productos ofrecidos por <strong>{COMPANY_INFO.name}</strong>, {COMPANY_INFO.legalName}
-                                (en adelante, "La Pilcha", "nosotros" o "nuestro").
+                                (en adelante, "El Paisano", "nosotros" o "nuestro").
                             </p>
                             <p>
                                 <strong>Datos del titular del sitio:</strong>

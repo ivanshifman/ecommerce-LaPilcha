@@ -201,7 +201,7 @@ export class MailService {
     isAuthenticated?: boolean;
     userId?: string;
   }): Promise<SentMessageInfo> {
-    const adminEmail = this.configService.get<string>('ADMIN_EMAIL') || 'info@lapilcha.com';
+    const adminEmail = this.configService.get<string>('ADMIN_EMAIL') || 'info@elpaisano.com';
 
     return this.sendMail(
       adminEmail,

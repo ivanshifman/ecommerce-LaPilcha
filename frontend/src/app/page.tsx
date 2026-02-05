@@ -8,6 +8,7 @@ import { useProductActions, useProducts } from '../store/productStore';
 import { HeroBanner } from '../components/home/HeroBanner';
 import { CategoryBanners } from '../components/home/CategoryBanners';
 import { FeaturedProducts } from '../components/home/FeaturedProducts';
+import { PromoBanners } from '../components/home/PromoBanners';
 
 export default function HomePage() {
   const searchParams = useSearchParams();
@@ -38,19 +39,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Banner */}
       <HeroBanner />
 
-      {/* Category Banners */}
+      <PromoBanners />
+
       <CategoryBanners />
 
-      {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
+      <section className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-text-primary mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-3">
             Productos Destacados
           </h2>
-          <p className="text-text-muted max-w-2xl mx-auto">
+          <p className="text-text-muted text-lg max-w-2xl mx-auto">
             Descubrí nuestra selección especial de productos más vendidos y mejor valorados
           </p>
         </div>
@@ -64,7 +64,6 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Benefits Section */}
       <section className="bg-accent/30 py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
