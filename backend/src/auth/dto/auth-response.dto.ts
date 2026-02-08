@@ -4,6 +4,7 @@ export class AuthResponseDto {
   user: UserResponseDto = new UserResponseDto();
   accessToken!: string;
   refreshToken!: string;
+  expiresIn?: number;
 }
 
 export class UserResponseDto {

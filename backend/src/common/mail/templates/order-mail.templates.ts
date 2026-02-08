@@ -14,7 +14,7 @@ const baseTemplate = (content: string) => `
   
   <tr>
     <td style="background:#111827;color:#fff;padding:20px;">
-      <h1 style="margin:0;font-size:20px;">El Paisano</h1>
+      <h1 style="margin:0;font-size:20px;">El Atahualpa</h1>
     </td>
   </tr>
 
@@ -306,7 +306,7 @@ Esperamos que disfrutes tu compra.
 <hr style="margin:24px 0;" />
 
 <p style="font-size:13px;color:#6b7280;">
-Gracias por confiar en El Paisano.
+Gracias por confiar en El Atahualpa.
 </p>
 `);
   }
@@ -385,7 +385,7 @@ Si tenés alguna consulta, podés responder este correo y nuestro equipo te va a
         </div>
 
         <div style="background-color: #000; color: #fff; padding: 15px; text-align: center; font-size: 12px;">
-          <p style="margin: 5px 0;">&copy; 2026 El Paisano. Todos los derechos reservados.</p>
+          <p style="margin: 5px 0;">&copy; 2026 El Atahualpa. Todos los derechos reservados.</p>
         </div>
       </div>
 `);
@@ -601,7 +601,7 @@ El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
             dateStyle: 'full',
             timeStyle: 'short',
           })}</p>
-          <p>Enviado desde el formulario de contacto de El Paisano</p>
+          <p>Enviado desde el formulario de contacto de El Atahualpa</p>
         </div>
       </div>
     </body>

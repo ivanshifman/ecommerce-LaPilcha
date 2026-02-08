@@ -12,7 +12,7 @@ export function cookieOptions(config: ConfigService, isRefresh = false): CookieO
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? 'none' : 'lax',
-    path: isRefresh ? '/auth/refresh' : '/',
+    path: '/',
   };
   if (isRefresh) {
     opts.maxAge = parseDurationToMs(config.get<string>('JWT_REFRESH_EXPIRATION') ?? '7d');

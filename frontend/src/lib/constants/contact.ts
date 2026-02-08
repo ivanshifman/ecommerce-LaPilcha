@@ -6,15 +6,15 @@ export const CONTACT_INFO = {
 } as const;
 
 export const SOCIAL_LINKS = {
-  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://facebook.com/elpaisano',
-  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/elpaisano',
-  twitter: process.env.NEXT_PUBLIC_TWITTER_URL || 'https://twitter.com/elpaisano',
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://facebook.com/elatahualpa',
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://instagram.com/elatahualpa',
+  twitter: process.env.NEXT_PUBLIC_TWITTER_URL || 'https://twitter.com/elatahualpa',
 } as const;
 
 export const COMPANY_INFO = {
-  name: 'El Paisano',
+  name: 'El Atahualpa',
   slogan: 'Moda argentina con estilo auténtico. Calidad y tradición en cada prenda.',
-  legalName: 'El Paisano S.A.',
+  legalName: 'El Atahualpa S.A.',
   taxId: process.env.NEXT_PUBLIC_TAX_ID || 'CUIT 30-12345678-9',
   foundedYear: 2026,
 } as const;

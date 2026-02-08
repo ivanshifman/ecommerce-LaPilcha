@@ -64,7 +64,7 @@ export default function RegisterPage() {
             Crear cuenta
           </h1>
           <p className="text-text-muted">
-            Únete a El Paisano
+            Únete a El Atahualpa
           </p>
         </div>
 

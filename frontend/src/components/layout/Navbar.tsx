@@ -122,12 +122,12 @@ export function Navbar() {
               className="lg:absolute lg:left-1/2 lg:-translate-x-1/2"
             >
               <Image
-                src="/LOGO_LA_PILCHA.png"
+                src="/LOGO_EL_ATAHUALPA.png"
                 alt="Logo"
                 width={90}
                 height={90}
                 loading='eager'
-                className="md:w-[120px]"
+                className="md:w-[140px]"
               />
             </Link>
 

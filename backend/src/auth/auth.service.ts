@@ -118,11 +118,33 @@ export class AuthService {
       }
     }
 
+    const accessExpiration = this.configService.get<string>('JWT_ACCESS_EXPIRATION') || '15m';
+    const expiresIn = this.parseDurationToSeconds(accessExpiration);
+
     return {
       user: UserMapper.toUserResponseDto(userDoc),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
+      expiresIn,
     };
+  }
+
+  private parseDurationToSeconds(str: string): number {
+    if (!str) return 900;
+    const num = parseInt(str.slice(0, -1), 10);
+    const unit = str.slice(-1);
+    switch (unit) {
+      case 's':
+        return num;
+      case 'm':
+        return num * 60;
+      case 'h':
+        return num * 60 * 60;
+      case 'd':
+        return num * 24 * 60 * 60;
+      default:
+        return num;
+    }
   }
 
   async loginLocal(user: AuthenticatedUserDto, res: Response): Promise<AuthResponseDto> {
@@ -149,7 +171,7 @@ export class AuthService {
   async refreshTokensFromCookie(
     refreshToken: string,
     res: Response,
-  ): Promise<AuthTokens & { user: AuthenticatedUserDto }> {
+  ): Promise<AuthTokens & { user: AuthenticatedUserDto; expiresIn: number }> {
     const payload = await this.tokensUtil.verifyToken(refreshToken);
     const userId = payload.sub;
     const tokens = await this.tokenService.refreshTokens(userId, refreshToken);
@@ -165,7 +187,10 @@ export class AuthService {
       role: userDoc.role,
     };
 
-    return { ...tokens, user };
+    const accessExpiration = this.configService.get<string>('JWT_ACCESS_EXPIRATION') || '15m';
+    const expiresIn = this.parseDurationToSeconds(accessExpiration);
+
+    return { ...tokens, user, expiresIn };
   }
 
   async profile(user: AuthenticatedUserDto): Promise<ProfileResponseDto> {

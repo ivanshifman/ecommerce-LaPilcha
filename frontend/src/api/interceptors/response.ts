@@ -36,6 +36,7 @@ export const responseInterceptor = async (
     '/auth/resend-code',
     '/auth/forgot-password',
     '/auth/reset-password',
+    '/auth/refresh',
   ];
 
   if (authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))) {
@@ -44,9 +45,7 @@ export const responseInterceptor = async (
 
   if (
     error.response?.status === 401 &&
-    originalRequest.method !== "get" &&
-    !originalRequest._retry &&
-    !originalRequest.url?.includes("/auth/refresh")
+    !originalRequest._retry
   ) {
     if (isRefreshing) {
       return new Promise((resolve, reject) =>
@@ -60,14 +59,24 @@ export const responseInterceptor = async (
     isRefreshing = true;
 
     try {
-      await apiClient.post("/auth/refresh");
+      const refreshResponse = await apiClient.post("/auth/refresh");
       processQueue(null);
+
+      if (refreshResponse.data?.data?.expiresIn) {
+        const { scheduleTokenRefresh } = await import('../../lib/auth/tokenRefresh');
+        scheduleTokenRefresh(refreshResponse.data.data.expiresIn);
+      }
+
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as AxiosError);
       await logout();
       useCartStore.setState({ cart: null });
-      window.location.href = "/login";
+
+      if (typeof window !== 'undefined') {
+        window.location.href = "/login";
+      }
+
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

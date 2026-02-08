@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/shallow';
 import { authService } from '../services/auth.service';
+import { scheduleTokenRefresh, clearTokenRefresh } from '../lib/auth/tokenRefresh';
 import type {
   User,
   LoginDto,
@@ -9,7 +10,6 @@ import type {
   ProfileResponse,
 } from '../types/auth.types';
 import { handleApiError } from '../api/error-handler';
-import { cartService } from '../services/cart.service';
 import { useCartStore } from './cartStore';
 
 interface AuthState {
@@ -43,6 +43,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      if (response.expiresIn) {
+        scheduleTokenRefresh(response.expiresIn);
+      } else {
+        scheduleTokenRefresh();
+      }
     } catch (error) {
       const apiError = handleApiError(error);
       set({ error: apiError.message, isLoading: false });
@@ -66,6 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
+      clearTokenRefresh();
       await authService.logout();
       useCartStore.setState({ cart: null });
       set({
@@ -90,6 +97,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      scheduleTokenRefresh();
     } catch (error) {
       throw error;
     }
@@ -113,6 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await get().getProfile();
     } catch {
+      clearTokenRefresh();
       set({
         user: null,
         profile: null,

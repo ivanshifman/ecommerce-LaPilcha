@@ -4,8 +4,8 @@ import { Shield, AlertCircle, Lock, Eye, FileText, Mail } from 'lucide-react';
 import { COMPANY_INFO, CONTACT_INFO } from '../../../lib/constants/contact';
 
 export const metadata = {
-    title: 'Política de Privacidad | El Paisano',
-    description: 'Política de privacidad y protección de datos personales de El Paisano',
+    title: 'Política de Privacidad | El Atahualpa',
+    description: 'Política de privacidad y protección de datos personales de El Atahualpa',
 };
 
 export default function PrivacyPage() {
