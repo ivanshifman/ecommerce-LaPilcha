@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { Navbar } from "../components/layout/Navbar";
 import { ScrollToTop } from "../components/layout/ScrollToTop";
 import { Footer } from "../components/layout/Footer";
+import { WhatsAppButton } from "../components/ui/WhatsAppButton";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -36,6 +37,10 @@ export default function RootLayout({
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <Footer />
+          <WhatsAppButton
+            phoneNumber="5491151213147"
+            message="¡Hola El Atahualpa! Me gustaría hacer una consulta sobre los productos."
+          />
         </Providers>
       </body>
     </html>

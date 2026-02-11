@@ -68,11 +68,11 @@ const FOOTER_LINKS = {
         },
         {
             label: 'Ofertas',
-            href: '/products?sale=true',
+            href: '/products?onDiscount=true',
         },
         {
             label: 'Novedades',
-            href: '/products?sort=newest',
+            href: '/products?order=desc',
         },
     ],
 };

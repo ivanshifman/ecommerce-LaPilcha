@@ -213,7 +213,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link href="/faq" onClick={onClose} className="flex items-center gap-3">
+                                                <Link href="/help" onClick={onClose} className="flex items-center gap-3">
                                                     <HelpCircle className="w-5 h-5" /> Preguntas frecuentes
                                                 </Link>
                                             </li>

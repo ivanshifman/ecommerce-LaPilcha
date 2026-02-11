@@ -407,7 +407,7 @@ export default function TermsPage() {
                                     El costo se calculará y se informará antes de finalizar la compra
                                 </li>
                                 <li>
-                                    <strong>Envíos GRATIS</strong> en compras superiores a <strong>$50.000</strong>
+                                    <strong>Envíos GRATIS</strong> en compras superiores a <strong>$100.000</strong>
                                     {' '}(puede variar según promociones vigentes)
                                 </li>
                             </ul>
