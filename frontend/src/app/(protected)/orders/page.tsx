@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -17,13 +16,14 @@ import {
     XCircle,
     Clock,
 } from 'lucide-react';
-import { useAuth } from '../../../store/authStore';
+import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useOrders, useOrderActions } from '../../../store/orderStore';
 import { handleApiError } from '../../../api/error-handler';
 import { showError } from '../../../lib/notifications';
 import { OrderStatus } from '../../../types/order.types';
 import type { OrderQueryDto } from '../../../types/order.types';
 import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_CONFIG } from '../../../lib/constants/business';
+
 
 const STATUS_ICONS = {
     [OrderStatus.PENDING]: Clock,
@@ -39,8 +39,7 @@ const STATUS_ICONS = {
 } as const;
 
 export default function MyOrdersPage() {
-    const router = useRouter();
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
     const { orders, pagination, isLoading } = useOrders();
     const { fetchMyOrders } = useOrderActions();
 
@@ -49,12 +48,6 @@ export default function MyOrdersPage() {
         limit: 10,
     });
     const [showFilters, setShowFilters] = useState(false);
-
-    useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login?redirect=/orders');
-        }
-    }, [isAuthenticated, authLoading, router]);
 
     useEffect(() => {
         if (isAuthenticated) {

@@ -22,6 +22,7 @@ import {
     Camera,
 } from 'lucide-react';
 import { useAuth, useAuthActions } from '../../../store/authStore';
+import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { handleApiError } from '../../../api/error-handler';
 import { showSuccess, showError } from '../../../lib/notifications';
 import { profileSchema, UserSizePreference, UserColorPreference } from '../../../schemas/profile.schema';
@@ -58,7 +59,8 @@ const COLOR_LABELS: Record<UserColorPreference, string> = {
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { profile } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
     const { getProfile, updateProfile } = useAuthActions();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -88,12 +90,6 @@ export default function ProfilePage() {
     });
 
     const selectedColors = watch('preferences.favoriteColors') || [];
-
-    useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login?redirect=/profile');
-        }
-    }, [isAuthenticated, authLoading, router]);
 
     useEffect(() => {
         if (isAuthenticated) {

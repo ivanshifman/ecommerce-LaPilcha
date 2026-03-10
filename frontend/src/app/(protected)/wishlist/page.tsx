@@ -1,31 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Trash2, ShoppingCart, Loader2, X } from 'lucide-react';
-import { useAuth } from '../../../store/authStore';
+import { useRequireAuth } from '../../../hooks/useRequireAuth';
 import { useWishlist, useWishlistActions } from '../../../store/wishlistStore';
 import { useCartActions } from '../../../store/cartStore';
 import { handleApiError } from '../../../api/error-handler';
 import { showSuccess, showError } from '../../../lib/notifications';
 
 export default function WishlistPage() {
-    const router = useRouter();
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
     const { items, isLoading, hydrated } = useWishlist();
     const { fetchWishlist, removeFromWishlist, clearWishlist } = useWishlistActions();
     const { addToCart } = useCartActions();
 
     const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
     const [addingToCartIds, setAddingToCartIds] = useState<Set<string>>(new Set());
-
-    useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login?redirect=/wishlist');
-        }
-    }, [isAuthenticated, authLoading, router]);
 
     useEffect(() => {
         if (isAuthenticated && !hydrated) {

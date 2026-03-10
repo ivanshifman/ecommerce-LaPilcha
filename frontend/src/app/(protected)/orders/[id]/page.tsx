@@ -16,7 +16,7 @@ import {
     AlertCircle,
     Loader2,
 } from 'lucide-react';
-import { useAuth } from '../../../../store/authStore';
+import { useRequireAuth } from '../../../../hooks/useRequireAuth';
 import { useOrders, useOrderActions } from '../../../../store/orderStore';
 import { handleApiError } from '../../../../api/error-handler';
 import { showSuccess, showError } from '../../../../lib/notifications';
@@ -41,19 +41,13 @@ export default function OrderDetailPage() {
     const params = useParams();
     const orderId = params?.id as string;
 
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
     const { currentOrder, isLoading } = useOrders();
     const { fetchOrderById, cancelOrder, clearCurrentOrder } = useOrderActions();
 
     const [isCancelling, setIsCancelling] = useState(false);
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
-
-    useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push('/login?redirect=/orders');
-        }
-    }, [isAuthenticated, authLoading, router]);
 
     useEffect(() => {
         if (isAuthenticated && orderId) {
