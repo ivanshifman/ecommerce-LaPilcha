@@ -7,6 +7,13 @@ export enum ColorEnum {
     YELLOW = 'amarillo',
     GRAY = 'gris',
     BROWN = 'marron',
+    BURGUNDY = 'bordo',
+    ECRU_BLUE = 'crudo azul',
+    ECRU_RED = 'crudo rojo',
+    ECRU_GREEN = 'crudo verde',
+    BEIGE = 'beige',
+    CAMOUFLAGE = 'camuflaje',
+    PINK = 'rosa',
 }
 
 export enum GenderEnum {
