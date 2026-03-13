@@ -61,10 +61,10 @@ export function MobileMenu({ open, onClose }: Props) {
     }, [activeGender, fetchCategoriesByGender]);
 
     useEffect(() => {
-        if (activeCategory) {
-            fetchSubcategories(activeCategory).then(setSubcategories);
+        if (activeCategory && activeGender) {
+            fetchSubcategories(activeCategory, activeGender).then(setSubcategories);
         }
-    }, [activeCategory, fetchSubcategories]);
+    }, [activeCategory, activeGender, fetchSubcategories]);
 
     const handleBack = () => {
         if (level === 'category') {

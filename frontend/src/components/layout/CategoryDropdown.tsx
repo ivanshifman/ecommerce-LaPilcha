@@ -59,14 +59,14 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
         setActiveCategory(categorySlug);
         setLoadingSubcats(true);
 
-        const cacheKey = `${gender}_${categorySlug}`;
+        const cacheKey = `${gender}_${categorySlug}`; // ya usás gender acá, bien
 
         if (cacheRef.current[cacheKey]) {
             setSubcategories(cacheRef.current[cacheKey]);
             setLoadingSubcats(false);
         } else {
             try {
-                const subs = await fetchSubcategories(categorySlug);
+                const subs = await fetchSubcategories(categorySlug, gender);
                 setSubcategories(subs);
                 cacheRef.current[cacheKey] = subs;
             } catch (error) {
@@ -91,7 +91,6 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            {/* Trigger */}
             <button className="flex items-center gap-1 px-4 py-2 text-text-muted hover:text-primary transition-colors font-medium">
                 {label}
                 <ChevronDown
@@ -99,7 +98,6 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
                 />
             </button>
 
-            {/* Dropdown completo con animación */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -110,7 +108,6 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
                         exit="exit"
                         className="absolute left-0 top-full bg-white shadow-lg border border-border rounded-l-xl rounded-r-none z-50 flex overflow-hidden"
                     >
-                        {/* LEFT - Categories */}
                         <div className="w-[280px] rounded-l-xl border-r border-border">
                             {categories.length > 0 ? (
                                 categories.map((category) => (
@@ -129,9 +126,8 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
                             )}
                         </div>
 
-                        {/* RIGHT - Subcategories solo si hay hover en categoría */}
                         {activeCategory && (
-                            <div className="relative w-[340px] min-h-[120px] bg-white shadow-lg rounded-r-xl border border-border overflow-hidden">
+                            <div className="relative w-[340px] min-h-[120px] max-h-[400px] bg-white shadow-lg rounded-r-xl border border-border overflow-y-auto">
                                 <AnimatePresence mode="wait">
                                     <motion.div
                                         key={activeCategory}
@@ -139,7 +135,7 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                         transition={{ duration: 0.25, ease: 'easeOut' }}
-                                        className="absolute inset-0 p-6"
+                                        className="p-6"
                                     >
                                         <p className="text-[11px] font-semibold tracking-widest text-text-muted uppercase mb-2">
                                             Subcategorías

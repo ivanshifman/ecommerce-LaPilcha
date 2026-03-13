@@ -91,10 +91,11 @@ export const productService = {
     }
   },
 
-  getSubcategoriesByCategory: async (category: string): Promise<string[]> => {
+  getSubcategoriesByCategory: async (category: string, gender?: string): Promise<string[]> => {
     try {
       const response = await apiClient.get<ApiResponse<string[]>>(
-        `/products/meta/categories/${category}/subcategories`
+        `/products/meta/categories/${category}/subcategories`,
+        { params: gender ? { gender } : undefined }
       );
       return unwrapResponse(response.data);
     } catch (error) {

@@ -29,7 +29,7 @@ interface ProductState {
   fetchGenders: () => Promise<void>;
   fetchCategoriesByGender: (gender: string) => Promise<string[]>;
   fetchCategories: () => Promise<void>;
-  fetchSubcategories: (category: string) => Promise<string[]>;
+  fetchSubcategories: (category: string, gender?: string) => Promise<string[]>;
   fetchSizes: () => Promise<void>;
   fetchBrands: () => Promise<void>;
   fetchFilteredSizes: (filters?: ProductFilters) => Promise<void>;
@@ -145,9 +145,9 @@ export const useProductStore = create<ProductState>((set) => ({
     }
   },
 
-  fetchSubcategories: async (category) => {
+  fetchSubcategories: async (category, gender?) => {
     try {
-      return await productService.getSubcategoriesByCategory(category);
+      return await productService.getSubcategoriesByCategory(category, gender);
     } catch (error) {
       const apiError = handleApiError(error);
       set({ error: apiError.message });

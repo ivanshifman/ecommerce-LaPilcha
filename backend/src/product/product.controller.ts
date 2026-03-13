@@ -55,8 +55,8 @@ export class ProductController {
   }
 
   @Get('meta/categories/:category/subcategories')
-  getSubcategories(@Param('category') category: string) {
-    return this.productService.getSubcategoriesByCategory(category);
+  getSubcategories(@Param('category') category: string, @Query('gender') gender?: string) {
+    return this.productService.getSubcategoriesByCategory(category, gender);
   }
 
   @Get('meta/featured')

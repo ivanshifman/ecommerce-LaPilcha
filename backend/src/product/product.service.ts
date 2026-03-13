@@ -127,11 +127,17 @@ export class ProductService {
     return categories;
   }
 
-  async getSubcategoriesByCategory(category: string): Promise<string[]> {
-    const subcategories = await this.productModel.distinct('subcategory', {
+  async getSubcategoriesByCategory(category: string, gender?: string): Promise<string[]> {
+    const filter: Record<string, unknown> = {
       category: { $regex: new RegExp(`^${category}$`, 'i') },
       status: true,
-    });
+    };
+
+    if (gender) {
+      filter.gender = { $regex: new RegExp(`^${gender}$`, 'i') };
+    }
+
+    const subcategories = await this.productModel.distinct('subcategory', filter);
     return subcategories.filter(Boolean);
   }
 
