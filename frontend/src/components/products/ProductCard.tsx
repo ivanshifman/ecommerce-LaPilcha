@@ -34,6 +34,7 @@ export function ProductCard({ product, user }: Props) {
     const discountedPrice = hasDiscount
         ? product.price * (1 - product.discount! / 100)
         : product.price;
+    const hasSizes = product.sizes && product.sizes.length > 0;
 
     const handleToggleWishlist = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -58,13 +59,13 @@ export function ProductCard({ product, user }: Props) {
     };
 
     const handleAddToCart = async () => {
-        if (isAdmin || !selectedSize) return;
+        if (isAdmin || (hasSizes && !selectedSize)) return;
 
         setIsAddingToCart(true);
         try {
             await addToCart({
                 product: product.id,
-                variant: { size: selectedSize, color: product.color },
+                variant: { size: hasSizes ? selectedSize ?? undefined : undefined, color: product.color },
                 quantity: 1,
             });
             showSuccess('Producto agregado al carrito');
@@ -155,29 +156,33 @@ export function ProductCard({ product, user }: Props) {
 
                 {!isAdmin && (
                     <>
-                        <div className="mb-3">
-                            <p className="text-xs text-text-muted mb-2">Talle:</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {product.sizes?.map((sizeObj) => (
-                                    <button
-                                        key={sizeObj.size}
-                                        onClick={() => setSelectedSize(sizeObj.size)}
-                                        disabled={sizeObj.stock === 0}
-                                        className={`px-3 py-1 text-xs border rounded transition-colors cursor-pointer ${selectedSize === sizeObj.size
-                                            ? 'bg-primary text-white border-primary'
-                                            : sizeObj.stock === 0
-                                                ? 'bg-muted text-text-muted border-border cursor-not-allowed'
-                                                : 'bg-white text-text-primary border-border hover:border-primary'
-                                            }`}
-                                    >
-                                        {sizeObj.size}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {
+                            hasSizes && (
+                                <div className="mb-3">
+                                    <p className="text-xs text-text-muted mb-2">Talle:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {product.sizes?.map((sizeObj) => (
+                                            <button
+                                                key={sizeObj.size}
+                                                onClick={() => setSelectedSize(sizeObj.size)}
+                                                disabled={sizeObj.stock === 0}
+                                                className={`px-3 py-1 text-xs border rounded transition-colors cursor-pointer ${selectedSize === sizeObj.size
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : sizeObj.stock === 0
+                                                        ? 'bg-muted text-text-muted border-border cursor-not-allowed'
+                                                        : 'bg-white text-text-primary border-border hover:border-primary'
+                                                    }`}
+                                            >
+                                                {sizeObj.size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                        }
                         <button
                             onClick={handleAddToCart}
-                            disabled={!selectedSize || isAddingToCart}
+                            disabled={(hasSizes && !selectedSize) || isAddingToCart}
                             className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
                         >
                             <ShoppingCart className="w-4 h-4" />

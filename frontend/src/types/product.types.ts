@@ -11,6 +11,7 @@ export enum ColorEnum {
     ECRU_BLUE = 'crudo azul',
     ECRU_RED = 'crudo rojo',
     ECRU_GREEN = 'crudo verde',
+    ECRU_BROWN = 'crudo marron',
     BEIGE = 'beige',
     CAMOUFLAGE = 'camuflaje',
     PINK = 'rosa',
