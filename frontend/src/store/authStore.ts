@@ -120,11 +120,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   checkAuth: async () => {
     set({ isLoading: true });
-
     try {
       await get().getProfile();
       set({ isInitialized: true });
-    } catch {
+    } catch (error: any) {
+      const isNetworkError = !error.response || error.code === 'ECONNABORTED';
+
+      if (isNetworkError) {
+        try {
+          await new Promise(resolve => setTimeout(resolve, 3000)); 
+          await get().getProfile();
+          set({ isInitialized: true });
+          return;
+        } catch {
+          // Si falla de nuevo, ahí sí marcar como no autenticado
+        }
+      }
+
       clearTokenRefresh();
       set({
         user: null,
@@ -133,9 +145,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isInitialized: true,
         isLoading: false,
       });
-      return;
     }
-    set({ isInitialized: true });
   },
 
   clearError: () => set({ error: null }),
