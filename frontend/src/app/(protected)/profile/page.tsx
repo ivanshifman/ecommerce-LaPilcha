@@ -59,8 +59,7 @@ const COLOR_LABELS: Record<UserColorPreference, string> = {
 export default function ProfilePage() {
     const router = useRouter();
     const { profile } = useAuth();
-    const { isAuthenticated, isLoading: authLoading, isInitialized } = useRequireAuth();
-     console.log('ProfilePage render:', { isAuthenticated, authLoading, isInitialized });
+    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
     const { getProfile, updateProfile } = useAuthActions();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -91,16 +90,12 @@ export default function ProfilePage() {
 
     const selectedColors = watch('preferences.favoriteColors') || [];
 
-    if (!isInitialized || authLoading || !profile) {
+    if (authLoading || !profile) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
             </div>
         );
-    }
-
-    if (!isAuthenticated) {
-        return null;
     }
 
     useEffect(() => {
