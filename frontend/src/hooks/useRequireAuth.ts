@@ -11,6 +11,7 @@ export function useRequireAuth() {
   const pathname = usePathname();
 
   useEffect(() => {
+    console.log('useRequireAuth effect:', { isLoading, isInitialized, isAuthenticated, pathname });
     if (isLoading || !isInitialized) return;
 
     if (!isAuthenticated) {
@@ -24,5 +25,5 @@ export function useRequireAuth() {
     }
   }, [isAuthenticated, isLoading, isInitialized, user, pathname, router]);
 
-  return { isAuthenticated, isLoading: !isInitialized || isLoading, user };
+  return { isAuthenticated, isLoading, isInitialized, user };
 }
