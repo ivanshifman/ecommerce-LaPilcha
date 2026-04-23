@@ -11,6 +11,7 @@ function AuthInitializer() {
 
 function AppContent({ children }: { children: React.ReactNode }) {
     const { isInitialized } = useAuth();
+    
     if (!isInitialized) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -18,6 +19,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
             </div>
         );
     }
+    
     return <>{children}</>;
 }
 

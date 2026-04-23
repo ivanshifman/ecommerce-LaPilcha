@@ -11,7 +11,8 @@ export function useRequireAuth() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (isLoading || !isInitialized) return;
+    if (!isInitialized) return;
+    
     if (!isAuthenticated) {
       router.replace(`/login?from=${encodeURIComponent(pathname)}`);
       return;
@@ -19,7 +20,7 @@ export function useRequireAuth() {
     if (user && !hasAccess(pathname, user.role)) {
       router.replace('/403');
     }
-  }, [isAuthenticated, isLoading, isInitialized, user, pathname, router]);
+  }, [isAuthenticated, isInitialized, user, pathname, router]);
 
   return { isAuthenticated, isLoading: !isInitialized || isLoading, isInitialized, user };
 }
