@@ -80,6 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({
         user: null,
         profile: null,
+        isInitialized: true,
         isAuthenticated: false,
         isLoading: false,
       });
@@ -119,34 +120,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkAuth: async () => {
-    set({ isLoading: true });
-    try {
-      await get().getProfile();
-      set({ isInitialized: true });
-    } catch (error: any) {
-      const isNetworkError = !error.response || error.code === 'ECONNABORTED';
+  set({ isLoading: true, isInitialized: false });
+  try {
+    await get().getProfile();
+    set({ isInitialized: true, isLoading: false }); // ← agregar isLoading: false
+  } catch (error: any) {
+    const isNetworkError = !error.response || error.code === 'ECONNABORTED';
 
-      if (isNetworkError) {
-        try {
-          await new Promise(resolve => setTimeout(resolve, 3000)); 
-          await get().getProfile();
-          set({ isInitialized: true });
-          return;
-        } catch {
-          // Si falla de nuevo, ahí sí marcar como no autenticado
-        }
+    if (isNetworkError) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        await get().getProfile();
+        set({ isInitialized: true, isLoading: false }); // ← agregar isLoading: false
+        return;
+      } catch {
+        // falla de nuevo
       }
-
-      clearTokenRefresh();
-      set({
-        user: null,
-        profile: null,
-        isAuthenticated: false,
-        isInitialized: true,
-        isLoading: false,
-      });
     }
-  },
+
+    clearTokenRefresh();
+    set({
+      user: null,
+      profile: null,
+      isAuthenticated: false,
+      isInitialized: true,
+      isLoading: false,
+    });
+  }
+},
 
   clearError: () => set({ error: null }),
 }));
