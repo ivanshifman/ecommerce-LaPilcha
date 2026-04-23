@@ -8,7 +8,6 @@ import Image from 'next/image';
 import {
     User,
     Mail,
-    Phone,
     Edit2,
     Save,
     X,

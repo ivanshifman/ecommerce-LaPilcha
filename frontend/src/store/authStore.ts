@@ -16,6 +16,7 @@ interface AuthState {
   user: User | null;
   profile: ProfileResponse | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   isLoading: boolean;
   error: string | null;
   login: (data: LoginDto) => Promise<void>;
@@ -31,6 +32,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   isAuthenticated: false,
+  isInitialized: false,
   isLoading: true,
   error: null,
 
@@ -127,9 +129,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         user: null,
         profile: null,
         isAuthenticated: false,
+        isInitialized: true,
         isLoading: false,
       });
+      return;
     }
+    set({ isInitialized: true });
   },
 
   clearError: () => set({ error: null }),
@@ -141,6 +146,7 @@ export const useAuth = () =>
       user: state.user,
       profile: state.profile,
       isAuthenticated: state.isAuthenticated,
+      isInitialized: state.isInitialized,
       isLoading: state.isLoading,
       error: state.error,
     }))
