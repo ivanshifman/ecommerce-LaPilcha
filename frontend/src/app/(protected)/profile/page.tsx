@@ -90,14 +90,6 @@ export default function ProfilePage() {
 
     const selectedColors = watch('preferences.favoriteColors') || [];
 
-    if (authLoading || !profile) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
-            </div>
-        );
-    }
-
     useEffect(() => {
         if (isAuthenticated) {
             getProfile().catch(console.error);
@@ -123,6 +115,14 @@ export default function ProfilePage() {
             setAvatarPreview(profile.avatar || null);
         }
     }, [profile, reset]);
+
+    if (authLoading || !profile) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
+            </div>
+        );
+    }
 
     const onSubmit = async (data: ProfileFormData) => {
         setIsSubmitting(true);
