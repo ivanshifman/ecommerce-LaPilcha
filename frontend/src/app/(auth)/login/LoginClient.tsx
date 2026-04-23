@@ -100,18 +100,44 @@ export default function LoginClient({ from }: { from?: string }) {
                         />
 
                         <div className="flex items-center justify-between text-sm">
-                            <Link href="/forgot-password">
+                            <Link
+                                href="/forgot-password"
+                                className="text-primary hover:text-primary-dark transition-colors"
+                            >
                                 ¿Olvidaste tu contraseña?
                             </Link>
                         </div>
 
-                        <button type="submit" disabled={isLoading}>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                        >
                             {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                             {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                         </button>
                     </form>
 
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-4 bg-white text-text-muted">O continúa con</span>
+                        </div>
+                    </div>
+
                     <OAuthButtons />
+
+                    <p className="mt-6 text-center text-sm text-text-muted">
+                        ¿No tienes cuenta?{' '}
+                        <Link
+                            href="/register"
+                            className="text-primary hover:text-primary-dark font-medium transition-colors"
+                        >
+                            Regístrate aquí
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
