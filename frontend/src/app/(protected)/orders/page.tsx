@@ -38,7 +38,7 @@ const STATUS_ICONS = {
 } as const;
 
 export default function MyOrdersPage() {
-    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
+    const { isAuthenticated, isLoading: authLoading, isInitialized } = useRequireAuth();
     const { orders, pagination, isLoading } = useOrders();
     const { fetchMyOrders } = useOrderActions();
 
@@ -66,16 +66,12 @@ export default function MyOrdersPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (authLoading || isLoading) {
+    if (!isInitialized || authLoading || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
             </div>
         );
-    }
-
-    if (!isAuthenticated) {
-        return null;
     }
 
     return (

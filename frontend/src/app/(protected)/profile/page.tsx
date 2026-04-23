@@ -59,7 +59,7 @@ const COLOR_LABELS: Record<UserColorPreference, string> = {
 export default function ProfilePage() {
     const router = useRouter();
     const { profile } = useAuth();
-    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
+    const { isAuthenticated, isLoading: authLoading, isInitialized } = useRequireAuth();
     const { getProfile, updateProfile } = useAuthActions();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -116,7 +116,7 @@ export default function ProfilePage() {
         }
     }, [profile, reset]);
 
-    if (authLoading || !profile) {
+    if (!isInitialized || authLoading || !profile) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
