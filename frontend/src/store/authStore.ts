@@ -123,6 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       await get().getProfile();
+      set({ isInitialized: true });
     } catch {
       clearTokenRefresh();
       set({
