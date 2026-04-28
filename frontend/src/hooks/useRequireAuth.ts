@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../store/authStore';
 import { hasAccess } from '../lib/auth/route-protection';
 
+// hooks/useRequireAuth.ts
 export function useRequireAuth() {
   const { user, isAuthenticated, isLoading, isInitialized } = useAuth();
   const router = useRouter();
@@ -12,7 +13,8 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (!isInitialized) return;
-    
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.replace(`/login?from=${encodeURIComponent(pathname)}`);
       return;
@@ -20,7 +22,12 @@ export function useRequireAuth() {
     if (user && !hasAccess(pathname, user.role)) {
       router.replace('/403');
     }
-  }, [isAuthenticated, isInitialized, user, pathname, router]);
+  }, [isAuthenticated, isInitialized, isLoading, user, pathname, router]);
 
-  return { isAuthenticated, isLoading: !isInitialized || isLoading, isInitialized, user };
+  return { 
+    isAuthenticated, 
+    isLoading: !isInitialized || isLoading, 
+    isInitialized, 
+    user 
+  };
 }

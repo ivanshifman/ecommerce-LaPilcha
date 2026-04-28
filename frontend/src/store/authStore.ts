@@ -92,20 +92,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   getProfile: async () => {
-    try {
-      const profile = await authService.getProfile();
-      set({
-        profile,
-        user: profile,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      scheduleTokenRefresh();
-    } catch (error) {
-      throw error;
-    }
-  },
+  try {
+    const profile = await authService.getProfile();
+    set({
+      profile,
+      user: profile,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  } catch (error) {
+    throw error;
+  }
+},
 
   updateProfile: async (data) => {
     set({ isLoading: true, error: null });
@@ -122,22 +120,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
   set({ isLoading: true, isInitialized: false });
   try {
-    await get().getProfile();
-    set({ isInitialized: true, isLoading: false }); // ← agregar isLoading: false
-  } catch (error: any) {
-    const isNetworkError = !error.response || error.code === 'ECONNABORTED';
-
-    if (isNetworkError) {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        await get().getProfile();
-        set({ isInitialized: true, isLoading: false }); // ← agregar isLoading: false
-        return;
-      } catch {
-        // falla de nuevo
-      }
+    const response = await authService.refresh();
+    set({
+      user: response.user,
+      isAuthenticated: true,
+    });
+    if (response.expiresIn) {
+      scheduleTokenRefresh(response.expiresIn);
+    } else {
+      scheduleTokenRefresh();
     }
-
+    set({ isInitialized: true, isLoading: false });
+  } catch {
     clearTokenRefresh();
     set({
       user: null,
