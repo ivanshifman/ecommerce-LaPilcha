@@ -11,15 +11,17 @@ export interface DecodedToken {
 
 export async function getCurrentUser(req: NextRequest): Promise<DecodedToken | null> {
   const accessToken = req.cookies.get('access_token')?.value;
-  
-  if (!accessToken) {
-    return null;
-  }
+  if (!accessToken) return null;
 
   try {
     const payload = JSON.parse(
       Buffer.from(accessToken.split('.')[1], 'base64').toString()
     );
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      return null;
+    }
 
     return {
       sub: payload.sub,
@@ -29,7 +31,6 @@ export async function getCurrentUser(req: NextRequest): Promise<DecodedToken | n
       exp: payload.exp,
     };
   } catch (error) {
-    console.error('Token decode failed:', error);
     return null;
   }
 }

@@ -72,7 +72,14 @@ export class TokenService {
   }
 
   clearCookies(res: Response) {
-    res.clearCookie(ACCESS_COOKIE, { path: '/' });
-    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    const clearOptions = {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? ('none' as const) : ('lax' as const),
+      path: '/',
+    };
+    res.clearCookie(ACCESS_COOKIE, clearOptions);
+    res.clearCookie(REFRESH_COOKIE, clearOptions);
   }
 }

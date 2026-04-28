@@ -161,10 +161,20 @@ export class AuthService {
 
   async logout(userId: string, res: Response) {
     await this.userService.setRefreshTokenHash(userId, null);
-    res.clearCookie(ACCESS_COOKIE, { path: '/' });
-    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
-    res.clearCookie(CART_COOKIE, { path: '/' });
-    res.clearCookie(WISHLIST_COOKIE, { path: '/' });
+
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    const clearOptions = {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? ('none' as const) : ('lax' as const),
+      path: '/',
+    };
+
+    res.clearCookie(ACCESS_COOKIE, clearOptions);
+    res.clearCookie(REFRESH_COOKIE, clearOptions);
+    res.clearCookie(CART_COOKIE, clearOptions);
+    res.clearCookie(WISHLIST_COOKIE, clearOptions);
+
     return { message: 'Sesión cerrada' };
   }
 
