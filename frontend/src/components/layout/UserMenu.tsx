@@ -96,8 +96,8 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
             >
                 {user?.avatar ? (
                     <Image
-                        src={user.avatar}
-                        alt={user.name}
+                        src={user?.avatar}
+                        alt={user?.name ?? ''}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full object-cover"
@@ -105,7 +105,7 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
                 ) : (
                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">
-                            {user?.name.charAt(0).toUpperCase()}
+                            {user?.name?.charAt(0).toUpperCase()}
                         </span>
                     </div>
                 )}
