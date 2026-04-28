@@ -96,7 +96,7 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
             >
                 {user?.avatar ? (
                     <Image
-                        src={user?.avatar}
+                        src={user.avatar}
                         alt={user?.name ?? ''}
                         width={32}
                         height={32}
