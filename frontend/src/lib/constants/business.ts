@@ -71,13 +71,6 @@ export const PAYMENT_METHOD_CONFIG = {
         discount: 0,
         description: 'Tarjetas de crédito, débito y efectivo',
     },
-    [PaymentMethod.MODO]: {
-        id: PaymentMethod.MODO,
-        label: 'Modo',
-        shortLabel: 'Modo',
-        discount: 0,
-        description: 'Transferencia inmediata con CVU',
-    },
     [PaymentMethod.BANK_TRANSFER]: {
         id: PaymentMethod.BANK_TRANSFER,
         label: 'Transferencia Bancaria',

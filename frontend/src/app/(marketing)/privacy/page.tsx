@@ -294,7 +294,7 @@ export default function PrivacyPage() {
                                         💳 Procesadores de pago
                                     </h4>
                                     <p className="text-sm">
-                                        Mercado Pago, Modo y entidades bancarias para procesar pagos de forma segura.
+                                        Mercado Pago y entidades bancarias para procesar pagos de forma segura.
                                         Estos proveedores cuentan con certificaciones de seguridad (PCI-DSS).
                                     </p>
                                 </div>

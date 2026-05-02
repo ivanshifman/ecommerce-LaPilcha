@@ -22,7 +22,6 @@ import { PAYMENT_METHOD_CONFIG } from '../../../../../lib/constants/business';
 
 const PAYMENT_ICONS = {
     [PaymentMethod.MERCADO_PAGO]: CreditCard,
-    [PaymentMethod.MODO]: Smartphone,
     [PaymentMethod.BANK_TRANSFER]: Building2,
 } as const;
 

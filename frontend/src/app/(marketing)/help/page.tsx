@@ -31,7 +31,7 @@ const HELP_SECTIONS = [
         items: [
             {
                 question: '¿Qué métodos de pago aceptan?',
-                answer: 'Aceptamos Mercado Pago (tarjetas de crédito/débito), Modo y transferencia bancaria con 10% de descuento.',
+                answer: 'Aceptamos Mercado Pago (tarjetas de crédito/débito) y transferencia bancaria con 10% de descuento.',
             },
             {
                 question: '¿Puedo pagar en cuotas?',

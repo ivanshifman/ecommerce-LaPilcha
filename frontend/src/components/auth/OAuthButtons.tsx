@@ -7,9 +7,9 @@ export function OAuthButtons() {
         authService.loginWithGoogle();
     };
 
-    const handleAppleLogin = () => {
-        authService.loginWithApple();
-    };
+    // const handleAppleLogin = () => {
+    //     authService.loginWithApple();
+    // };
 
     return (
         <div className="space-y-3">
@@ -41,7 +41,7 @@ export function OAuthButtons() {
                 </span>
             </button>
 
-            <button
+            {/* <button
                 type="button"
                 onClick={handleAppleLogin}
                 className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-900 transition-all duration-200 cursor-pointer"
@@ -52,7 +52,7 @@ export function OAuthButtons() {
                 <span className="text-sm font-medium">
                     Continuar con Apple
                 </span>
-            </button>
+            </button> */}
         </div>
     );
 }

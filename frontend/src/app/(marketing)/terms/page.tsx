@@ -349,15 +349,6 @@ export default function TermsPage() {
 
                                 <div className="bg-white border border-border rounded-lg p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
-                                        📱 Modo
-                                    </h4>
-                                    <p className="text-sm">
-                                        Transferencia inmediata a través de CVU. Pago instantáneo y seguro.
-                                    </p>
-                                </div>
-
-                                <div className="bg-white border border-border rounded-lg p-4">
-                                    <h4 className="font-semibold text-text-primary mb-2">
                                         🏦 Transferencia Bancaria
                                     </h4>
                                     <p className="text-sm mb-2">
@@ -373,7 +364,7 @@ export default function TermsPage() {
 
                             <h3 className="text-xl font-semibold text-text-primary">8.1. Seguridad de Pagos</h3>
                             <p>
-                                Los pagos se procesan a través de plataformas seguras de terceros (Mercado Pago, Modo).
+                                Los pagos se procesan a través de plataformas seguras de terceros (Mercado Pago).
                                 No almacenamos información de tarjetas de crédito en nuestros servidores.
                             </p>
 

@@ -79,7 +79,6 @@ const FOOTER_LINKS = {
 
 const PAYMENT_METHODS = [
     { name: 'Mercado Pago' },
-    { name: 'Modo' },
     { name: 'Transferencia' },
 ];
 

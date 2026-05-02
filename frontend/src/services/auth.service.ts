@@ -140,7 +140,7 @@ export const authService = {
     window.location.href = `${apiClient.defaults.baseURL}/auth/google`;
   },
 
-  loginWithApple: (): void => {
-    window.location.href = `${apiClient.defaults.baseURL}/auth/apple`;
-  },
+  // loginWithApple: (): void => {
+  //   window.location.href = `${apiClient.defaults.baseURL}/auth/apple`;
+  // },
 };

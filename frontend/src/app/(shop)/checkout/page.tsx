@@ -457,27 +457,6 @@ export default function CheckoutPage() {
                                     </label>
 
                                     <label
-                                        className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedPaymentMethod === 'modo'
-                                            ? 'border-primary bg-primary/5'
-                                            : 'border-border hover:border-primary/50'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <input
-                                                type="radio"
-                                                name="payment"
-                                                checked={selectedPaymentMethod === PaymentMethod.MODO}
-                                                onChange={() => setSelectedPaymentMethod(PaymentMethod.MODO)}
-                                                className="w-4 h-4 text-primary"
-                                            />
-                                            <div>
-                                                <p className="font-semibold text-text-primary">Modo</p>
-                                                <p className="text-sm text-text-muted">Pago digital con CVU</p>
-                                            </div>
-                                        </div>
-                                    </label>
-
-                                    <label
                                         className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${selectedPaymentMethod === 'bank_transfer'
                                             ? 'border-primary bg-primary/5'
                                             : 'border-border hover:border-primary/50'

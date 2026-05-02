@@ -6,7 +6,7 @@ export enum UserRole {
 export enum AuthProvider {
   LOCAL = 'local',
   GOOGLE = 'google',
-  APPLE = 'apple',
+  // APPLE = 'apple',
 }
 
 export interface User {
