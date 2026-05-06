@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SentMessageInfo } from 'nodemailer';
-import { OrderMailDto } from './dto/order-mail.dto';
+import { BrevoClient } from '@getbrevo/brevo';
 import { OrderMailTemplates } from './templates/order-mail.templates';
+import { OrderMailDto } from './dto/order-mail.dto';
 
 @Injectable()
 export class MailService {
-  constructor(
-    private readonly mailerService: MailerService,
-    private readonly configService: ConfigService,
-  ) {}
+  private readonly logger = new Logger(MailService.name);
+  private client: BrevoClient;
+  private fromEmail: string;
 
-  async sendMail(to: string, subject: string, html: string): Promise<SentMessageInfo> {
-    return this.mailerService.sendMail({
-      to,
-      subject,
-      html,
+  constructor(private readonly configService: ConfigService) {
+    this.client = new BrevoClient({
+      apiKey: this.configService.get<string>('BREVO_API_KEY') || '',
     });
+    this.fromEmail = this.configService.get<string>('SMTP_FROM') || 'info@elatahualpa.com.ar';
   }
 
-  async sendResetPasswordEmail(to: string, token: string): Promise<SentMessageInfo> {
+  async sendMail(to: string, subject: string, html: string): Promise<void> {
+    try {
+      await this.client.transactionalEmails.sendTransacEmail({
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        sender: { name: 'El Atahualpa', email: this.fromEmail },
+      });
+    } catch (error) {
+      this.logger.error(`Error enviando email a ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendResetPasswordEmail(to: string, token: string): Promise<void> {
     const frontend = this.configService.get<string>('FRONTEND_URL') ?? '';
     const url = `${frontend}/reset-password?token=${encodeURIComponent(token)}`;
 
@@ -33,7 +44,7 @@ export class MailService {
     return this.sendMail(to, 'Restablecer contraseña', html);
   }
 
-  async sendVerificationCode(to: string, code: string): Promise<SentMessageInfo> {
+  async sendVerificationCode(to: string, code: string): Promise<void> {
     const html = `
       <p>Tu código de verificación es:</p>
       <h2>${code}</h2>
@@ -42,7 +53,7 @@ export class MailService {
     return this.sendMail(to, 'Código de verificación', html);
   }
 
-  async sendVerificationLink(to: string, token: string): Promise<SentMessageInfo> {
+  async sendVerificationLink(to: string, token: string): Promise<void> {
     const frontend = this.configService.get<string>('FRONTEND_URL') ?? '';
     const url = `${frontend}/verify-email?token=${encodeURIComponent(token)}`;
 
@@ -60,7 +71,7 @@ export class MailService {
       originalAmount?: number;
       discount?: number;
     },
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Instrucciones de pago - Orden ${data.orderNumber}`,
@@ -68,7 +79,7 @@ export class MailService {
     );
   }
 
-  async sendBankTransferConfirmed(email: string, orderNumber: string): Promise<SentMessageInfo> {
+  async sendBankTransferConfirmed(email: string, orderNumber: string): Promise<void> {
     return this.sendMail(
       email,
       `Pago confirmado - Orden ${orderNumber}`,
@@ -76,7 +87,7 @@ export class MailService {
     );
   }
 
-  async sendOrderConfirmation(email: string, order: OrderMailDto): Promise<SentMessageInfo> {
+  async sendOrderConfirmation(email: string, order: OrderMailDto): Promise<void> {
     return this.sendMail(
       email,
       `Confirmación de orden ${order.orderNumber}`,
@@ -91,7 +102,7 @@ export class MailService {
       total: number;
       paymentMethod: string;
     },
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Reembolso de orden ${order.orderNumber}`,
@@ -99,7 +110,7 @@ export class MailService {
     );
   }
 
-  async sendOrderCancellation(email: string, orderNumber: string): Promise<SentMessageInfo> {
+  async sendOrderCancellation(email: string, orderNumber: string): Promise<void> {
     return this.sendMail(
       email,
       `Orden ${orderNumber} cancelada`,
@@ -111,7 +122,7 @@ export class MailService {
     email: string,
     orderNumber: string,
     trackingNumber?: string,
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Tu orden ${orderNumber} fue enviada`,
@@ -119,7 +130,7 @@ export class MailService {
     );
   }
 
-  async sendOrderDelivered(email: string, orderNumber: string): Promise<SentMessageInfo> {
+  async sendOrderDelivered(email: string, orderNumber: string): Promise<void> {
     return this.sendMail(
       email,
       `Orden ${orderNumber} entregada`,
@@ -127,7 +138,7 @@ export class MailService {
     );
   }
 
-  async sendReadyForPickup(email: string, orderNumber: string): Promise<SentMessageInfo> {
+  async sendReadyForPickup(email: string, orderNumber: string): Promise<void> {
     return this.sendMail(
       email,
       `Orden ${orderNumber} lista para retirar`,
@@ -139,7 +150,7 @@ export class MailService {
     email: string,
     returnNumber: string,
     orderNumber: string,
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Solicitud de devolución ${returnNumber}`,
@@ -151,7 +162,7 @@ export class MailService {
     email: string,
     returnNumber: string,
     approvedAmount: number,
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Devolución aprobada ${returnNumber}`,
@@ -159,11 +170,7 @@ export class MailService {
     );
   }
 
-  async sendReturnRejected(
-    email: string,
-    returnNumber: string,
-    reason: string,
-  ): Promise<SentMessageInfo> {
+  async sendReturnRejected(email: string, returnNumber: string, reason: string): Promise<void> {
     return this.sendMail(
       email,
       `Devolución rechazada ${returnNumber}`,
@@ -171,7 +178,7 @@ export class MailService {
     );
   }
 
-  async sendReturnReceived(email: string, returnNumber: string): Promise<SentMessageInfo> {
+  async sendReturnReceived(email: string, returnNumber: string): Promise<void> {
     return this.sendMail(
       email,
       `Producto recibido - ${returnNumber}`,
@@ -184,7 +191,7 @@ export class MailService {
     returnNumber: string,
     refundedAmount: number,
     paymentMethod: string,
-  ): Promise<SentMessageInfo> {
+  ): Promise<void> {
     return this.sendMail(
       email,
       `Reembolso procesado - ${returnNumber}`,
@@ -200,7 +207,7 @@ export class MailService {
     message: string;
     isAuthenticated?: boolean;
     userId?: string;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const adminEmail = this.configService.get<string>('ADMIN_EMAIL') || 'info@elpaisano.com';
 
     return this.sendMail(
