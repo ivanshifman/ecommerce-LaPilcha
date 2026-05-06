@@ -10,7 +10,11 @@ export const checkoutSchema = z.object({
         .min(1, 'El email es requerido')
         .regex(emailRegex, 'Ingresa un email válido')
         .optional(),
-    guestPhone: z.string().optional(),
+    guestPhone: z.string()
+        .min(1, 'El teléfono es requerido')
+        .transform(val => val.replace(/\s/g, ''))
+        .pipe(z.string().regex(phoneRegex, 'Formato inválido. Usa: +54 9 11 1234-5678'))
+        .optional(),
     fullName: z.string().min(3, 'Nombre completo requerido'),
     phone: z
         .string()
