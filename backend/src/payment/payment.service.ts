@@ -150,21 +150,19 @@ export class PaymentService {
       await session.endSession();
 
       if (dto.method === PaymentMethod.BANK_TRANSFER) {
-        try {
-          const originalAmount = order.bankTransferDiscount
-            ? order.total + order.bankTransferDiscount
-            : order.total;
-
-          await this.mailService.sendBankTransferInstructions(email, {
+        this.mailService
+          .sendBankTransferInstructions(email, {
             orderNumber: order.orderNumber,
             amount: order.total,
             paymentId: payment._id.toString(),
-            originalAmount: order.bankTransferDiscount ? originalAmount : undefined,
+            originalAmount: order.bankTransferDiscount
+              ? order.total + order.bankTransferDiscount
+              : undefined,
             discount: order.bankTransferDiscount,
+          })
+          .catch((emailError) => {
+            this.logger.error('Error enviando instrucciones de transferencia:', emailError);
           });
-        } catch (emailError) {
-          this.logger.error('Error enviando instrucciones de transferencia:', emailError);
-        }
       }
 
       if (this.configService.get('NODE_ENV') !== 'production') {
@@ -457,8 +455,7 @@ export class PaymentService {
 
           if (isShippedOrDelivered) {
             this.logger.warn(
-              `⚠️ Reembolso para orden enviada: ${order.orderNumber}. ` +
-                `El stock se devolverá cuando se reciba el producto.`,
+              `⚠️ Reembolso para orden enviada: ${order.orderNumber}. El stock se devolverá cuando se reciba el producto.`,
             );
 
             order.status = OrderStatus.REFUND_PENDING;

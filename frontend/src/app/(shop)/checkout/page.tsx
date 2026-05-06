@@ -178,9 +178,16 @@ export default function CheckoutPage() {
             }
         } catch (err) {
             const apiError = handleApiError(err);
+            if (apiError.statusCode === 408 || apiError.message?.includes('timeout')) {
+                showSuccess('Tu orden fue procesada. Revisá el email que te enviamos.');
+                if (isAuthenticated) {
+                    router.push('/orders');
+                } else {
+                    router.push('/');
+                }
+                return;
+            }
             showError(apiError.message || 'Error al procesar la orden');
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
