@@ -327,6 +327,16 @@ export default function ProductDetailPage() {
                             </div>
                         )}
 
+                        {!isAdmin && !hasSizes && (
+                            <div className="mb-6">
+                                <QuantitySelector
+                                    quantity={quantity}
+                                    maxQuantity={99}
+                                    onQuantityChange={setQuantity}
+                                />
+                            </div>
+                        )}
+
                         {!isAdmin && (
                             <button
                                 onClick={handleAddToCart}
