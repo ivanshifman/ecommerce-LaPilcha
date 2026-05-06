@@ -164,7 +164,9 @@ export class PaymentController {
   }
 
   @Get('payment/success')
-  redirectSuccess(@Res() res: Response) {
-    return res.redirect(`${process.env.FRONTEND_URL}/checkout/success`);
+  redirectSuccess(@Req() req: Request, @Res() res: Response) {
+    const query = new URLSearchParams(req.query as Record<string, string>).toString();
+    const frontendUrl = process.env.FRONTEND_URL || 'https://elatahualpa.com.ar';
+    return res.redirect(`${frontendUrl}/checkout/success?${query}`);
   }
 }

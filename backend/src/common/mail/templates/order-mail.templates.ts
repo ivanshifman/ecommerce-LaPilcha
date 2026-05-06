@@ -168,23 +168,23 @@ ${
   <table width="100%" style="font-size:14px;">
     <tr>
       <td style="padding:8px 0;"><strong>Banco:</strong></td>
-      <td style="padding:8px 0;">Banco Ejemplo</td>
+      <td style="padding:8px 0;">${process.env.BANK_NAME}</td>
     </tr>
     <tr>
       <td style="padding:8px 0;"><strong>Titular:</strong></td>
-      <td style="padding:8px 0;">El Piasano S.A.</td>
+      <td style="padding:8px 0;">${process.env.BANK_OWNER}</td>
     </tr>
     <tr>
-      <td style="padding:8px 0;"><strong>CUIT:</strong></td>
-      <td style="padding:8px 0;">XX-XXXXXXXX-X</td>
+      <td style="padding:8px 0;"><strong>CUIL:</strong></td>
+      <td style="padding:8px 0;">${process.env.BANK_CUIL}</td>
     </tr>
     <tr>
       <td style="padding:8px 0;"><strong>CBU:</strong></td>
-      <td style="padding:8px 0;font-family:monospace;font-size:16px;">0000000000000000000000</td>
+      <td style="padding:8px 0;font-family:monospace;font-size:16px;">${process.env.BANK_CBU}</td>
     </tr>
     <tr>
       <td style="padding:8px 0;"><strong>Alias:</strong></td>
-      <td style="padding:8px 0;font-family:monospace;font-size:16px;">ELPAISANO.STORE</td>
+      <td style="padding:8px 0;font-family:monospace;font-size:16px;">${process.env.BANK_ALIAS}</td>
     </tr>
   </table>
 </div>

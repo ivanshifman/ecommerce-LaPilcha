@@ -390,8 +390,13 @@ export class PaymentService {
 
             this.logger.log(`✅ Shipping creado automáticamente para orden ${order.orderNumber}`);
           }
-        } catch (error) {
-          this.logger.error(`❌ Error creando shipping automático:`, error);
+        } catch (error: any) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (error?.code === 11000) {
+            this.logger.warn(`⚠️ Shipping ya existe para orden ${order.orderNumber}`);
+          } else {
+            this.logger.error(`❌ Error creando shipping automático:`, error);
+          }
         }
 
         if (email && payment.status === PaymentStatus.APPROVED) {

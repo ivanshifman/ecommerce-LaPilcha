@@ -155,7 +155,6 @@ export default function CheckoutPage() {
             };
 
             const order = await createOrder(orderData);
-            showSuccess('¡Orden creada exitosamente!');
 
             const payment = await paymentService.createPayment({
                 orderId: order.id,
@@ -166,7 +165,7 @@ export default function CheckoutPage() {
             sessionStorage.removeItem('checkoutShipping');
 
             if (selectedPaymentMethod === PaymentMethod.BANK_TRANSFER) {
-                showSuccess('Revisa tu email para completar la transferencia');
+                showSuccess('Orden creada. Revisá tu email para los datos de transferencia.');
                 router.push(`/orders/${order.id}`);
                 return;
             }
