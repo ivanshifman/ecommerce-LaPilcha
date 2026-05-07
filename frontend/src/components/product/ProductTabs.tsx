@@ -88,13 +88,13 @@ export function ProductTabs({ description, material, category }: Props) {
                             <div>
                                 <h4 className="font-semibold text-text-primary mb-2">Envío Estándar</h4>
                                 <p className="text-text-secondary">
-                                    Recibí tu pedido en 3-5 días hábiles. Gratis en compras superiores a $100.000.
+                                    Recibí tu pedido en 5-10 días hábiles. Gratis en compras superiores a $100.000.
                                 </p>
                             </div>
                             <div>
                                 <h4 className="font-semibold text-text-primary mb-2">Envío Express</h4>
                                 <p className="text-text-secondary">
-                                    Recibí tu pedido en 1-2 días hábiles. Costo adicional según zona.
+                                    Recibí tu pedido en 2-4 días hábiles. Costo adicional según zona.
                                 </p>
                             </div>
                             <div>

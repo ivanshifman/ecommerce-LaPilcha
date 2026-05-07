@@ -12,7 +12,7 @@ const HELP_SECTIONS = [
         items: [
             {
                 question: '¿Cuánto tarda el envío?',
-                answer: 'Los envíos tardan entre 3 y 7 días hábiles dependiendo de tu ubicación. Para Capital Federal y Gran Buenos Aires, el tiempo estimado es de 2-4 días hábiles.',
+                answer: 'Los envíos tardan entre 5 y 10 días hábiles dependiendo de tu ubicación. Para Capital Federal y Gran Buenos Aires, el tiempo estimado es de 2-4 días hábiles.',
             },
             {
                 question: '¿Cuál es el costo de envío?',

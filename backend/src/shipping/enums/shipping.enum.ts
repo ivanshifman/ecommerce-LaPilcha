@@ -5,9 +5,9 @@ export enum ShippingMethod {
 }
 
 export const SHIPPING_METHOD_LABELS: Record<ShippingMethod, string> = {
-  [ShippingMethod.STANDARD]: 'Envío Estándar (5-7 días hábiles)',
-  [ShippingMethod.EXPRESS]: 'Envío Express (2-3 días hábiles)',
-  [ShippingMethod.PICKUP]: 'Retiro en Sucursal',
+  [ShippingMethod.STANDARD]: 'Envío Estándar (5-10 días hábiles)',
+  [ShippingMethod.EXPRESS]: 'Envío Express (2-4 días hábiles)',
+  [ShippingMethod.PICKUP]: 'Retiro a conveniencia (CABA)',
 };
 
 export enum ShippingStatus {

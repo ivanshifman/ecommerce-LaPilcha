@@ -37,7 +37,7 @@ async function seedShippingRates() {
       freeShippingThreshold: 0,
       estimatedDaysMin: 1,
       estimatedDaysMax: 2,
-      description: 'Retiro en sucursal CABA',
+      description: 'Retiro a conveniencia (CABA)',
     },
 
     // GBA (Gran Buenos Aires)

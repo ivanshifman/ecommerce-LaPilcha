@@ -145,7 +145,7 @@ export class ShippingCalculatorService {
     const labels: Record<ShippingMethod, string> = {
       [ShippingMethod.STANDARD]: 'Envío Estándar',
       [ShippingMethod.EXPRESS]: 'Envío Express',
-      [ShippingMethod.PICKUP]: 'Retiro en Sucursal',
+      [ShippingMethod.PICKUP]: 'Retiro a conveniencia (CABA)',
     };
     return labels[method];
   }

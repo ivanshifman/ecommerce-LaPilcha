@@ -1,7 +1,7 @@
 export const CONTACT_INFO = {
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'info@elpaisano.com',
-  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+54 9 11 1234-5678',
-  phoneRaw: process.env.NEXT_PUBLIC_CONTACT_PHONE?.replace(/\s/g, '') || '+5491112345678',
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'elatahualpaarg@gmail.com',
+  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+54 9 11 5121-3147',
+  phoneRaw: process.env.NEXT_PUBLIC_CONTACT_PHONE?.replace(/\s/g, '') || '+5491151213147',
   address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Buenos Aires, Argentina',
 } as const;
 

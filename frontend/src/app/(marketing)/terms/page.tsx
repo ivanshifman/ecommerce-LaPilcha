@@ -410,7 +410,7 @@ export default function TermsPage() {
                             </p>
                             <div className="bg-white border border-border rounded-lg p-4 space-y-2">
                                 <p><strong>Capital Federal y Gran Buenos Aires:</strong> 2 a 4 días hábiles</p>
-                                <p><strong>Interior del país:</strong> 3 a 7 días hábiles</p>
+                                <p><strong>Interior del país:</strong> 5 a 10 días hábiles</p>
                                 <p className="text-sm text-text-muted mt-2">
                                     * Zonas remotas o de difícil acceso pueden tener plazos mayores
                                 </p>
