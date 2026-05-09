@@ -3,9 +3,8 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { X, ShoppingCart, Trash2, Heart } from 'lucide-react';
+import { X, Trash2, Heart } from 'lucide-react';
 import { useWishlist, useWishlistActions } from '../../store/wishlistStore';
-import { useCartActions } from '../../store/cartStore';
 import { colorLabels } from '../../utils/colorMap';
 import { showSuccess, showError } from '../../lib/notifications';
 import { handleApiError } from '../../api/error-handler';
@@ -18,7 +17,6 @@ interface Props {
 export function WishlistSidebar({ isOpen, onClose }: Props) {
     const { items, isLoading } = useWishlist();
     const { removeFromWishlist } = useWishlistActions();
-    const { addToCart } = useCartActions();
 
     useEffect(() => {
         if (isOpen) {
@@ -26,7 +24,6 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
         } else {
             document.body.style.overflow = 'unset';
         }
-
         return () => {
             document.body.style.overflow = 'unset';
         };
@@ -42,26 +39,6 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
         }
     };
 
-    const handleAddToCart = async (product: any) => {
-        try {
-            const firstAvailableSize = product.sizes?.find((s: any) => s.stock > 0);
-            if (!firstAvailableSize) {
-                showError('Sin stock disponible');
-                return;
-            }
-
-            await addToCart({
-                product: product.id,
-                variant: { size: firstAvailableSize.size, color: product.color },
-                quantity: 1,
-            });
-            showSuccess('Agregado al carrito');
-        } catch (err) {
-            const apiError = handleApiError(err);
-            showError(apiError.message || 'Error al agregar al carrito');
-        }
-    };
-
     return (
         <>
             {isOpen && (
@@ -72,8 +49,7 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
             )}
 
             <div
-                className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between p-4 border-b border-border">
@@ -161,29 +137,21 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
                                                 <p className="text-xs text-text-muted mt-1">
                                                     {colorLabels[product.color]}
                                                 </p>
-                                                <div className="flex items-center gap-2 mt-2">
-                                                    <span className="text-sm font-bold text-primary">
-                                                        ${finalPrice.toFixed(2)}
-                                                    </span>
-                                                    {hasDiscount && (
-                                                        <span className="text-xs text-text-muted line-through">
-                                                            ${product.price.toFixed(2)}
+                                                <div className="flex items-center justify-between mt-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-primary">
+                                                            ${finalPrice.toFixed(2)}
                                                         </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex gap-2 mt-3">
-                                                    <button
-                                                        onClick={() => handleAddToCart(product)}
-                                                        className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-primary text-white text-xs rounded hover:bg-primary-dark transition-colors cursor-pointer"
-                                                    >
-                                                        <ShoppingCart className="w-3 h-3" />
-                                                        Agregar
-                                                    </button>
+                                                        {hasDiscount && (
+                                                            <span className="text-xs text-text-muted line-through">
+                                                                ${product.price.toFixed(2)}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <button
                                                         onClick={() => handleRemove(product.id)}
                                                         className="p-1.5 text-destructive hover:bg-destructive/10 rounded transition-colors cursor-pointer"
-                                                        title="Eliminar"
+                                                        title="Eliminar de favoritos"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>

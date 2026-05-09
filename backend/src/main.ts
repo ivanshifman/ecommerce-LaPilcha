@@ -28,6 +28,9 @@ async function bootstrap() {
     exclude: [
       { path: 'payments/webhook/mercadopago', method: RequestMethod.ALL },
       { path: 'payments/webhook/modo', method: RequestMethod.ALL },
+      { path: 'payments/payment/success', method: RequestMethod.GET },
+      { path: 'payments/payment/failure', method: RequestMethod.GET },
+      { path: 'payments/payment/pending', method: RequestMethod.GET },
     ],
   });
   const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
