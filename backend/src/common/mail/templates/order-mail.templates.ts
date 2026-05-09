@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { OrderMailDto } from '../dto/order-mail.dto';
 
 const money = (value: number) =>
@@ -81,19 +82,17 @@ ${rows}
 <table width="100%">
 <tr><td>Subtotal</td><td align="right">${money(order.subtotal)}</td></tr>
 <tr><td>Descuento productos</td><td align="right">-${money(order.discount)}</td></tr>
-${
-  order.bankTransferDiscount && order.bankTransferDiscount > 0
-    ? `<tr style="color:#16a34a;">
+${order.bankTransferDiscount && order.bankTransferDiscount > 0
+        ? `<tr style="color:#16a34a;">
          <td><strong>🎉 Descuento por transferencia (10%)</strong></td>
          <td align="right"><strong>-${money(order.bankTransferDiscount)}</strong></td>
        </tr>`
-    : ''
-}
-${
-  order.couponApplied
-    ? `<tr style="color:#16a34a;"><td>Cupón aplicado (${order.couponApplied.code})</td><td align="right">-${money(order.couponApplied.discountAmount)}</td></tr>`
-    : ''
-}
+        : ''
+      }
+${order.couponApplied
+        ? `<tr style="color:#16a34a;"><td>Cupón aplicado (${order.couponApplied.code})</td><td align="right">-${money(order.couponApplied.discountAmount)}</td></tr>`
+        : ''
+      }
 <tr><td>Envío</td><td align="right">${money(order.shippingCost)}</td></tr>
 <tr>
   <td><strong>Total</strong></td>
@@ -101,15 +100,14 @@ ${
 </tr>
 </table>
 
-${
-  order.bankTransferDiscount && order.bankTransferDiscount > 0
-    ? `
+${order.bankTransferDiscount && order.bankTransferDiscount > 0
+        ? `
 <div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;margin:16px 0;">
   <p style="margin:0;"><strong>🎉 ¡Ahorraste ${money(order.bankTransferDiscount)} pagando con transferencia!</strong></p>
 </div>
 `
-    : ''
-}
+        : ''
+      }
 
 <h3 style="margin-top:24px;">Dirección de envío</h3>
 <p>
@@ -120,16 +118,15 @@ ${order.shippingAddress.postalCode} – ${order.shippingAddress.country}
 </p>
 
 <p><strong>Método de pago:</strong> ${order.paymentMethod}</p>
-${
-  order.couponApplied
-    ? `
+${order.couponApplied
+        ? `
 <div style="background:#dcfce7;border-left:4px solid #16a34a;padding:12px;margin:16px 0;">
   <p style="margin:0;"><strong>✅ Cupón aplicado: ${order.couponApplied.code}</strong></p>
   <p style="margin:4px 0;">Ahorraste ${money(order.couponApplied.discountAmount)}</p>
 </div>
 `
-    : ''
-}
+        : ''
+      }
 `);
   }
 
@@ -149,9 +146,8 @@ ${
 <p>Gracias por tu compra. Para completar tu orden <strong>${data.orderNumber}</strong>, 
 por favor realizá la transferencia bancaria con los siguientes datos:</p>
 
-${
-  data.discount && data.discount > 0 && data.originalAmount
-    ? `
+${data.discount && data.discount > 0 && data.originalAmount
+        ? `
 <div style="background:#dcfce7;border:2px solid #16a34a;padding:16px;margin:24px 0;border-radius:8px;text-align:center;">
   <p style="margin:0;font-size:16px;color:#166534;">🎉 <strong>¡Ahorraste ${money(data.discount)} pagando con transferencia!</strong></p>
   <p style="margin:8px 0 0 0;font-size:14px;color:#6b7280;">
@@ -159,8 +155,8 @@ ${
   </p>
 </div>
 `
-    : ''
-}
+        : ''
+      }
 
 <div style="background:#e0f2fe;border-left:4px solid #0284c7;padding:20px;margin:24px 0;border-radius:6px;">
   <h3 style="margin-top:0;color:#0284c7;">Datos bancarios</h3>
@@ -192,18 +188,17 @@ ${
 <div style="background:#dcfce7;border-left:4px solid #16a34a;padding:16px;margin:16px 0;border-radius:6px;">
   <p style="margin:0;font-size:18px;"><strong>Monto a transferir:</strong></p>
   <p style="margin:8px 0 0 0;font-size:32px;color:#16a34a;font-weight:bold;">${money(data.amount)}</p>
-  ${
-    data.discount && data.discount > 0
-      ? `<p style="margin:4px 0 0 0;font-size:14px;color:#16a34a;">✅ Ya incluye 10% de descuento por transferencia</p>`
-      : ''
-  }
+  ${data.discount && data.discount > 0
+        ? `<p style="margin:4px 0 0 0;font-size:14px;color:#16a34a;">✅ Ya incluye 10% de descuento por transferencia</p>`
+        : ''
+      }
 </div>
 
 <div style="background:#fef9c3;border-left:4px solid #eab308;padding:16px;margin:24px 0;border-radius:6px;">
   <p style="margin:0;"><strong>⚠️ Importante:</strong></p>
   <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
     <li>Usá como <strong>referencia</strong> tu número de orden: <code style="background:#fff;padding:2px 6px;border-radius:3px;">${data.orderNumber}</code></li>
-    <li>Una vez realizada la transferencia, <strong>enviá el comprobante por WhatsApp</strong> al +54 9 11 XXXX-XXXX</li>
+    <li>Una vez realizada la transferencia, <strong>enviá el comprobante por WhatsApp</strong> al +54 9 11 5121-3147</li>
     <li>El pedido será procesado una vez que confirmemos el pago (24-48hs hábiles)</li>
     <li>Guardá este email para futura referencia</li>
   </ul>
@@ -552,18 +547,17 @@ El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
           <h2>📧 Nuevo Mensaje de Contacto</h2>
         </div>
         <div class="content">
-          ${
-            data.isAuthenticated
-              ? `
+          ${data.isAuthenticated
+        ? `
             <div class="user-info">
               <span class="badge badge-user">✓ Usuario Registrado</span>
               <p style="margin: 5px 0 0 0; font-size: 13px;">ID: ${data.userId}</p>
             </div>
           `
-              : `
+        : `
             <span class="badge badge-guest">👤 Usuario Invitado</span>
           `
-          }
+      }
           
           <div class="field">
             <span class="label">Nombre:</span>
@@ -575,16 +569,15 @@ El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
             <div class="value"><a href="mailto:${data.email}">${data.email}</a></div>
           </div>
           
-          ${
-            data.phone
-              ? `
+          ${data.phone
+        ? `
           <div class="field">
             <span class="label">Teléfono:</span>
             <div class="value"><a href="tel:${data.phone}">${data.phone}</a></div>
           </div>
           `
-              : ''
-          }
+        : ''
+      }
           
           <div class="field">
             <span class="label">Asunto:</span>
@@ -598,9 +591,9 @@ El reembolso puede tardar 5-10 días hábiles en reflejarse en tu cuenta.
         </div>
         <div class="footer">
           <p>📅 Enviado el ${new Date().toLocaleString('es-AR', {
-            dateStyle: 'full',
-            timeStyle: 'short',
-          })}</p>
+        dateStyle: 'full',
+        timeStyle: 'short',
+      })}</p>
           <p>Enviado desde el formulario de contacto de El Atahualpa</p>
         </div>
       </div>
