@@ -1,0 +1,10 @@
+/* eslint-disable prettier/prettier */
+import { Controller, Get } from '@nestjs/common';
+
+@Controller('ping')
+export class PingController {
+    @Get()
+    ping() {
+        return 'OK';
+    }
+}

@@ -18,6 +18,7 @@ import { ShippingModule } from './shipping/shipping.module';
 import { ReturnModule } from './return/return.module';
 import { CouponModule } from './coupon/coupon.module';
 import { ContactModule } from './common/contact/contact.module';
+import { PingModule } from './ping/ping.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { ContactModule } from './common/contact/contact.module';
     ShippingModule,
     ReturnModule,
     CouponModule,
+    PingModule,
   ],
   controllers: [],
   providers: [
@@ -87,4 +89,5 @@ import { ContactModule } from './common/contact/contact.module';
     },
   ],
 })
-export class AppModule {}
+// eslint-disable-next-line prettier/prettier
+export class AppModule { }
