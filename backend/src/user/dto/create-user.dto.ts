@@ -24,7 +24,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString({ message: 'El apellido debe ser texto.' })
-  @MinLength(3, { message: 'El apellido debe tener al menos 3 caracteres.' })
+  @MinLength(2, { message: 'El apellido debe tener al menos 2 caracteres.' })
   @MaxLength(255, { message: 'El apellido no puede exceder los 255 caracteres.' })
   @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El apellido solo puede contener letras y espacios.',
@@ -75,7 +75,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString({ message: 'El apellido debe ser texto.' })
-  @MinLength(3, { message: 'El apellido debe tener al menos 3 caracteres.' })
+  @MinLength(2, { message: 'El apellido debe tener al menos 2 caracteres.' })
   @MaxLength(255, { message: 'El apellido no puede exceder los 255 caracteres.' })
   @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El apellido solo puede contener letras y espacios.',

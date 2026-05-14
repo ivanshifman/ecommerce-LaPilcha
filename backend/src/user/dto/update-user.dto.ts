@@ -22,7 +22,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(3)
+  @MinLength(2)
   @MaxLength(255)
   lastName?: string;
 
@@ -53,7 +53,7 @@ export class UpdateUserAdminDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(3)
+  @MinLength(2)
   @MaxLength(255)
   lastName?: string;
 

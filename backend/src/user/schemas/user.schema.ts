@@ -10,7 +10,7 @@ export class User {
   @Prop({ required: true, minlength: 3, maxlength: 255 })
   name!: string;
 
-  @Prop({ required: false, minlength: 3, maxlength: 255 })
+  @Prop({ required: false, minlength: 2, maxlength: 255 })
   lastName?: string;
 
   @Prop({
