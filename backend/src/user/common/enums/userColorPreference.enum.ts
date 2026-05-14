@@ -8,4 +8,6 @@ export enum UserColorPreference {
   GREEN = 'verde',
   YELLOW = 'amarillo',
   NEUTRAL = 'neutral',
+  PINK = 'rosa',
+  BLUELIGHT = 'celeste',
 }

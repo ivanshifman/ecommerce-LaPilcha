@@ -54,6 +54,8 @@ const COLOR_LABELS: Record<UserColorPreference, string> = {
     [UserColorPreference.GREEN]: 'Verde',
     [UserColorPreference.YELLOW]: 'Amarillo',
     [UserColorPreference.NEUTRAL]: 'Neutral',
+    [UserColorPreference.PINK]: 'Rosa',
+    [UserColorPreference.BLUELIGHT]: 'Celeste',
 };
 
 export default function ProfilePage() {

@@ -31,6 +31,8 @@ export enum UserColorPreference {
     GREEN = 'verde',
     YELLOW = 'amarillo',
     NEUTRAL = 'neutral',
+    PINK = 'rosa',
+    BLUELIGHT = 'celeste',
 }
 
 const userSizeValues = Object.values(UserSizePreference) as Array<

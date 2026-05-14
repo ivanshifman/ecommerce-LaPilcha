@@ -8,6 +8,7 @@ export const colorMap: Record<ColorEnum, string> = {
     [ColorEnum.GREEN]: '#16A34A',
     [ColorEnum.YELLOW]: '#EAB308',
     [ColorEnum.GRAY]: '#6B7280',
+    [ColorEnum.GRAY_DARK]: '#374151',
     [ColorEnum.BROWN]: '#92400E',
     [ColorEnum.BURGUNDY]: '#7C2D12',
     [ColorEnum.ECRU_BLUE]: '#93C5FD',
@@ -17,6 +18,7 @@ export const colorMap: Record<ColorEnum, string> = {
     [ColorEnum.BEIGE]: '#F5F5DC',
     [ColorEnum.CAMOUFLAGE]: '#8B4513',
     [ColorEnum.PINK]: '#F472B6',
+    [ColorEnum.BLUELIGHT]: '#93C5FD',
 };
 
 export const colorLabels: Record<ColorEnum, string> = {
@@ -27,6 +29,7 @@ export const colorLabels: Record<ColorEnum, string> = {
     [ColorEnum.GREEN]: 'Verde',
     [ColorEnum.YELLOW]: 'Amarillo',
     [ColorEnum.GRAY]: 'Gris',
+    [ColorEnum.GRAY_DARK]: 'Gris Oscuro',
     [ColorEnum.BROWN]: 'Marrón',
     [ColorEnum.BURGUNDY]: 'Bordo',
     [ColorEnum.ECRU_BLUE]: 'Crudo Azul',
@@ -36,4 +39,5 @@ export const colorLabels: Record<ColorEnum, string> = {
     [ColorEnum.BEIGE]: 'Beige',
     [ColorEnum.CAMOUFLAGE]: 'Camuflaje',
     [ColorEnum.PINK]: 'Rosa',
+    [ColorEnum.BLUELIGHT]: 'Celeste',
 };

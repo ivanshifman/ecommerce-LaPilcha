@@ -83,7 +83,7 @@ export default function PrivacyPage() {
                                 Esta Política de Privacidad se aplica a:
                             </p>
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>El sitio web <strong>elpaisano.com.ar</strong></li>
+                                <li>El sitio web <strong>elatahualpa.com.ar</strong></li>
                                 <li>Aplicaciones móviles de {COMPANY_INFO.name} (si las hubiere)</li>
                                 <li>Cualquier interacción que tengas con nosotros relacionada con la compra de productos</li>
                                 <li>Comunicaciones por email, teléfono o redes sociales</li>

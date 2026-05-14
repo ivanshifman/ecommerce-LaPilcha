@@ -52,7 +52,7 @@ export default function TermsPage() {
                         <div className="text-text-secondary space-y-4">
                             <p>
                                 El presente documento establece los Términos y Condiciones (en adelante, "T&C") que regulan
-                                el uso del sitio web <strong>elpaisano.com.ar</strong> (en adelante, el "Sitio") y la compra
+                                el uso del sitio web <strong>elatahualpa.com.ar</strong> (en adelante, el "Sitio") y la compra
                                 de productos ofrecidos por <strong>{COMPANY_INFO.name}</strong>, {COMPANY_INFO.legalName}
                                 (en adelante, "El Atahualpa", "nosotros" o "nuestro").
                             </p>
