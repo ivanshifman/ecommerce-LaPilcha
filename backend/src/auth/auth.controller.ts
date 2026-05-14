@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -40,7 +41,7 @@ export class AuthController {
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   @Post('register')
   async register(@Body() dto: RegisterDto): Promise<RegisterResponseDto> {
@@ -70,7 +71,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  googleAuth() {}
+  googleAuth() { }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
@@ -81,11 +82,14 @@ export class AuthController {
     try {
       const anonymousCartId = getCookie(req, CART_COOKIE);
       if (anonymousCartId) {
-        await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+        try {
+          await this.cartService.mergeAnonymousCart(user.id, anonymousCartId, res);
+        } catch (cartError) {
+          console.error('Error mergeando carrito en Google OAuth:', cartError);
+        }
       }
 
       await this.authService.loginOAuth(user, res);
-
       return res.redirect(`${frontendUrl}/?auth=success`);
     } catch (error) {
       console.error('Google OAuth error:', error);
@@ -95,7 +99,7 @@ export class AuthController {
 
   @Get('apple')
   @UseGuards(AuthGuard('apple'))
-  appleAuth() {}
+  appleAuth() { }
 
   @Get('apple/callback')
   @UseGuards(AuthGuard('apple'))

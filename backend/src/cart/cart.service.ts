@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
@@ -22,7 +23,7 @@ export class CartService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     private readonly configService: ConfigService,
     private readonly stockService: StockService,
-  ) {}
+  ) { }
 
   async addToCart(
     dto: AddToCartDto,
@@ -60,9 +61,9 @@ export class CartService {
         product: new Types.ObjectId(dto.product),
         variant: dto.variant
           ? {
-              size: dto.variant.size?.toUpperCase(),
-              color: dto.variant.color?.toLowerCase(),
-            }
+            size: dto.variant.size?.toUpperCase(),
+            color: dto.variant.color?.toLowerCase(),
+          }
           : undefined,
         quantity: dto.quantity,
         addedAt: new Date(),
@@ -168,7 +169,7 @@ export class CartService {
         if (item.variant?.size) {
           this.stockService
             .releaseStock(item.product?._id?.toString() || '', item.variant.size, item.quantity)
-            .catch(() => {});
+            .catch(() => { });
         }
       }
     });
@@ -237,8 +238,9 @@ export class CartService {
     res?: Response,
   ): Promise<{ cart: CartResponseDto }> {
     if (!anonymousId) {
-      const populatedCart = await this.getPopulatedCart(userId);
-      return { cart: CartMapper.toCartResponseDto(populatedCart, false) };
+      await this.getOrCreateUserCart(userId);
+      const populated = await this.getPopulatedCart(userId);
+      return { cart: CartMapper.toCartResponseDto(populated, false) };
     }
 
     const anonymousCart = await this.cartModel.findOne({ anonymousId }).exec();
@@ -247,16 +249,15 @@ export class CartService {
       if (res) {
         res.clearCookie(CART_COOKIE, { httpOnly: true, path: '/' });
       }
-
-      const populatedCart = await this.getPopulatedCart(userId);
-      return { cart: CartMapper.toCartResponseDto(populatedCart, false) };
+      await this.getOrCreateUserCart(userId);
+      const populated = await this.getPopulatedCart(userId);
+      return { cart: CartMapper.toCartResponseDto(populated, false) };
     }
 
     const userCart = await this.getOrCreateUserCart(userId);
 
     for (const item of anonymousCart.items) {
       const index = this.findItemIndex(userCart, item.product.toString(), item.variant);
-
       if (index >= 0) {
         userCart.items[index].quantity += item.quantity;
       } else {
@@ -278,10 +279,7 @@ export class CartService {
     }
 
     const populatedCart = await this.getPopulatedCart(userId);
-
-    return {
-      cart: CartMapper.toCartResponseDto(populatedCart, false),
-    };
+    return { cart: CartMapper.toCartResponseDto(populatedCart, false) };
   }
 
   async deleteCartAndReleaseStockByUser(userId: string): Promise<void> {
