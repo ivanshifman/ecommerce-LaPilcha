@@ -83,6 +83,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={() => router.push('/login')}
                 className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-all duration-200"
+                type="button"
               >
                 Ir al inicio de sesión
               </button>
@@ -90,6 +91,7 @@ export default function ForgotPasswordPage() {
               <button
                 onClick={() => setIsSuccess(false)}
                 className="w-full text-text-muted hover:text-primary text-sm transition-colors"
+                type="button"
               >
                 ¿No recibiste el email? Intenta de nuevo
               </button>

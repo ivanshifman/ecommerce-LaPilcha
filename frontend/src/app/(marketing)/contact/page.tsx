@@ -159,6 +159,7 @@ export default function ContactPage() {
                             <button
                                 onClick={() => setIsSuccess(false)}
                                 className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors cursor-pointer"
+                                type="button"
                             >
                                 Enviar Otro Mensaje
                             </button>

@@ -53,11 +53,13 @@ export function QuantitySelector({ quantity, maxQuantity, quantityInCart = 0, on
                         disabled={quantity <= 1}
                         className="p-3 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         title="Disminuir cantidad"
+                        type="button"
                     >
                         <Minus className="w-4 h-4 text-text-primary" />
                     </button>
                     <input
                         type="number"
+                        name="quantity"
                         title='Cantidad'
                         min="1"
                         max={maxQuantity}
@@ -70,6 +72,7 @@ export function QuantitySelector({ quantity, maxQuantity, quantityInCart = 0, on
                         disabled={quantity >= maxQuantity}
                         className="p-3 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         title="Aumentar cantidad"
+                        type="button"
                     >
                         <Plus className="w-4 h-4 text-text-primary" />
                     </button>

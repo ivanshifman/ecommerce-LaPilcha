@@ -30,28 +30,29 @@ export default function VerifyEmailClient({ userId }: { userId?: string }) {
 
     useEffect(() => {
         if (countdown > 0) {
-            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
             return () => clearTimeout(timer);
         } else {
             setCanResend(true);
         }
     }, [countdown]);
 
-    useEffect(() => {
-        if (code.length === 6 && !isVerifying) {
-            handleVerify();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [code]);
+    const handleCodeChange = (value: string) => {
+    setCode(value);
 
-    const handleVerify = async () => {
-        if (!userId || code.length !== 6) return;
+    if (value.length === 6 && !isVerifying) {
+        handleVerify(value);
+    }
+};
+
+    const handleVerify = async (verificationCode: string) => {
+        if (!userId || verificationCode.length !== 6) return;
 
         setIsVerifying(true);
         setError('');
 
         try {
-            await authService.verifyEmail({ userId, code });
+            await authService.verifyEmail({ userId, code: verificationCode });
             await checkAuth();
 
             if (typeof window !== 'undefined') {
@@ -113,7 +114,7 @@ export default function VerifyEmailClient({ userId }: { userId?: string }) {
                         <VerificationCodeInput
                             length={6}
                             value={code}
-                            onChange={setCode}
+                            onChange={handleCodeChange}
                             error={error}
                             disabled={isVerifying}
                         />
@@ -141,6 +142,7 @@ export default function VerifyEmailClient({ userId }: { userId?: string }) {
                             onClick={handleResendCode}
                             disabled={!canResend || isResending}
                             className="text-primary hover:text-primary-dark font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto"
+                            type="button"
                         >
                             {isResending ? (
                                 <>

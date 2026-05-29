@@ -7,8 +7,12 @@ import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
+// Swiper CSS imports may not have TypeScript declarations in this project.
+// @ts-ignore: Ignoring missing type declarations for CSS side-effect imports
 import 'swiper/css';
+// @ts-ignore: Ignoring missing type declarations for CSS side-effect imports
 import 'swiper/css/pagination';
+// @ts-ignore: Ignoring missing type declarations for CSS side-effect imports
 import 'swiper/css/effect-fade';
 
 const heroSlides = [

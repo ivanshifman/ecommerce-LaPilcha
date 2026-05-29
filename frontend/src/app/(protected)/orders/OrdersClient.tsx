@@ -88,6 +88,7 @@ export default function MyOrdersPage() {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className="flex items-center gap-2 text-text-primary font-semibold hover:text-primary transition-colors"
+                        type="button"
                     >
                         <Filter className="w-5 h-5" />
                         Filtros
@@ -120,12 +121,14 @@ export default function MyOrdersPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="startDate">
                                     Desde
                                 </label>
                                 <input
                                     type="date"
                                     title="Desde"
+                                    id="startDate"
+                                    arial-labelledby="startDate"
                                     value={filters.startDate || ''}
                                     onChange={(e) => handleFilterChange('startDate', e.target.value || undefined)}
                                     className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -133,12 +136,14 @@ export default function MyOrdersPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-text-primary mb-2">
+                                <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="endDate">
                                     Hasta
                                 </label>
                                 <input
                                     type="date"
                                     title="Hasta"
+                                    id="endDate"
+                                    arial-labelledby="endDate"
                                     value={filters.endDate || ''}
                                     onChange={(e) => handleFilterChange('endDate', e.target.value || undefined)}
                                     className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -262,6 +267,7 @@ export default function MyOrdersPage() {
                             onClick={() => handlePageChange(pagination.page - 1)}
                             disabled={pagination.page === 1}
                             className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="button"
                         >
                             Anterior
                         </button>
@@ -275,6 +281,7 @@ export default function MyOrdersPage() {
                                         ? 'bg-primary text-white'
                                         : 'border border-border hover:bg-accent'
                                         }`}
+                                    type="button"
                                 >
                                     {page}
                                 </button>
@@ -285,6 +292,7 @@ export default function MyOrdersPage() {
                             onClick={() => handlePageChange(pagination.page + 1)}
                             disabled={pagination.page === pagination.totalPages}
                             className="px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="button"
                         >
                             Siguiente
                         </button>

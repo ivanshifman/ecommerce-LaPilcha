@@ -110,6 +110,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                             onClick={handlePrevMain}
                             className="absolute left-3 top-1/2 -translate-y-1/2 p-3 bg-white/80 hover:bg-white rounded-full shadow
               opacity-100 md:opacity-0 md:group-hover:opacity-100 transition"
+                            type="button"
                         >
                             <ChevronLeft className="w-6 h-6 text-text-primary" />
                         </button>
@@ -122,6 +123,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                             onClick={handleNextMain}
                             className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-white/80 hover:bg-white rounded-full shadow
               opacity-100 md:opacity-0 md:group-hover:opacity-100 transition"
+                            type="button"
                         >
                             <ChevronRight className="w-6 h-6 text-text-primary" />
                         </button>
@@ -133,6 +135,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                         onClick={() => openLightbox(selectedImage)}
                         className="absolute top-4 right-4 p-3 bg-white/90 hover:bg-white rounded-lg shadow
             opacity-100 md:opacity-0 md:group-hover:opacity-100 transition"
+                        type="button"
                     >
                         <ZoomIn className="w-5 h-5 text-text-primary" />
                     </button>
@@ -144,6 +147,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                         {displayImages.map((img, index) => (
                             <button
                                 key={index}
+                                type="button"
                                 title={`Miniatura ${index + 1}`}
                                 onClick={() => {
                                     setDirection(index > selectedImage ? 1 : -1);
@@ -174,6 +178,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                     {/* Cerrar */}
                     <button
                         title="Cerrar visor de imágenes"
+                        type="button"
                         onClick={() => setIsLightboxOpen(false)}
                         className="absolute top-4 right-4 z-50 p-3 bg-white/20 hover:bg-white/30 rounded-lg"
                     >
@@ -187,6 +192,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                                 title="Imagen anterior"
                                 onClick={handlePreviousLightbox}
                                 className="absolute left-4 z-40 p-3 bg-white/10 hover:bg-white/20 rounded-lg"
+                                type="button"
                             >
                                 <ChevronLeft className="w-6 h-6 text-white" />
                             </button>
@@ -195,6 +201,7 @@ export function ProductImageGallery({ images, productName }: Props) {
                                 title="Imagen siguiente"
                                 onClick={handleNextLightbox}
                                 className="absolute right-4 z-40 p-3 bg-white/10 hover:bg-white/20 rounded-lg"
+                                type="button"
                             >
                                 <ChevronRight className="w-6 h-6 text-white" />
                             </button>

@@ -63,6 +63,7 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
                             </span>
                         </div>
                         <button
+                            type="button"
                             onClick={onClose}
                             className="p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                             aria-label="Cerrar"
@@ -149,6 +150,7 @@ export function WishlistSidebar({ isOpen, onClose }: Props) {
                                                         )}
                                                     </div>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleRemove(product.id)}
                                                         className="p-1.5 text-destructive hover:bg-destructive/10 rounded transition-colors cursor-pointer"
                                                         title="Eliminar de favoritos"

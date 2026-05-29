@@ -144,6 +144,7 @@ export function Navbar() {
                 onClick={handleWishlistOpen}
                 className="relative p-1.5 lg:p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Favoritos"
+                type="button"
               >
                 <Heart className="w-5 h-5 text-text-primary" />
                 {wishlistCount > 0 && (
@@ -160,6 +161,7 @@ export function Navbar() {
               />
 
               <button
+                type="button"
                 onClick={handleCartOpen}
                 className="relative p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Carrito de compras"
@@ -173,6 +175,7 @@ export function Navbar() {
               </button>
 
               <button
+                type="button"
                 onClick={handleMobileMenuOpen}
                 className="lg:hidden p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                 aria-label="Abrir menú"

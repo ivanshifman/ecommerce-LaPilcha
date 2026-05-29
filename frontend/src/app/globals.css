@@ -214,3 +214,11 @@
 .swiper-button-disabled {
   opacity: 0.3 !important;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

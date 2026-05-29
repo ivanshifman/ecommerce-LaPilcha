@@ -109,6 +109,7 @@ export default function VerifyEmailNoticeClient({ userId: initialUserId }: { use
                     <div className="space-y-3">
                         {isLoadingUserId ? (
                             <button
+                                type="button"
                                 disabled
                                 className="w-full bg-primary/50 text-white py-3 rounded-lg font-medium cursor-not-allowed flex items-center justify-center gap-2"
                             >
@@ -117,6 +118,7 @@ export default function VerifyEmailNoticeClient({ userId: initialUserId }: { use
                             </button>
                         ) : userId ? (
                             <button
+                                type="button"
                                 onClick={handleVerifyClick}
                                 className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-all duration-200 flex items-center justify-center gap-2"
                             >
@@ -131,6 +133,7 @@ export default function VerifyEmailNoticeClient({ userId: initialUserId }: { use
                                     </p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => router.push('/register')}
                                     className="w-full bg-primary text-white py-3 rounded-lg font-medium"
                                 >
@@ -146,6 +149,7 @@ export default function VerifyEmailNoticeClient({ userId: initialUserId }: { use
                         )}
 
                         <button
+                            type="button"
                             onClick={() => router.push('/login')}
                             className="w-full bg-secondary/10 text-secondary py-3 rounded-lg font-medium"
                         >

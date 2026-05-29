@@ -102,6 +102,7 @@ export function MobileMenu({ open, onClose }: Props) {
                         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
                             {level !== 'root' ? (
                                 <button
+                                    type="button"
                                     onClick={handleBack}
                                     className="p-2 rounded-full hover:bg-accent"
                                     aria-label="Volver"
@@ -133,6 +134,7 @@ export function MobileMenu({ open, onClose }: Props) {
                             </div>
 
                             <button
+                                
                                 onClick={onClose}
                                 className="p-2 rounded-full hover:bg-accent"
                                 aria-label='Cerrar menú'
@@ -178,6 +180,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                                     </li>
                                                     <li>
                                                         <button
+                                                            type="button"
                                                             onClick={async () => {
                                                                 await logout();
                                                                 onClose();
@@ -195,6 +198,7 @@ export function MobileMenu({ open, onClose }: Props) {
 
                                             <li>
                                                 <button
+                                                    type="button"
                                                     onClick={() => setLevel('products')}
                                                     className="flex w-full items-center justify-between"
                                                 >
@@ -240,6 +244,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                             {genders.map((gender) => (
                                                 <li key={gender}>
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             setActiveGender(gender);
                                                             setLevel('gender');
@@ -268,6 +273,7 @@ export function MobileMenu({ open, onClose }: Props) {
                                             {categories.map((cat) => (
                                                 <li key={cat}>
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             setActiveCategory(cat);
                                                             setLevel('category');

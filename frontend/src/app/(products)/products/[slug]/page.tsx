@@ -85,20 +85,6 @@ export default function ProductDetailPage() {
         };
     }, [slug, fetchProductBySlug, clearCurrentProduct, router]);
 
-    useEffect(() => {
-        if (!selectedSize) return;
-
-        if (maxQuantity === 0) {
-            setQuantity(1);
-            return;
-        }
-
-        if (quantity > maxQuantity) {
-            setQuantity(maxQuantity);
-        }
-    }, [maxQuantity, selectedSize]);
-
-
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -199,11 +185,11 @@ export default function ProductDetailPage() {
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex items-center gap-2 text-sm text-text-muted mb-6">
-                    <button onClick={() => router.push('/')} className="hover:text-primary transition-colors cursor-pointer">
+                    <button onClick={() => router.push('/')} className="hover:text-primary transition-colors cursor-pointer" type="button">
                         Inicio
                     </button>
                     <span>/</span>
-                    <button onClick={() => router.push('/products')} className="hover:text-primary transition-colors cursor-pointer">
+                    <button onClick={() => router.push('/products')} className="hover:text-primary transition-colors cursor-pointer" type="button">
                         Productos
                     </button>
                     {currentProduct.gender && (
@@ -245,6 +231,7 @@ export default function ProductDetailPage() {
                                             disabled={isTogglingWishlist}
                                             className="p-2 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 cursor-pointer"
                                             title={inWishlist ? 'Eliminar de favoritos' : 'Agregar a favoritos'}
+                                            type="button"
                                         >
                                             <Heart
                                                 className={`w-5 h-5 transition-colors ${inWishlist ? 'fill-primary text-primary' : 'text-text-muted'
@@ -255,6 +242,7 @@ export default function ProductDetailPage() {
                                             onClick={handleShare}
                                             className="p-2 border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
                                             title="Compartir"
+                                            type="button"
                                         >
                                             <Share2 className="w-5 h-5 text-text-muted" />
                                         </button>
@@ -305,7 +293,36 @@ export default function ProductDetailPage() {
                                     selectedSize={selectedSize}
                                     onSizeSelect={(size) => {
                                         setSelectedSize(size);
-                                        setQuantity(1);
+
+                                        const sizeData = currentProduct.sizes?.find(
+                                            s => s.size === size
+                                        );
+
+                                        if (!sizeData) {
+                                            setQuantity(1);
+                                            return;
+                                        }
+
+                                        const cartItem = cart?.items?.find(
+                                            item =>
+                                                item.product.id === currentProduct.id &&
+                                                item.variant?.size === size
+                                        );
+
+                                        const quantityInCart = cartItem?.quantity || 0;
+
+                                        const availableQuantity = Math.max(
+                                            0,
+                                            sizeData.stock - quantityInCart
+                                        );
+
+                                        if (availableQuantity === 0) {
+                                            setQuantity(1);
+                                        } else {
+                                            setQuantity(prev =>
+                                                Math.min(prev, availableQuantity)
+                                            );
+                                        }
                                     }}
                                 />
                             </div>
@@ -346,6 +363,7 @@ export default function ProductDetailPage() {
                                     isOutOfStockForSelectedSize
                                 }
                                 className="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4 cursor-pointer"
+                                type="button"
                             >
                                 <ShoppingCart className="w-5 h-5" />
                                 {isAddingToCart
@@ -385,6 +403,7 @@ export default function ProductDetailPage() {
                                         <button
                                             onClick={() => setIsSizeGuideOpen(true)}
                                             className="text-sm font-medium text-text-primary hover:text-primary transition-colors text-left cursor-pointer hover:underline"
+                                            type="button"
                                         >
                                             Guía de talles
                                         </button>

@@ -114,6 +114,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                             </span>
                         </div>
                         <button
+                            type="button"
                             onClick={onClose}
                             className="p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                             aria-label="Cerrar"
@@ -213,6 +214,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                                 <div className="flex items-center justify-between mt-3">
                                                     <div className="flex items-center border border-border rounded">
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleUpdateQuantity(
                                                                 item.product.id,
                                                                 item.quantity - 1,
@@ -229,6 +231,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                                             {item.quantity}
                                                         </span>
                                                         <button
+                                                            type="button"
                                                             onClick={() => handleUpdateQuantity(
                                                                 item.product.id,
                                                                 item.quantity + 1,
@@ -244,6 +247,7 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                                     </div>
 
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleRemove(
                                                             item.product.id,
                                                             item.variant?.size,
@@ -282,12 +286,14 @@ export function CartSidebar({ isOpen, onClose }: Props) {
                                 </div>
                             </div>
                             <button
+                                type="button"
                                 onClick={handleCheckout}
                                 className="w-full px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors cursor-pointer"
                             >
                                 Ir al carrito
                             </button>
                             <button
+                                type="button"
                                 onClick={onClose}
                                 className="w-full px-6 py-2 text-sm text-text-muted hover:text-text-primary transition-colors cursor-pointer"
                             >

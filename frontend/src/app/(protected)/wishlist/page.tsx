@@ -107,6 +107,7 @@ export default function WishlistPage() {
                         <button
                             onClick={handleClearAll}
                             className="flex items-center gap-2 px-4 py-2 border-2 border-destructive text-destructive rounded-lg hover:bg-destructive hover:text-white transition-colors cursor-pointer"
+                            type="button"
                         >
                             <Trash2 className="w-4 h-4" />
                             Vaciar Lista
@@ -165,6 +166,7 @@ export default function WishlistPage() {
                                             disabled={isRemoving}
                                             className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-destructive hover:text-white transition-colors disabled:opacity-50 cursor-pointer"
                                             title="Eliminar de favoritos"
+                                            type="button"
                                         >
                                             {isRemoving ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -216,6 +218,7 @@ export default function WishlistPage() {
                                                 onClick={() => handleAddToCart(product.id, product.sizes?.[0]?.size)}
                                                 disabled={!product.status || isAddingToCart}
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                                type="button"
                                             >
                                                 {isAddingToCart ? (
                                                     <Loader2 className="w-4 h-4 animate-spin" />

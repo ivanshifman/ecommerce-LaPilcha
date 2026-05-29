@@ -257,6 +257,7 @@ export default function ProductsPage() {
                     <button
                         onClick={() => setFilterOpen(true)}
                         className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                        type="button"
                     >
                         <Filter className="w-5 h-5 text-text-primary" />
                         <span className="font-medium text-text-primary">Filtros</span>
@@ -271,6 +272,7 @@ export default function ProductsPage() {
                         <button
                             onClick={() => setSortOpen(!sortOpen)}
                             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                            type="button"
                         >
                             <SlidersHorizontal className="w-5 h-5 text-text-primary" />
                             <span className="font-medium text-text-primary">Ordenar</span>
@@ -296,6 +298,7 @@ export default function ProductsPage() {
                             <button
                                 onClick={handleClearAllFilters}
                                 className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                                type="button"
                             >
                                 Limpiar todos los filtros
                             </button>

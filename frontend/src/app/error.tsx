@@ -82,6 +82,7 @@ export default function Error({
                         <button
                             onClick={reset}
                             className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-all duration-200 shadow-md hover:shadow-lg group"
+                            type="button"
                         >
                             <RefreshCw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                             <span>Intentar nuevamente</span>
@@ -100,6 +101,7 @@ export default function Error({
                         <button
                             onClick={() => window.history.back()}
                             className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors group"
+                            type="button"
                         >
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             <span>Volver a la página anterior</span>

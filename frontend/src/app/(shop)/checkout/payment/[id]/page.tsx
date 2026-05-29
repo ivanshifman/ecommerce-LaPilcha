@@ -126,6 +126,7 @@ export default function OrderPaymentPage() {
                     <button
                         onClick={() => router.push(`/orders/${orderId}`)}
                         className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors cursor-pointer"
+                        type="button"
                     >
                         Ver Orden
                     </button>
@@ -151,6 +152,7 @@ export default function OrderPaymentPage() {
                 <button
                     onClick={() => router.push(`/orders/${orderId}`)}
                     className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
+                    type="button"
                 >
                     <ArrowLeft className="w-5 h-5" />
                     Volver a la orden
@@ -182,6 +184,7 @@ export default function OrderPaymentPage() {
                                     return (
                                         <button
                                             key={method.id}
+                                            type="button"
                                             onClick={() => setSelectedMethod(method.id)}
                                             disabled={!isOriginalMethod}
                                             className={`w-full p-4 border-2 rounded-lg text-left transition-all ${!isOriginalMethod
@@ -329,6 +332,7 @@ export default function OrderPaymentPage() {
                                 onClick={handlePayment}
                                 disabled={!selectedMethod || isProcessing}
                                 className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                                type="button"
                             >
                                 {isProcessing ? (
                                     <>

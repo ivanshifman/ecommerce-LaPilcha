@@ -105,6 +105,7 @@ export function ProductCard({ product, user }: Props) {
                         onClick={handleToggleWishlist}
                         disabled={isTogglingWishlist}
                         className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all disabled:opacity-50 z-10 cursor-pointer"
+                        type="button"
                     >
                         <Heart
                             className={`w-4 h-4 transition-colors ${inWishlist ? 'fill-primary text-primary' : 'text-text-muted'
@@ -172,6 +173,7 @@ export function ProductCard({ product, user }: Props) {
                                                         ? 'bg-muted text-text-muted border-border cursor-not-allowed'
                                                         : 'bg-white text-text-primary border-border hover:border-primary'
                                                     }`}
+                                                type="button"
                                             >
                                                 {sizeObj.size}
                                             </button>
@@ -184,6 +186,7 @@ export function ProductCard({ product, user }: Props) {
                             onClick={handleAddToCart}
                             disabled={(hasSizes && !selectedSize) || isAddingToCart}
                             className="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm cursor-pointer"
+                            type="button"
                         >
                             <ShoppingCart className="w-4 h-4" />
                             {isAddingToCart ? 'Agregando...' : 'Agregar al carrito'}

@@ -17,7 +17,9 @@ export function VerificationCodeInput({
     error,
     disabled = false,
 }: VerificationCodeInputProps) {
-    const [digits, setDigits] = useState<string[]>(Array(length).fill(''));
+    const [digits, setDigits] = useState<string[]>(
+        () => Array(length).fill('')
+    );
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     useEffect(() => {

@@ -138,7 +138,11 @@ export default function CartPage() {
         try {
             const cartProducts = cart.items.map((item) => item.product.id);
             const cartCategories = Array.from(
-                new Set(cart.items.map((item) => item.product.category).filter(Boolean))
+                new Set(
+                    cart.items.flatMap(item =>
+                        item.product.category ? [item.product.category] : []
+                    )
+                )
             );
 
             await validateCoupon({
@@ -240,9 +244,15 @@ export default function CartPage() {
     const selectedOption = shippingOptions.find(opt => opt.method === selectedShippingMethod);
     const shippingCost = selectedOption ? (selectedOption.isFree || freeShipping ? 0 : selectedOption.cost) : 0;
     const finalTotal = totalAfterCoupon + shippingCost;
-    const lowestThreshold = shippingOptions
-        .filter(opt => opt.freeShippingThreshold && opt.freeShippingThreshold > 0)
-        .sort((a, b) => (a.freeShippingThreshold || 0) - (b.freeShippingThreshold || 0))[0]?.freeShippingThreshold;
+    const thresholds = shippingOptions.flatMap(opt =>
+        opt.freeShippingThreshold && opt.freeShippingThreshold > 0
+            ? [opt.freeShippingThreshold]
+            : []
+    );
+    const lowestThreshold =
+        thresholds.length > 0
+            ? Math.min(...thresholds)
+            : undefined;
 
     return (
         <div className="min-h-screen bg-background">
@@ -267,6 +277,7 @@ export default function CartPage() {
                                 onClick={handleClearCart}
                                 disabled={isClearingCart}
                                 className="px-3 py-2 text-xs sm:text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50 cursor-pointer self-start sm:self-auto"
+                                type="button"
                             >
                                 {isClearingCart ? 'Vaciando...' : 'Vaciar carrito'}
                             </button>
@@ -347,6 +358,7 @@ export default function CartPage() {
                                                     }
                                                     className="p-1.5 sm:p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
                                                     title="Eliminar"
+                                                    type="button"
                                                 >
                                                     <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                                 </button>
@@ -366,6 +378,7 @@ export default function CartPage() {
                                                         disabled={item.quantity <= 1 || isMutating}
                                                         className="p-1.5 sm:p-2 hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                                         title="Disminuir cantidad"
+                                                        type="button"
                                                     >
                                                         <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
                                                     </button>
@@ -428,6 +441,7 @@ export default function CartPage() {
                                             onClick={handleRemoveCoupon}
                                             className="p-1 hover:bg-success/20 rounded transition-colors cursor-pointer shrink-0"
                                             title="Eliminar cupón"
+                                            type="button"
                                         >
                                             <X className="w-3 h-3 sm:w-4 sm:h-4 text-success" />
                                         </button>
@@ -436,6 +450,7 @@ export default function CartPage() {
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
+                                            name="coupon"
                                             value={couponCode}
                                             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                             placeholder="CÓDIGO"
@@ -444,6 +459,7 @@ export default function CartPage() {
                                         />
                                         <button
                                             onClick={handleApplyCoupon}
+                                            type="button"
                                             disabled={isValidating || !couponCode.trim()}
                                             className="px-3 sm:px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 cursor-pointer text-xs sm:text-sm shrink-0"
                                         >
@@ -487,8 +503,8 @@ export default function CartPage() {
                                             <label
                                                 key={option.method}
                                                 className={`flex items-center justify-between p-2 sm:p-3 border-2 rounded-lg cursor-pointer transition-all ${selectedShippingMethod === option.method
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-border hover:border-primary/50'
+                                                    ? 'border-primary bg-primary/5'
+                                                    : 'border-border hover:border-primary/50'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -570,6 +586,7 @@ export default function CartPage() {
                                 onClick={handleCheckout}
                                 disabled={!selectedProvince || !selectedShippingMethod}
                                 className="w-full py-3 sm:py-4 bg-primary text-white rounded-lg font-semibold text-sm sm:text-base lg:text-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                type="button"
                             >
                                 Finalizar compra
                             </button>

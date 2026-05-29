@@ -169,7 +169,7 @@ export default function PrivacyPage() {
                             </p>
 
                             <div className="space-y-4">
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         📦 Gestión de compras y pedidos
                                     </h4>
@@ -182,7 +182,7 @@ export default function PrivacyPage() {
                                     </ul>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         👤 Gestión de cuenta de usuario
                                     </h4>
@@ -194,7 +194,7 @@ export default function PrivacyPage() {
                                     </ul>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         📧 Comunicaciones
                                     </h4>
@@ -210,7 +210,7 @@ export default function PrivacyPage() {
                                     </ul>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         📊 Análisis y mejora del servicio
                                     </h4>
@@ -222,7 +222,7 @@ export default function PrivacyPage() {
                                     </ul>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         ⚖️ Cumplimiento legal
                                     </h4>
@@ -541,7 +541,7 @@ export default function PrivacyPage() {
                             </p>
 
                             <div className="space-y-3">
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         📋 Acceso
                                     </h4>
@@ -551,7 +551,7 @@ export default function PrivacyPage() {
                                     </p>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         ✏️ Rectificación
                                     </h4>
@@ -561,7 +561,7 @@ export default function PrivacyPage() {
                                     </p>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         🗑️ Supresión
                                     </h4>
@@ -571,7 +571,7 @@ export default function PrivacyPage() {
                                     </p>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         🔒 Bloqueo/Oposición
                                     </h4>
@@ -581,7 +581,7 @@ export default function PrivacyPage() {
                                     </p>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         📥 Portabilidad
                                     </h4>
@@ -590,7 +590,7 @@ export default function PrivacyPage() {
                                     </p>
                                 </div>
 
-                                <div className="bg-white border-l-4 border-primary p-4">
+                                <div className="bg-white shadow-[inset_3px_0_0_0_var(--color-primary)] border-primary p-4">
                                     <h4 className="font-semibold text-text-primary mb-2">
                                         ✋ Revocación del consentimiento
                                     </h4>

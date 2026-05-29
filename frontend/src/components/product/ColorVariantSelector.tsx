@@ -133,6 +133,7 @@ export function ColorVariantSelector({
                             return (
                                 <button
                                     key={gender}
+                                    type="button"
                                     onClick={() => !isSelected && handleGenderChange(gender)}
                                     disabled={isSelected}
                                     className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${isSelected
@@ -173,6 +174,7 @@ export function ColorVariantSelector({
                             return (
                                 <button
                                     key={variant.id}
+                                    type="button"
                                     onClick={() => handleColorChange(variant.slug!)}
                                     disabled={isSelected}
                                     className={`group relative transition-all ${isSelected ? 'cursor-default' : 'cursor-pointer'

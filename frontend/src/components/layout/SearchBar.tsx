@@ -116,6 +116,7 @@ export function SearchBar({ onOpen }: Props) {
         <div ref={searchRef} className="relative">
             {!isOpen && (
                 <button
+                    type="button"
                     onClick={handleOpen}
                     className="p-2 hover:bg-accent rounded-full transition-colors cursor-pointer"
                     aria-label="Buscar"
@@ -132,6 +133,7 @@ export function SearchBar({ onOpen }: Props) {
                             <input
                                 ref={inputRef}
                                 type="text"
+                                name="search"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Buscar productos..."

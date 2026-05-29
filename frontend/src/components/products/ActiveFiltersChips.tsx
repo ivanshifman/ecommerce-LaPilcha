@@ -124,6 +124,7 @@ function Chip({ label, icon, variant = 'default', onRemove }: ChipProps) {
                 title="Eliminar filtro"
                 onClick={onRemove}
                 className="rounded-full p-0.5 hover:bg-black/10 transition-colors"
+                type="button"
             >
                 <X className="w-3 h-3" />
             </button>

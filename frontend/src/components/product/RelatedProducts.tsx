@@ -158,6 +158,7 @@ export function RelatedProducts({ currentProductId, category, gender }: Props) {
                                         onClick={(e) => handleToggleWishlist(product.id, e)}
                                         className="absolute top-2 right-2 p-2 bg-white/90 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                         title={inWishlist ? 'Eliminar de favoritos' : 'Agregar a favoritos'}
+                                        type="button"
                                     >
                                         <Heart
                                             className={`w-4 h-4 ${inWishlist ? 'fill-primary text-primary' : 'text-text-muted'
@@ -188,6 +189,7 @@ export function RelatedProducts({ currentProductId, category, gender }: Props) {
                                     <button
                                         onClick={(e) => handleQuickAdd(product, e)}
                                         className="w-full mt-3 py-2 bg-secondary text-white text-sm rounded-lg hover:bg-secondary-dark transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                        type="button"
                                     >
                                         <ShoppingCart className="w-4 h-4" />
                                         Agregar

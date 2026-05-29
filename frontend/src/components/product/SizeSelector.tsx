@@ -43,6 +43,7 @@ export function SizeSelector({ sizes, selectedSize, onSizeSelect }: Props) {
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {availableSizes.map((sizeObj) => (
                     <button
+                        type="button"
                         key={sizeObj.size}
                         onClick={() => onSizeSelect(sizeObj.size)}
                         className={`relative py-3 px-2 text-sm font-medium rounded-lg border-2 transition-all cursor-pointer ${selectedSize === sizeObj.size
@@ -61,6 +62,7 @@ export function SizeSelector({ sizes, selectedSize, onSizeSelect }: Props) {
 
                 {outOfStockSizes.map((sizeObj) => (
                     <button
+                        type="button"
                         key={sizeObj.size}
                         disabled
                         className="relative py-3 px-2 text-sm font-medium rounded-lg border-2 border-border bg-muted text-text-muted cursor-not-allowed"

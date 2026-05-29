@@ -91,7 +91,7 @@ export function CategoryDropdown({ gender, label, openGender, setOpenGender }: C
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <button className="flex items-center gap-1 px-4 py-2 text-text-muted hover:text-primary transition-colors font-medium">
+            <button className="flex items-center gap-1 px-4 py-2 text-text-muted hover:text-primary transition-colors font-medium" type="button">
                 {label}
                 <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}

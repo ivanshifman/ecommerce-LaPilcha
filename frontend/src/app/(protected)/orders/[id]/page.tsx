@@ -105,6 +105,7 @@ export default function OrderDetailPage() {
                 <button
                     onClick={() => router.push('/orders')}
                     className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
+                    type="button"
                 >
                     <ArrowLeft className="w-5 h-5" />
                     Volver a mis órdenes
@@ -335,6 +336,7 @@ export default function OrderDetailPage() {
                             <button
                                 onClick={() => router.push(`/checkout/payment/${orderId}`)}
                                 className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-semibold cursor-pointer mb-3"
+                                type="button"
                             >
                                 Realizar Pago
                             </button>
@@ -344,6 +346,7 @@ export default function OrderDetailPage() {
                             <button
                                 onClick={() => setShowCancelModal(true)}
                                 className="w-full py-3 border-2 border-destructive text-destructive rounded-lg hover:bg-destructive hover:text-white transition-colors font-semibold cursor-pointer"
+                                type="button"
                             >
                                 Cancelar Orden
                             </button>
@@ -372,6 +375,7 @@ export default function OrderDetailPage() {
                             <button
                                 onClick={() => setShowCancelModal(false)}
                                 disabled={isCancelling}
+                                type="button"
                                 className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors cursor-pointer"
                             >
                                 Volver
@@ -380,6 +384,7 @@ export default function OrderDetailPage() {
                                 onClick={handleCancelOrder}
                                 disabled={isCancelling || !cancelReason.trim()}
                                 className="flex-1 px-4 py-2 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                                type="button"
                             >
                                 {isCancelling ? (
                                     <>

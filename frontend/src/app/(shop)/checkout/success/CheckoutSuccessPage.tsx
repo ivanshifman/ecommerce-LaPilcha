@@ -27,6 +27,7 @@ export default function CheckoutSuccessPage() {
             setLoading(false);
             return;
         }
+
         if (statusParam === 'rejected' || statusParam === 'failure') {
             setStatus('rejected');
             setLoading(false);
@@ -36,6 +37,9 @@ export default function CheckoutSuccessPage() {
         let attempts = 0;
         const maxAttempts = 6;
         const interval = 3000;
+
+        let timeoutId: ReturnType<typeof setTimeout>;
+
         const fetchStatus = async () => {
             try {
                 const res = await fetch(
@@ -71,16 +75,21 @@ export default function CheckoutSuccessPage() {
             if (done) return;
 
             attempts++;
+
             if (attempts >= maxAttempts) {
                 setStatus('pending');
                 setLoading(false);
                 return;
             }
 
-            setTimeout(poll, interval);
+            timeoutId = setTimeout(poll, interval);
         };
 
         poll();
+
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, [externalReference, statusParam]);
 
     return (
@@ -110,6 +119,7 @@ export default function CheckoutSuccessPage() {
                         <button
                             className="btn-primary w-full"
                             onClick={() => router.push('/')}
+                            type="button"
                         >
                             Volver a la tienda
                         </button>
@@ -128,6 +138,7 @@ export default function CheckoutSuccessPage() {
                         <button
                             className="btn-secondary w-full"
                             onClick={() => router.push('/')}
+                            type="button"
                         >
                             Volver a la tienda
                         </button>
@@ -146,6 +157,7 @@ export default function CheckoutSuccessPage() {
                         <button
                             className="btn-secondary w-full"
                             onClick={() => router.push('/checkout')}
+                            type="button"
                         >
                             Intentar nuevamente
                         </button>

@@ -124,6 +124,7 @@ export default function HelpPage() {
                                             <button
                                                 onClick={() => toggleItem(section.id, index)}
                                                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-accent/50 transition-colors"
+                                                type="button"
                                             >
                                                 <span className="font-semibold text-text-primary">
                                                     {item.question}

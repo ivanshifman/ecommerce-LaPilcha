@@ -280,6 +280,7 @@ export default function ProfilePage() {
                                     <button
                                         onClick={() => setIsEditing(true)}
                                         className="flex items-center gap-2 px-4 py-2 text-primary border-2 border-primary rounded-lg hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                                        type="button"
                                     >
                                         <Edit2 className="w-4 h-4" />
                                         Editar
@@ -346,7 +347,7 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-2">
+                                    <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="name">
                                         Nombre *
                                     </label>
                                     <div className="relative">
@@ -366,7 +367,7 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-2">
+                                    <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="lastName">
                                         Apellido
                                     </label>
                                     <div className="relative">
@@ -383,13 +384,18 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-2">Email</label>
+                                    <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="email">
+                                        Email
+                                    </label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                                         <input
                                             title='El email no puede ser modificado'
                                             type="email"
+                                            id="email"
+                                            arial-labelledby="email"
                                             value={profile.email}
+                                            readOnly
                                             disabled
                                             className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-muted cursor-not-allowed"
                                         />
@@ -398,7 +404,7 @@ export default function ProfilePage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-2">
+                                    <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="phone">
                                         Teléfono
                                     </label>
                                     <Controller
@@ -423,7 +429,7 @@ export default function ProfilePage() {
 
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-text-primary mb-2 items-center gap-2">
+                                            <label className="block text-sm font-medium text-text-primary mb-2 items-center gap-2" htmlFor="defaultSize">
                                                 <Ruler className="w-4 h-4" />
                                                 Talle Preferido
                                             </label>
@@ -495,7 +501,7 @@ export default function ProfilePage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-text-primary mb-2">
+                                            <label className="block text-sm font-medium text-text-primary mb-2" htmlFor="favoriteColors">
                                                 Colores Favoritos (selecciona varios)
                                             </label>
                                             <Controller
@@ -650,6 +656,7 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => router.push('/orders')}
                                 className="w-full py-2 text-sm text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                                type="button"
                             >
                                 Ver Órdenes
                             </button>
@@ -684,6 +691,7 @@ export default function ProfilePage() {
                             <button
                                 onClick={() => router.push('/wishlist')}
                                 className="w-full py-2 text-sm text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                                type="button"
                             >
                                 Ver Lista
                             </button>
@@ -695,6 +703,7 @@ export default function ProfilePage() {
                                 <button
                                     onClick={() => router.push('/products')}
                                     className="w-full py-2 text-sm text-text-primary border border-border rounded-lg hover:bg-accent transition-colors text-left px-4 cursor-pointer"
+                                    type="button"
                                 >
                                     Explorar Productos
                                 </button>

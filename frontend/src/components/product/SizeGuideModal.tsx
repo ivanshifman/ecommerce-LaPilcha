@@ -220,6 +220,7 @@ export function SizeGuideModal({ isOpen, onClose, category, subcategory }: SizeG
                         onClick={onClose}
                         className="p-2 hover:bg-accent rounded-lg transition-colors cursor-pointer"
                         title="Cerrar"
+                        type="button"
                     >
                         <X className="w-6 h-6 text-text-muted" />
                     </button>
@@ -296,6 +297,7 @@ export function SizeGuideModal({ isOpen, onClose, category, subcategory }: SizeG
                     <button
                         onClick={onClose}
                         className="w-full py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors cursor-pointer"
+                        type="button"
                     >
                         Entendido
                     </button>

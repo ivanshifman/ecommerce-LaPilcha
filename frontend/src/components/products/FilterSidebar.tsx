@@ -178,6 +178,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                 <div className="sticky top-0 bg-white border-b border-border px-6 py-4 flex items-center justify-between z-10">
                     <h2 className="text-lg font-bold text-text-primary">Filtros</h2>
                     <button
+                        type="button"
                         title='Cerrar filtros'
                         onClick={onClose}
                         className="p-2 hover:bg-accent rounded-full transition-colors"
@@ -190,6 +191,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                     {/* Gender */}
                     <div className="border-b border-border pb-4">
                         <button
+                            type="button"
                             onClick={() => toggleSection('gender')}
                             className="w-full flex items-center justify-between mb-3"
                         >
@@ -222,6 +224,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                     {/* Category */}
                     <div className="border-b border-border pb-4">
                         <button
+                            type="button"
                             onClick={() => toggleSection('category')}
                             className="w-full flex items-center justify-between mb-3"
                         >
@@ -261,6 +264,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                             <button
                                 onClick={() => toggleSection('subcategory')}
                                 className="w-full flex items-center justify-between mb-3"
+                                type="button"
                             >
                                 <h3 className="font-semibold text-text-primary">Subcategoría</h3>
                                 <ChevronDown
@@ -291,6 +295,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         <button
                             onClick={() => toggleSection('discount')}
                             className="w-full flex items-center justify-between mb-3"
+                            type="button"
                         >
                             <div className="flex items-center gap-2">
                                 <Percent className="w-4 h-4 text-primary" />
@@ -326,6 +331,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         <button
                             onClick={() => toggleSection('color')}
                             className="w-full flex items-center justify-between mb-3"
+                            type="button"
                         >
                             <h3 className="font-semibold text-text-primary">Color</h3>
                             <ChevronDown
@@ -341,6 +347,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                                         onClick={() =>
                                             handleTempFilterChange('color', tempFilters.color === color ? undefined : color)
                                         }
+                                        type="button"
                                         className={`relative w-10 h-10 rounded-full border-2 transition-all cursor-pointer ${tempFilters.color === color
                                             ? 'border-primary scale-110'
                                             : 'border-border hover:scale-105'
@@ -364,6 +371,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         <button
                             onClick={() => toggleSection('size')}
                             className="w-full flex items-center justify-between mb-3"
+                            type="button"
                         >
                             <h3 className="font-semibold text-text-primary">Talle</h3>
                             <ChevronDown
@@ -402,6 +410,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         <button
                             onClick={() => toggleSection('brand')}
                             className="w-full flex items-center justify-between mb-3"
+                            type="button"
                         >
                             <h3 className="font-semibold text-text-primary">Marca</h3>
                             <ChevronDown
@@ -438,6 +447,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         <button
                             onClick={() => toggleSection('price')}
                             className="w-full flex items-center justify-between mb-3"
+                            type="button"
                         >
                             <h3 className="font-semibold text-text-primary">Precio</h3>
                             <ChevronDown
@@ -448,8 +458,12 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                         {expandedSections.price && (
                             <div className="space-y-3">
                                 <div>
-                                    <label className="text-xs text-text-muted mb-1 block">Mínimo</label>
+                                    <label className="text-xs text-text-muted mb-1 block" htmlFor="priceMin">
+                                        Mínimo
+                                    </label>
                                     <input
+                                        id="priceMin"
+                                        arial-labelledby="priceMin"
                                         type="number"
                                         value={tempFilters.priceMin || ''}
                                         onChange={(e) => handleTempFilterChange('priceMin', Number(e.target.value) || undefined)}
@@ -458,8 +472,12 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs text-text-muted mb-1 block">Máximo</label>
+                                    <label className="text-xs text-text-muted mb-1 block" htmlFor="priceMax">
+                                        Máximo
+                                    </label>
                                     <input
+                                        id="priceMax"
+                                        arial-labelledby="priceMax"
                                         type="number"
                                         value={tempFilters.priceMax || ''}
                                         onChange={(e) => handleTempFilterChange('priceMax', Number(e.target.value) || undefined)}
@@ -472,16 +490,17 @@ export function FilterSidebar({ isOpen, onClose, filters, onApplyFilters, onClea
                     </div>
                 </div>
 
-                {/* Botones fijos en el footer */}
                 <div className="sticky bottom-0 bg-white border-t border-border px-6 py-4 space-y-2">
                     <button
                         onClick={handleApplyFilters}
+                        type="button"
                         className="w-full py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-semibold"
                     >
                         Aplicar filtros
                     </button>
                     <button
                         onClick={handleClearFilters}
+                        type="button"
                         className="w-full py-2 border border-border text-text-primary rounded-lg hover:bg-accent transition-colors text-sm font-medium"
                     >
                         Limpiar filtros
