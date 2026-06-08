@@ -379,7 +379,7 @@ export default function ProductDetailPage() {
                                 <Truck className="w-5 h-5 text-primary shrink-0" />
                                 <div>
                                     <p className="text-sm font-medium text-text-primary">Envío gratis</p>
-                                    <p className="text-xs text-text-muted">En compras +$100.000</p>
+                                    <p className="text-xs text-text-muted">En compras +$150.000</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
