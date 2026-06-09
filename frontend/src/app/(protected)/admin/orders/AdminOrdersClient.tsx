@@ -9,7 +9,7 @@ import {
     CreditCard, Truck, AlertCircle, CheckCircle2,
     XCircle, Clock, User,
 } from 'lucide-react';
-import { useAuth } from '../../../../store/authStore';
+import { useRequireAuth } from '../../../../hooks/useRequireAuth';
 import { useOrders, useOrderActions } from '../../../../store/orderStore';
 import { handleApiError } from '../../../../api/error-handler';
 import { showError } from '../../../../lib/notifications';
@@ -32,14 +32,13 @@ const STATUS_ICONS = {
 
 export default function AdminOrdersClient() {
     const router = useRouter();
-    const { user, isInitialized, isLoading: authLoading } = useAuth();
-    const { orders, pagination, isLoading } = useOrders();
+    const { isAuthenticated, isLoading, isInitialized, user } = useRequireAuth();
+    const { orders, pagination, isLoading: ordersLoading } = useOrders();
     const { fetchAllOrders } = useOrderActions();
 
     const [filters, setFilters] = useState<OrderQueryDto>({ page: 1, limit: 20 });
     const [showFilters, setShowFilters] = useState(false);
 
-    // Protección de ruta en cliente
     useEffect(() => {
         if (isInitialized && (!user || user.role !== 'admin')) {
             router.replace('/');
@@ -63,7 +62,7 @@ export default function AdminOrdersClient() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (!isInitialized || authLoading || isLoading) {
+    if (!isInitialized || isLoading || ordersLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary" />
@@ -81,7 +80,6 @@ export default function AdminOrdersClient() {
                     <p className="text-text-muted">Panel de administración — gestión global de pedidos</p>
                 </div>
 
-                {/* Filtros */}
                 <div className="bg-white border border-border rounded-lg p-4 mb-6">
                     <button
                         type="button"
@@ -133,7 +131,6 @@ export default function AdminOrdersClient() {
                     )}
                 </div>
 
-                {/* Lista */}
                 {orders.length === 0 ? (
                     <div className="bg-white border border-border rounded-lg p-12 text-center">
                         <Package className="w-16 h-16 text-text-muted mx-auto mb-4" />
@@ -194,7 +191,6 @@ export default function AdminOrdersClient() {
                                                             <Package className="w-4 h-4" />
                                                             {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
                                                         </span>
-                                                        {/* Info del cliente */}
                                                         <span className="flex items-center gap-1">
                                                             <User className="w-4 h-4" />
                                                             {order.isGuest
@@ -234,7 +230,6 @@ export default function AdminOrdersClient() {
                     </div>
                 )}
 
-                {/* Paginación */}
                 {pagination && pagination.totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8">
                         <button
