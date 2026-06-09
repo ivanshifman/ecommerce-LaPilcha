@@ -15,6 +15,7 @@ import {
     Phone,
     Truck,
     Handbag,
+    Package,
 } from 'lucide-react';
 import { useProductActions, useProducts } from '../../store/productStore';
 import { genderLabels } from '../../utils/genderLabels';
@@ -134,7 +135,7 @@ export function MobileMenu({ open, onClose }: Props) {
                             </div>
 
                             <button
-                                
+
                                 onClick={onClose}
                                 className="p-2 rounded-full hover:bg-accent"
                                 aria-label='Cerrar menú'
@@ -226,6 +227,13 @@ export function MobileMenu({ open, onClose }: Props) {
                                                     <Truck className="w-5 h-5" /> Seguimiento de pedidos
                                                 </Link>
                                             </li>
+                                            {isAuthenticated && user?.role === 'admin' && (
+                                                <li>
+                                                    <Link href="/admin/orders" onClick={onClose} className="flex items-center gap-3 text-primary font-medium">
+                                                        <Package className="w-5 h-5" /> Todas las Órdenes
+                                                    </Link>
+                                                </li>
+                                            )}
                                         </ul>
                                     )}
 

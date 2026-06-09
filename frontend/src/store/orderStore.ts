@@ -17,6 +17,7 @@ interface OrderState {
     error: string | null;
     createOrder: (data: CreateOrderDto) => Promise<Order>;
     fetchMyOrders: (query?: OrderQueryDto) => Promise<void>;
+    fetchAllOrders: (query?: OrderQueryDto) => Promise<void>;
     fetchOrderById: (id: string) => Promise<void>;
     cancelOrder: (id: string, data: CancelOrderDto) => Promise<void>;
     clearCurrentOrder: () => void;
@@ -47,6 +48,22 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         set({ isLoading: true });
         try {
             const res = await orderService.getMyOrders(query);
+            set({
+                orders: res.orders,
+                pagination: res,
+                isLoading: false,
+            });
+        } catch (error) {
+            const apiError = handleApiError(error);
+            set({ error: apiError.message, isLoading: false });
+            throw error;
+        }
+    },
+
+    fetchAllOrders: async (query) => {
+        set({ isLoading: true });
+        try {
+            const res = await orderService.getAllOrders(query);
             set({
                 orders: res.orders,
                 pagination: res,
@@ -103,6 +120,7 @@ export const useOrders = () => useOrderStore(
 export const useOrderActions = () => useOrderStore(
     useShallow((state) => ({
         createOrder: state.createOrder,
+        fetchAllOrders: state.fetchAllOrders,
         fetchMyOrders: state.fetchMyOrders,
         fetchOrderById: state.fetchOrderById,
         cancelOrder: state.cancelOrder,

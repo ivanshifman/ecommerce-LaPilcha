@@ -42,7 +42,7 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
 
     const handleToggle = () => {
         const newState = !isOpen;
-        
+
         if (externalOnClose !== undefined) {
             if (newState) {
                 onOpen?.();
@@ -135,20 +135,33 @@ export function UserMenu({ onOpen, isOpen: externalIsOpen, onClose: externalOnCl
                             Mi Perfil
                         </Link>
 
-                        <Link
-                            href="/orders"
-                            onClick={() => {
-                                if (externalOnClose) {
-                                    externalOnClose();
-                                } else {
-                                    setInternalIsOpen(false);
-                                }
-                            }}
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
-                        >
-                            <Package className="w-4 h-4" />
-                            Mis Órdenes
-                        </Link>
+                        {user?.role !== 'admin' && (
+                            <Link
+                                href="/orders"
+                                onClick={() => {
+                                    if (externalOnClose) {
+                                        externalOnClose();
+                                    } else {
+                                        setInternalIsOpen(false);
+                                    }
+                                }}
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
+                            >
+                                <Package className="w-4 h-4" />
+                                Mis Órdenes
+                            </Link>
+                        )}
+
+                        {user?.role === 'admin' && (
+                            <Link
+                                href="/admin/orders"
+                                onClick={() => { externalOnClose ? externalOnClose() : setInternalIsOpen(false); }}
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-accent transition-colors text-text-secondary"
+                            >
+                                <Package className="w-4 h-4" />
+                                Todas las Órdenes
+                            </Link>
+                        )}
 
                         <Link
                             href="/wishlist"
