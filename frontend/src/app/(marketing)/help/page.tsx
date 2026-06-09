@@ -44,21 +44,25 @@ const HELP_SECTIONS = [
         ],
     },
     {
-        id: 'devoluciones',
-        title: 'Cambios y Devoluciones',
+        id: 'garantia',
+        title: 'Garantía y Reclamos',
         icon: RefreshCw,
         items: [
             {
-                question: '¿Cuál es la política de devoluciones?',
-                answer: 'Tienes 30 días desde la recepción del producto para solicitar un cambio o devolución. El producto debe estar sin usar y con etiquetas.',
+                question: '¿Aceptan devoluciones?',
+                answer: 'No realizamos devoluciones por cambio de opinión, error en la elección del talle o preferencias personales. Te recomendamos revisar cuidadosamente las medidas y características del producto antes de realizar tu compra.',
             },
             {
-                question: '¿Cómo solicito un cambio?',
-                answer: 'Contacta a nuestro equipo a través del email elatahualpaarg@gmail.com indicando tu número de orden y el motivo del cambio.',
+                question: '¿Qué hago si mi producto llega dañado o con una falla?',
+                answer: 'Si tu pedido presenta una falla de fabricación o sufrió daños durante el envío, contáctanos dentro de las 48 horas posteriores a la recepción adjuntando fotografías del producto para que podamos evaluar el caso y ofrecerte una solución.',
             },
             {
-                question: '¿Quién paga el envío de la devolución?',
-                answer: 'Si el producto tiene un defecto de fábrica, nosotros nos hacemos cargo. Si es por cambio de talle o arrepentimiento, el costo corre por cuenta del cliente.',
+                question: '¿Cómo realizo un reclamo?',
+                answer: 'Puedes comunicarte con nosotros a través de nuestro formulario de contacto o por email indicando tu número de pedido, una descripción del inconveniente y fotografías del producto afectado.',
+            },
+            {
+                question: '¿Todos los reclamos son aprobados?',
+                answer: 'Cada caso es evaluado individualmente. Los reclamos proceden únicamente cuando se verifica una falla de fabricación o un daño previo a la entrega del producto.',
             },
         ],
     },

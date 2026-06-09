@@ -603,76 +603,77 @@ export default function TermsPage() {
 
                     <section className="mb-12">
                         <h2 className="text-2xl font-bold text-text-primary mb-4">
-                            11. Política de Cambios y Devoluciones
+                            11. Garantía y Reclamos
                         </h2>
+
                         <div className="text-text-secondary space-y-4">
                             <p>
-                                Además del derecho de arrepentimiento legal, ofrecemos una política de cambios
-                                más extensa:
+                                Todos nuestros productos son revisados antes de ser despachados para
+                                garantizar que lleguen en óptimas condiciones.
                             </p>
 
-                            <h3 className="text-xl font-semibold text-text-primary">11.1. Cambios por Talle o Color</h3>
+                            <h3 className="text-xl font-semibold text-text-primary">
+                                11.1. Productos con Fallas o Daños
+                            </h3>
+
                             <p>
-                                Aceptamos cambios por talle o color dentro de los <strong>30 días corridos</strong>
-                                {' '}desde la recepción del producto, siempre que se cumplan las condiciones del punto 10.2.
-                            </p>
-                            <p>
-                                <strong>Proceso:</strong>
-                            </p>
-                            <ol className="list-decimal pl-6 space-y-2">
-                                <li>Contactanos a {CONTACT_INFO.email}</li>
-                                <li>Verificaremos disponibilidad del talle/color solicitado</li>
-                                <li>Te enviaremos instrucciones de devolución</li>
-                                <li>Una vez recibido el producto, te enviamos el cambio</li>
-                            </ol>
-                            <p className="text-sm text-text-muted">
-                                * El costo de envío del producto a cambiar corre por cuenta del cliente.
-                                El envío del nuevo producto corre por nuestra cuenta.
+                                Si el producto presenta una falla de fabricación o llega dañado durante
+                                el transporte, deberás comunicarte con nosotros dentro de las
+                                <strong> 48 horas posteriores a la recepción</strong>, adjuntando
+                                fotografías y el número de pedido.
                             </p>
 
-                            <h3 className="text-xl font-semibold text-text-primary">11.2. Productos con Defectos de Fábrica</h3>
                             <p>
-                                Si el producto presenta defectos de fabricación, tenés derecho a:
+                                Una vez evaluado el caso, podremos ofrecer, según corresponda:
                             </p>
+
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>
-                                    <strong>Cambio</strong> por un producto igual en perfecto estado
-                                </li>
-                                <li>
-                                    <strong>Devolución</strong> del dinero
-                                </li>
-                                <li>
-                                    <strong>Descuento</strong> sobre el precio (si aceptás quedarte con el producto defectuoso)
-                                </li>
-                            </ul>
-                            <p>
-                                En estos casos, <strong>todos los costos de envío corren por nuestra cuenta</strong>.
-                            </p>
-
-                            <h3 className="text-xl font-semibold text-text-primary">11.3. Producto Incorrecto</h3>
-                            <p>
-                                Si recibiste un producto diferente al que pediste:
-                            </p>
-                            <ul className="list-disc pl-6 space-y-2">
-                                <li>Contactanos inmediatamente</li>
-                                <li>Te enviaremos el producto correcto sin cargo</li>
-                                <li>Coordinaremos el retiro del producto incorrecto</li>
-                                <li>Todos los costos corren por nuestra cuenta</li>
+                                <li>Cambio por un producto igual o equivalente.</li>
+                                <li>Reposición del producto.</li>
+                                <li>Reintegro del importe abonado.</li>
                             </ul>
 
-                            <h3 className="text-xl font-semibold text-text-primary">11.4. Garantía</h3>
+                            <h3 className="text-xl font-semibold text-text-primary">
+                                11.2. Producto Incorrecto
+                            </h3>
+
                             <p>
-                                Todos nuestros productos cuentan con <strong>90 días de garantía</strong> contra
-                                defectos de fabricación, conforme a la Ley 24.240 de Defensa del Consumidor.
+                                Si recibiste un producto diferente al solicitado, contactanos
+                                inmediatamente para coordinar el envío del producto correcto sin costo
+                                adicional.
                             </p>
+
                             <p>
-                                La garantía NO cubre:
+                                En estos casos, todos los costos de envío correrán por nuestra cuenta.
                             </p>
+
+                            <h3 className="text-xl font-semibold text-text-primary">
+                                11.3. Cambios y Devoluciones
+                            </h3>
+
+                            <p>
+                                No realizamos cambios ni devoluciones por error en la elección del talle,
+                                color, modelo o por cambio de opinión del comprador.
+                            </p>
+
+                            <p>
+                                Recomendamos revisar cuidadosamente las medidas, descripciones e imágenes
+                                del producto antes de concretar la compra.
+                            </p>
+
+                            <h3 className="text-xl font-semibold text-text-primary">
+                                11.4. Exclusiones
+                            </h3>
+
+                            <p>
+                                No serán considerados defectos de fabricación:
+                            </p>
+
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>Desgaste natural por uso normal</li>
-                                <li>Daños causados por mal uso o negligencia</li>
-                                <li>Modificaciones realizadas por el comprador</li>
-                                <li>Daños causados por lavado incorrecto</li>
+                                <li>Desgaste natural por el uso normal del producto.</li>
+                                <li>Daños ocasionados por uso indebido o negligencia.</li>
+                                <li>Modificaciones o reparaciones realizadas por terceros.</li>
+                                <li>Daños derivados de lavado o mantenimiento incorrecto.</li>
                             </ul>
                         </div>
                     </section>

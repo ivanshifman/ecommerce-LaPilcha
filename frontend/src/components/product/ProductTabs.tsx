@@ -9,7 +9,7 @@ interface Props {
     category: string;
 }
 
-type Tab = 'description' | 'specs' | 'shipping' | 'returns';
+type Tab = 'description' | 'specs' | 'shipping' | 'warranty';
 
 export function ProductTabs({ description, material, category }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>('description');
@@ -18,7 +18,7 @@ export function ProductTabs({ description, material, category }: Props) {
         { id: 'description' as Tab, label: 'Descripción', icon: FileText },
         { id: 'specs' as Tab, label: 'Especificaciones', icon: Package2 },
         { id: 'shipping' as Tab, label: 'Envíos', icon: Truck },
-        { id: 'returns' as Tab, label: 'Devoluciones', icon: RotateCcw },
+        { id: 'warranty' as Tab, label: 'Garantía', icon: RotateCcw },
     ];
 
     return (
@@ -29,8 +29,8 @@ export function ProductTabs({ description, material, category }: Props) {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors whitespace-nowrap ${activeTab === tab.id
-                                ? 'text-primary border-b-2 border-primary'
-                                : 'text-text-muted hover:text-text-primary'
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-text-muted hover:text-text-primary'
                             }`}
                     >
                         <tab.icon className="w-4 h-4" />
@@ -68,12 +68,8 @@ export function ProductTabs({ description, material, category }: Props) {
                                 </div>
                             )}
                             <div className="flex justify-between py-3 border-b border-border">
-                                <span className="font-medium text-text-primary">Garantía:</span>
-                                <span className="text-text-secondary">12 meses</span>
-                            </div>
-                            <div className="flex justify-between py-3 border-b border-border">
                                 <span className="font-medium text-text-primary">Origen:</span>
-                                <span className="text-text-secondary">Importado</span>
+                                <span className="text-text-secondary">Argentino</span>
                             </div>
                         </div>
                     </div>
@@ -107,32 +103,40 @@ export function ProductTabs({ description, material, category }: Props) {
                     </div>
                 )}
 
-                {activeTab === 'returns' && (
+                {activeTab === 'warranty' && (
                     <div>
                         <h3 className="text-xl font-semibold text-text-primary mb-4">
-                            Política de Devoluciones
+                            Garantía y Reclamos
                         </h3>
+
                         <div className="space-y-4">
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">30 Días de Devolución</h4>
+                                <h4 className="font-semibold text-text-primary mb-2">
+                                    Control de calidad
+                                </h4>
                                 <p className="text-text-secondary">
-                                    Tenés 30 días desde la recepción para devolver tu producto si no estás satisfecho.
+                                    Todos nuestros productos son revisados antes de ser despachados para garantizar su correcto estado.
                                 </p>
                             </div>
+
                             <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Condiciones</h4>
+                                <h4 className="font-semibold text-text-primary mb-2">
+                                    Productos con fallas
+                                </h4>
+                                <p className="text-text-secondary">
+                                    Si tu producto presenta una falla de fabricación o llega dañado, contactanos dentro de las 48 horas de recibido para evaluar el caso y brindarte una solución.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold text-text-primary mb-2">
+                                    Importante
+                                </h4>
                                 <ul className="list-disc list-inside text-text-secondary space-y-2">
-                                    <li>El producto debe estar sin usar y con las etiquetas originales</li>
-                                    <li>Debe incluir el empaque original</li>
-                                    <li>No se aceptan devoluciones de productos personalizados</li>
-                                    <li>El reembolso se procesa en 5-10 días hábiles</li>
+                                    <li>No realizamos devoluciones por cambio de opinión.</li>
+                                    <li>Verificá el talle antes de realizar la compra.</li>
+                                    <li>Las imágenes son ilustrativas y pueden variar levemente según la pantalla utilizada.</li>
                                 </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-text-primary mb-2">Cambios</h4>
-                                <p className="text-text-secondary">
-                                    Los cambios de talle o color son gratuitos dentro de los 30 días.
-                                </p>
                             </div>
                         </div>
                     </div>

@@ -29,8 +29,8 @@ const FOOTER_LINKS = {
             icon: CreditCard,
         },
         {
-            label: 'Cambios y Devoluciones',
-            href: '/help#devoluciones',
+            label: 'Garantía y Reclamos',
+            href: '/help#garantia',
             icon: RefreshCw,
         },
         {

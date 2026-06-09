@@ -385,15 +385,15 @@ export default function ProductDetailPage() {
                             <div className="flex items-center gap-3">
                                 <Package className="w-5 h-5 text-primary shrink-0" />
                                 <div>
-                                    <p className="text-sm font-medium text-text-primary">Devolución</p>
-                                    <p className="text-xs text-text-muted">30 días gratis</p>
+                                    <p className="text-sm font-medium text-text-primary">Fabricación nacional</p>
+                                    <p className="text-xs text-text-muted">Hecho en Argentina</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Shield className="w-5 h-5 text-primary shrink-0" />
                                 <div>
-                                    <p className="text-sm font-medium text-text-primary">Garantía</p>
-                                    <p className="text-xs text-text-muted">12 meses</p>
+                                    <p className="text-sm font-medium text-text-primary">Compra con confianza</p>
+                                    <p className="text-xs text-text-muted">Soporte postventa</p>
                                 </div>
                             </div>
                             {hasSizes && (
