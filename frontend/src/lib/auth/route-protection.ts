@@ -80,6 +80,11 @@ export const ROUTE_PROTECTION: RouteConfig[] = [
     allowedRoles: [UserRole.CUSTOMER, UserRole.ADMIN],
   },
   {
+    path: '/admin/orders',
+    requiresAuth: true,
+    allowedRoles: [UserRole.ADMIN],
+  },
+  {
     path: '/returns',
     requiresAuth: true,
     allowedRoles: [UserRole.CUSTOMER, UserRole.ADMIN],
@@ -106,11 +111,11 @@ export function isPublicRoute(pathname: string): boolean {
 
 export function hasAccess(pathname: string, userRole?: UserRole): boolean {
   const config = getRouteConfig(pathname);
-  
+
   if (!config) return true;
   if (!config.requiresAuth) return true;
   if (!userRole) return false;
   if (!config.allowedRoles) return true;
-  
+
   return config.allowedRoles.includes(userRole);
 }
