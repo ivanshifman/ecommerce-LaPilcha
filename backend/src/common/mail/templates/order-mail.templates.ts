@@ -27,7 +27,7 @@ const baseTemplate = (content: string) => `
 
   <tr>
     <td style="background:#f9fafb;padding:16px;font-size:12px;color:#6b7280;">
-      © ${new Date().getFullYear()} El Piasano
+      © ${new Date().getFullYear()} El Atahualpa. Todos los derechos reservados.<br/>
     </td>
   </tr>
 
