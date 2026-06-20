@@ -41,7 +41,7 @@ export default function OrderDetailPage() {
     const params = useParams();
     const orderId = params?.id as string;
 
-    const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
+    const { isAuthenticated, isLoading: authLoading, user } = useRequireAuth();
     const { currentOrder, isLoading } = useOrders();
     const { fetchOrderById, cancelOrder, clearCurrentOrder } = useOrderActions();
 
@@ -102,6 +102,18 @@ export default function OrderDetailPage() {
     return (
         <div className="min-h-screen bg-background">
             <div className="max-w-6xl mx-auto px-4 py-8">
+                {
+                    user?.role === 'admin' && (
+                        <button
+                            onClick={() => router.push('admin/orders')}
+                            className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
+                            type="button"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            Volver a administración de órdenes
+                        </button>
+                    )
+                }
                 <button
                     onClick={() => router.push('/orders')}
                     className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
