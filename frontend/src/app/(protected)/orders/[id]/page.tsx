@@ -97,7 +97,7 @@ export default function OrderDetailPage() {
     const statusConfig = ORDER_STATUS_CONFIG[order.status];
     const StatusIcon = STATUS_ICONS[order.status];
     const canCancel = CANCELLABLE_ORDER_STATUSES.includes(order.status);
-    const showPaymentButton = order.status === OrderStatus.PAYMENT_PENDING && order.paymentMethod !== PaymentMethod.BANK_TRANSFER
+    const showPaymentButton = order.status === OrderStatus.PAYMENT_PENDING && order.paymentMethod !== PaymentMethod.BANK_TRANSFER;
 
     return (
         <div className="min-h-screen bg-background">
@@ -105,7 +105,7 @@ export default function OrderDetailPage() {
                 {
                     user?.role === 'admin' ? (
                         <button
-                            onClick={() => router.push('admin/orders')}
+                            onClick={() => router.push('/admin/orders')}
                             className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
                             type="button"
                         >
