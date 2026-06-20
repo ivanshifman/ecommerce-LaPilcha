@@ -103,7 +103,7 @@ export default function OrderDetailPage() {
         <div className="min-h-screen bg-background">
             <div className="max-w-6xl mx-auto px-4 py-8">
                 {
-                    user?.role === 'admin' && (
+                    user?.role === 'admin' ? (
                         <button
                             onClick={() => router.push('admin/orders')}
                             className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
@@ -112,16 +112,18 @@ export default function OrderDetailPage() {
                             <ArrowLeft className="w-5 h-5" />
                             Volver a administración de órdenes
                         </button>
+                    ) : (
+                        <button
+                            onClick={() => router.push('/orders')}
+                            className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
+                            type="button"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            Volver a mis órdenes
+                        </button>
                     )
                 }
-                <button
-                    onClick={() => router.push('/orders')}
-                    className="flex items-center gap-2 text-text-muted hover:text-primary mb-6 transition-colors"
-                    type="button"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    Volver a mis órdenes
-                </button>
+               
 
                 <div className="mb-6 flex items-start justify-between">
                     <div>
